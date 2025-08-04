@@ -45,10 +45,10 @@ class DataTile extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              context.read<RegionCubit>().upDateRegion(
-                region.copyWith(name: controller.text),
-              );
-              Navigator.pop(context);
+              // context.read<RegionCubit>().upDateRegion(
+              //   region.copyWith(name: controller.text),
+              // );
+              // Navigator.pop(context);
             },
             child: const Text('Зберегти'),
           ),

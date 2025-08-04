@@ -3,12 +3,12 @@ import 'package:injectable/injectable.dart';
 
 import '../repositories/region_repository.dart';
 @injectable
-class GetAllRegionsUseCase {
+class SeedRegionsUseCase {
   final RegionRepository repository;
 
-  GetAllRegionsUseCase(this.repository);
+  SeedRegionsUseCase(this.repository);
 
-  Future<List<RegionEntity>> call() async {
-    return await repository.getAllRegions();
+  Future<void> call(List<String> regionNames) async {
+    return await repository.seedRegions(regionNames);
   }
 }

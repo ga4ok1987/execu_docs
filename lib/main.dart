@@ -1,3 +1,4 @@
+import 'package:execu_docs/data/repositories_impl/region_repository_impl.dart';
 import 'package:execu_docs/presentation/blocs/folder_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'core/constants/uk_regions.dart';
 import 'core/di/di.dart';
 import 'core/router.dart';
 import 'data/datasources/local/database.dart';
@@ -15,7 +17,7 @@ void main() async {
 
   final db = AppDatabase();
   final regionDao = RegionDao(db);
-  await regionDao.seedRegions();
+  await RegionRepositoryImpl(regionDao).seedRegions(ukrainianRegions);
 
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: kIsWeb

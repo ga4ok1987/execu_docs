@@ -1,6 +1,7 @@
 import 'package:execu_docs/domain/entities/region_entity.dart';
 import 'package:execu_docs/domain/repositories/region_repository.dart';
-
+import 'package:injectable/injectable.dart';
+@injectable
 class AddRegionUseCase {
   final RegionRepository repository;
 

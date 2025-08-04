@@ -1,6 +1,6 @@
 import 'package:execu_docs/domain/entities/region_entity.dart';
 import 'package:execu_docs/domain/usecases/add_region_usacase.dart';
-import 'package:execu_docs/domain/usecases/update_region_usecase.dart';
+import 'package:execu_docs/domain/usecases/update_executor_offices_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/usecases/del_region_usecase.dart';
@@ -10,7 +10,7 @@ class RegionCubit extends Cubit<List<RegionEntity>> {
   final GetAllRegionsUseCase getAllRegionsUseCase;
   final DelRegionUseCase deleteRegionUseCase;
   final AddRegionUseCase addRegionUseCase;
-  final UpdateRegionUseCase updateRegionUseCase;
+  final UpdateExecutorOfficesUseCase updateRegionUseCase;
 
   RegionCubit({
     required this.getAllRegionsUseCase,
@@ -33,9 +33,9 @@ class RegionCubit extends Cubit<List<RegionEntity>> {
     await loadRegions();
   }
 
-  Future<void> upDateRegion(RegionEntity region) async {
-    await updateRegionUseCase(region);
-    await loadRegions();
-  }
+  // Future<void> upDateRegion(RegionEntity region) async {
+  //   await updateRegionUseCase(region);
+  //   await loadRegions();
+  // }
 }
 
