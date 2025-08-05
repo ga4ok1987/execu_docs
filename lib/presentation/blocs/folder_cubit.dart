@@ -1,7 +1,7 @@
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-@lazySingleton
+@injectable
 class FolderCubit extends HydratedCubit<String?> {
   FolderCubit() : super(null);
 

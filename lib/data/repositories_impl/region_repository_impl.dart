@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:execu_docs/data/datasources/local/database.dart';
-import 'package:execu_docs/data/mappers/region_dto_mapper.dart';
 import 'package:execu_docs/domain/entities/region_entity.dart';
 import 'package:execu_docs/domain/repositories/region_repository.dart';
 import 'package:injectable/injectable.dart';
