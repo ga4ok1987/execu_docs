@@ -10,10 +10,9 @@ class RegionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(16),
-      child: Column(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Регіони')),
+      body: Column(
         children: [
           Expanded(
             child: BlocBuilder<RegionCubit, List<RegionEntity>>(
@@ -23,7 +22,7 @@ class RegionPanel extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return RegionTile(region: regions[index]);
                   },
-                  separatorBuilder: (_, __) => const Divider(height: 0),
+                  separatorBuilder: (_, __) =>  Divider(height: 0,color: Colors.grey.shade500,),
                 );
               },
             ),

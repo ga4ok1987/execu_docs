@@ -7,6 +7,8 @@ abstract class ExecutorOfficeEntity with _$ExecutorOfficeEntity {
   const factory ExecutorOfficeEntity({
     required int id,
     required String name,
+    required String address,
+    @Default(false) bool isPrimary,
   }) = _ExecutorOfficeEntity;
 }
 

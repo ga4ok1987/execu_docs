@@ -1,5 +1,6 @@
 import 'package:execu_docs/data/repositories_impl/region_repository_impl.dart';
 import 'package:execu_docs/presentation/blocs/folder_cubit.dart';
+import 'package:execu_docs/presentation/blocs/panels_cubit.dart';
 import 'package:execu_docs/presentation/blocs/region_cubit.dart';
 import 'package:execu_docs/presentation/blocs/region_selection_cubit.dart';
 import 'package:flutter/foundation.dart';
@@ -54,6 +55,7 @@ class AppWrapper extends StatelessWidget {
           )..loadRegions(),
         ),
         BlocProvider<RegionSelectionCubit>(create: (_) => getIt<RegionSelectionCubit>()),
+        BlocProvider<PanelsCubit>(create: (_) => getIt<PanelsCubit>()),
       ],
 
       child: const MyApp(),

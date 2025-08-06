@@ -12,10 +12,10 @@ class ExecutorOfficesPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     if (regionId == null) return const SizedBox();
 
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(16),
-      child: Column(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Виконавці'),),
+
+      body: Column(
         children: [
           Row(
             children: [

@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
-
-import '../../domain/entities/executor_office_entity.dart';
+import 'package:execu_docs/domain/entities/executor_office_entity.dart';
 import '../datasources/local/database.dart';
 
 extension ExecutorOfficeDtoMapper on ExecutorOfficeDto {
@@ -8,16 +7,19 @@ extension ExecutorOfficeDtoMapper on ExecutorOfficeDto {
     return ExecutorOfficeEntity(
       id: id,
       name: name,
+      address: address,
+      isPrimary: isPrimary,
     );
   }
 }
 
-
 extension ExecutorOfficeEntityMapper on ExecutorOfficeEntity {
-ExecutorOfficesCompanion toDto(int regionId) {
-  return ExecutorOfficesCompanion(
-    name: Value(name),
-    regionId: Value(regionId),
-  );
-}
+  ExecutorOfficesCompanion toDto({required int regionId}) {
+    return ExecutorOfficesCompanion(
+      name: Value(name),
+      address: Value(address),
+      isPrimary: Value(isPrimary),
+      regionId: Value(regionId),
+    );
+  }
 }

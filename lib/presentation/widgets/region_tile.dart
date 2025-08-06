@@ -32,11 +32,16 @@ class RegionTile extends StatelessWidget {
           }
         },
         child: Container(
-          color: isSelected ? Colors.grey.shade300 : Colors.white ,
+          color: selectedRegion == null
+              ? Colors.white
+              : isSelected
+              ? Colors.white
+              : Colors.grey.shade500,
 
           child: ListTile(
             title: Text(region.name),
-            trailing: isSelected?SizedBox()
+            trailing: isSelected
+                ? SizedBox()
                 : Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -49,8 +54,7 @@ class RegionTile extends StatelessWidget {
                         onPressed: () => _confirmDeletion(context),
                       ),
                     ],
-                  )
-
+                  ),
           ),
         ),
       ),
