@@ -11,7 +11,23 @@ class RegionPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Регіони')),
+      appBar: AppBar(title: const Text('Регіони'), actions: [
+        BlocBuilder<RegionCubit, List<RegionEntity>>(
+          builder: (context, state) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 22.0),
+              child: IconButton(
+                style: IconButton.styleFrom(backgroundColor: Colors.redAccent),
+                highlightColor: Colors.blueAccent,
+                hoverColor: Colors.amber,
+                onPressed: () => _showAddDialog(context),
+                icon: const Icon(Icons.add),
+
+              ),
+            );
+          },
+        )
+      ],),
       body: Column(
         children: [
           Expanded(
@@ -22,24 +38,13 @@ class RegionPanel extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return RegionTile(region: regions[index]);
                   },
-                  separatorBuilder: (_, __) =>  Divider(height: 0,color: Colors.grey.shade500,),
+                  separatorBuilder: (_, __) =>
+                      Divider(height: 0, color: Colors.grey.shade500,),
                 );
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: BlocBuilder<RegionCubit, List<RegionEntity>>(
-              builder: (context, regions) {
-                return ElevatedButton.icon(
-                  onPressed: () => _showAddDialog(context),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Додати регіон'),
-                );
-              },
-            ),
-          ),
-        ],
+                  ],
       ),
     );
   }

@@ -9,7 +9,6 @@ abstract class ExecutorOfficeEntity with _$ExecutorOfficeEntity {
     required String name,
     required String address,
     @Default(false) bool isPrimary,
+    required int regionId,
   }) = _ExecutorOfficeEntity;
 }
-
-

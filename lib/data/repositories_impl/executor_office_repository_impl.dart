@@ -3,6 +3,7 @@ import 'package:execu_docs/domain/repositories/executor_office_repository.dart';
 
 import '../datasources/local/database.dart';
 import '../datasources/local/executor_office_dao.dart';
+import '../mappers/executor_office_dto_mapper.dart';
 
 class ExecutorOfficeRepositoryImpl implements ExecutorOfficeRepository {
   final ExecutorDao dao;
@@ -10,30 +11,25 @@ class ExecutorOfficeRepositoryImpl implements ExecutorOfficeRepository {
   ExecutorOfficeRepositoryImpl(this.dao);
 
   @override
-  Future<void> addExecutor(ExecutorOfficeEntity entity, int regionId) async {
-    final dto = ExecutorOfficeDto.fromEntity(entity, regionId: regionId);
-    await dao.insertExecutor(dto.toCompanion());
+  Future<void> addExecutor(ExecutorOfficeEntity entity) async {
+    final dto = ExecutorOfficeDtoMapperExt.fromEntity(entity);
+    await dao.insertExecutor(dto.toCompanion(true));
   }
 
   @override
   Future<void> deleteExecutor(int id) => dao.deleteExecutor(id);
 
   @override
-  Future<void> updateExecutor(ExecutorOfficeEntity entity, int regionId) async {
-    final dto = ExecutorOfficeDto.fromEntity(entity, regionId: regionId);
-    final driftModel = ExecutorOfficeDto(
-      id: dto.id,
-      name: dto.name,
-      address: dto.address,
-      isPrimary: dto.isPrimary,
-      regionId: dto.regionId,
-    );
-    await dao.updateExecutor(driftModel);
+  Future<void> updateExecutor(ExecutorOfficeEntity entity) async {
+    final dto = ExecutorOfficeDtoMapperExt.fromEntity(entity);
+    await dao.updateExecutor(dto);
   }
+
 
   @override
   Future<List<ExecutorOfficeEntity>> getByRegion(int regionId) async {
-    final rows = await dao.getExecutorsByRegion(regionId);
-    return rows.map((e) => ExecutorOfficeDto.fromData(e).toEntity()).toList();
+    final dtos = await dao.getExecutorsByRegion(regionId);
+    return dtos.map((dto) => dto.toEntity()).toList();
   }
+
 }

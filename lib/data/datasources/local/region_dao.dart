@@ -77,7 +77,7 @@ class RegionDao extends DatabaseAccessor<AppDatabase> with _$RegionDaoMixin {
       }
 
       for (final office in newOffices.where((o) => o.id != 0)) {
-        final dto = office.toDto(regionId).copyWith(id: Value(office.id));
+        final dto = office.toDto(regionId: regionId).copyWith(id: Value(office.id));
         await (update(
           executorOffices,
         )
@@ -85,7 +85,7 @@ class RegionDao extends DatabaseAccessor<AppDatabase> with _$RegionDaoMixin {
       }
 
       for (final office in newOffices.where((o) => o.id == 0)) {
-        await into(executorOffices).insert(office.toDto(regionId));
+        await into(executorOffices).insert(office.toDto(regionId: regionId));
       }
     });
   }

@@ -9,6 +9,7 @@ extension ExecutorOfficeDtoMapper on ExecutorOfficeDto {
       name: name,
       address: address,
       isPrimary: isPrimary,
+      regionId: regionId,
     );
   }
 }
@@ -23,3 +24,17 @@ extension ExecutorOfficeEntityMapper on ExecutorOfficeEntity {
     );
   }
 }
+
+extension ExecutorOfficeDtoMapperExt on ExecutorOfficeDto {
+  static ExecutorOfficeDto fromEntity(ExecutorOfficeEntity entity,) {
+    return ExecutorOfficeDto(
+      id: entity.id,
+      name: entity.name,
+      address: entity.address,
+      isPrimary: entity.isPrimary,
+      regionId: entity.regionId,
+    );
+  }
+}
+
+

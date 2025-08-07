@@ -43,18 +43,18 @@ class RegionTile extends StatelessWidget {
             trailing: isSelected
                 ? SizedBox()
                 : Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => _showEditDialog(context),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () => _confirmDeletion(context),
-                      ),
-                    ],
-                  ),
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () => _showEditDialog(context),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () => _confirmDeletion(context),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -123,32 +123,55 @@ class RegionTile extends StatelessWidget {
 
   void _showEditDialog(BuildContext context) {
     final controller = TextEditingController(text: region.name);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Редагувати регіон'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(labelText: 'Назва регіону'),
+      builder: (context) => Dialog(
+        alignment: Alignment.centerRight, // Вирівнювання справа
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 300), // Ширина діалогу
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Редагувати регіон',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: controller,
+                  decoration: const InputDecoration(labelText: 'Назва регіону'),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Скасувати'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        context.read<RegionCubit>().updateRegionName(
+                          region.id,
+                          controller.text,
+                        );
+                        Navigator.pop(context);
+                        controller.dispose();
+                      },
+                      child: const Text('Зберегти'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Скасувати'),
-          ),
-          TextButton(
-            onPressed: () {
-              context.read<RegionCubit>().updateRegionName(
-                region.id,
-                controller.text,
-              );
-              Navigator.pop(context);
-              controller.dispose();
-            },
-            child: const Text('Зберегти'),
-          ),
-        ],
       ),
     );
   }
+
 }
