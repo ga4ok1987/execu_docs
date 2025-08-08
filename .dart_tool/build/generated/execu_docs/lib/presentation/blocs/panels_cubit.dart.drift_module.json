@@ -1,0 +1,7 @@
+{
+  "elements": {},
+  "imports": [
+    "package:flutter_bloc/flutter_bloc.dart",
+    "package:injectable/injectable.dart"
+  ]
+}

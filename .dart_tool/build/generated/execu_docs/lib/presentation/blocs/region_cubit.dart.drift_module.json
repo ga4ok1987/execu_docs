@@ -1,0 +1,13 @@
+{
+  "elements": {},
+  "imports": [
+    "package:execu_docs/domain/entities/region_entity.dart",
+    "package:execu_docs/domain/usecases/add_region_usacase.dart",
+    "package:execu_docs/domain/usecases/update_executor_offices_usecase.dart",
+    "package:execu_docs/domain/usecases/update_region_name_usecase.dart",
+    "package:flutter_bloc/flutter_bloc.dart",
+    "package:injectable/injectable.dart",
+    "package:execu_docs/domain/usecases/del_region_usecase.dart",
+    "package:execu_docs/domain/usecases/get_all_region_usecase.dart"
+  ]
+}

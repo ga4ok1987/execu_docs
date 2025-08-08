@@ -1,0 +1,10 @@
+{
+  "elements": {},
+  "imports": [
+    "package:execu_docs/domain/entities/executor_office_entity.dart",
+    "package:execu_docs/domain/repositories/executor_office_repository.dart",
+    "package:execu_docs/data/datasources/local/database.dart",
+    "package:execu_docs/data/datasources/local/executor_office_dao.dart",
+    "package:execu_docs/data/mappers/executor_office_dto_mapper.dart"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "elements": {},
+  "imports": [
+    "package:drift/drift.dart",
+    "package:execu_docs/domain/entities/region_entity.dart",
+    "package:execu_docs/domain/entities/executor_office_entity.dart",
+    "package:execu_docs/data/datasources/local/database.dart"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "elements": {},
+  "imports": [
+    "package:execu_docs/presentation/widgets/region_tile.dart",
+    "package:flutter/material.dart",
+    "package:flutter_bloc/flutter_bloc.dart",
+    "package:execu_docs/domain/entities/region_entity.dart",
+    "package:execu_docs/presentation/blocs/region_cubit.dart"
+  ]
+}

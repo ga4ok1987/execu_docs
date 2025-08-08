@@ -1,0 +1,9 @@
+{
+  "elements": {},
+  "imports": [
+    "package:flutter/material.dart",
+    "package:flutter/gestures.dart",
+    "package:flutter_bloc/flutter_bloc.dart",
+    "package:execu_docs/domain/entities/executor_office_entity.dart"
+  ]
+}

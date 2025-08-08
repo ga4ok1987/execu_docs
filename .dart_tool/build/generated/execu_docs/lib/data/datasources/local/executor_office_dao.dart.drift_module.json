@@ -1,0 +1,52 @@
+{
+  "elements": {
+    "ExecutorDao": {
+      "id": {
+        "library_uri": "package:execu_docs/data/datasources/local/executor_office_dao.dart",
+        "name": "ExecutorDao"
+      },
+      "declaration": {
+        "source_uri": "package:execu_docs/data/datasources/local/executor_office_dao.dart",
+        "offset": 266,
+        "name": "ExecutorDao"
+      },
+      "references": [
+        {
+          "library_uri": "package:execu_docs/data/datasources/local/database.dart",
+          "name": "executor_offices"
+        }
+      ],
+      "type": "dao",
+      "tables": [
+        {
+          "library_uri": "package:execu_docs/data/datasources/local/database.dart",
+          "name": "executor_offices"
+        }
+      ],
+      "views": [],
+      "includes": [],
+      "queries": [],
+      "dart_type": {
+        "elements": [
+          {
+            "lexeme": "ExecutorDao",
+            "import_uri": "package:execu_docs/data/datasources/local/executor_office_dao.dart"
+          }
+        ]
+      },
+      "database": {
+        "elements": [
+          {
+            "lexeme": "AppDatabase",
+            "import_uri": "package:execu_docs/data/datasources/local/database.dart"
+          }
+        ]
+      }
+    }
+  },
+  "imports": [
+    "package:drift/drift.dart",
+    "package:execu_docs/data/datasources/local/database.dart",
+    "package:execu_docs/domain/entities/executor_office_entity.dart"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "elements": {},
+  "imports": [
+    "package:execu_docs/data/repositories_impl/region_repository_impl.dart",
+    "package:execu_docs/presentation/blocs/folder_cubit.dart",
+    "package:execu_docs/presentation/blocs/panels_cubit.dart",
+    "package:execu_docs/presentation/blocs/region_cubit.dart",
+    "package:execu_docs/presentation/blocs/region_selection_cubit.dart",
+    "package:flutter/foundation.dart",
+    "package:flutter/material.dart",
+    "package:flutter_bloc/flutter_bloc.dart",
+    "package:hydrated_bloc/hydrated_bloc.dart",
+    "package:path_provider/path_provider.dart",
+    "package:execu_docs/core/constants/uk_regions.dart",
+    "package:execu_docs/core/di/di.dart",
+    "package:execu_docs/core/router.dart",
+    "package:execu_docs/data/datasources/local/database.dart",
+    "package:execu_docs/data/datasources/local/region_dao.dart",
+    "package:execu_docs/domain/usecases/add_region_usacase.dart",
+    "package:execu_docs/domain/usecases/del_region_usecase.dart",
+    "package:execu_docs/domain/usecases/get_all_region_usecase.dart",
+    "package:execu_docs/domain/usecases/seed_regions_usecase.dart",
+    "package:execu_docs/domain/usecases/update_executor_offices_usecase.dart",
+    "package:execu_docs/domain/usecases/update_region_name_usecase.dart"
+  ]
+}

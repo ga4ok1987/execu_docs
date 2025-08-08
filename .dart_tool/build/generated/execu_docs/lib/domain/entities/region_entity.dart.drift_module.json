@@ -1,0 +1,7 @@
+{
+  "elements": {},
+  "imports": [
+    "package:freezed_annotation/freezed_annotation.dart",
+    "package:execu_docs/domain/entities/executor_office_entity.dart"
+  ]
+}
