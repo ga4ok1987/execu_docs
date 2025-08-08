@@ -10,14 +10,10 @@ class ExecutorOfficeRepositoryImpl implements ExecutorOfficeRepository {
 
   ExecutorOfficeRepositoryImpl(this.dao);
 
-  @override
-  Future<void> addExecutor(ExecutorOfficeEntity entity) async {
-    final dto = ExecutorOfficeDtoMapperExt.fromEntity(entity);
-    await dao.insertExecutor(dto.toCompanion(true));
-  }
+ 
 
   @override
-  Future<void> deleteExecutor(int id) => dao.deleteExecutor(id);
+  Future<void> deleteExecutorOffice(int id) => dao.deleteExecutor(id);
 
   @override
   Future<void> updateExecutor(ExecutorOfficeEntity entity) async {
@@ -31,5 +27,19 @@ class ExecutorOfficeRepositoryImpl implements ExecutorOfficeRepository {
     final dtos = await dao.getExecutorsByRegion(regionId);
     return dtos.map((dto) => dto.toEntity()).toList();
   }
+  
+  @override
+  Future<void> addExecutorOffice(ExecutorOfficeEntity entity) async {
+    final dto = ExecutorOfficeDtoMapperExt.fromEntity(entity);
+    await dao.insertExecutor(dto.toCompanion(true));
+  }
+  
+  @override
+  Future<void> getExecutorOfficesById(ExecutorOfficeEntity entity) {
+    // TODO: implement getExecutorOfficesById
+    throw UnimplementedError();
+  }
+  
+  
 
 }
