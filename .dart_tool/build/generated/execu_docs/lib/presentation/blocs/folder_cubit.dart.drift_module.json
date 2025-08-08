@@ -1,7 +1,0 @@
-{
-  "elements": {},
-  "imports": [
-    "package:hydrated_bloc/hydrated_bloc.dart",
-    "package:injectable/injectable.dart"
-  ]
-}

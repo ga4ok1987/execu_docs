@@ -1,7 +1,0 @@
-{
-  "elements": {},
-  "imports": [
-    "package:execu_docs/domain/repositories/region_repository.dart",
-    "package:injectable/injectable.dart"
-  ]
-}
