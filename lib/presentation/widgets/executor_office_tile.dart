@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/entities/executor_office_entity.dart';
-
+import '../../domain/entities/executor_office_entity.dart';
+import '../blocs/executor_office_cubit.dart';
 
 class ExecutorTile extends StatelessWidget {
   final ExecutorOfficeEntity office;
 
-  const ExecutorTile({super.key, required this.office,});
+  const ExecutorTile({super.key, required this.office});
 
   @override
   Widget build(BuildContext context) {
-
     return Listener(
       behavior: HitTestBehavior.deferToChild,
       onPointerDown: (event) {
@@ -22,12 +21,28 @@ class ExecutorTile extends StatelessWidget {
           _showContextMenu(context, position);
         }
       },
-      child: Container(
-        color: Colors.white
-            ,
+      child: Card(
         child: ListTile(
           title: Text(office.name),
-          subtitle: Text(office.address),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(office.address),
+              if (office.isPrimary)
+                Container(
+                  margin: const EdgeInsets.only(top: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    'Основна',
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ),
+            ],
+          ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -51,7 +66,7 @@ class ExecutorTile extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Підтвердити видалення'),
-        content: Text('Ви дійсно хочете видалити офіс "${office.name}"?'),
+        content: Text('Ви дійсно хочете видалити службу "${office.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -59,7 +74,8 @@ class ExecutorTile extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-
+              Navigator.pop(context);
+              context.read<ExecutorOfficeCubit>().removeOffice(office.id);
             },
             child: const Text('Видалити'),
           ),
@@ -96,7 +112,7 @@ class ExecutorTile extends StatelessWidget {
           if (selected.startsWith('edit')) {
             _showEditDialog(context);
           } else if (selected.startsWith('delete')) {
-            context.read<ExecutorCubit>().removeExecutor(office.id);
+            context.read<ExecutorOfficeCubit>().removeOffice(office.id);
           }
         });
       }
@@ -106,68 +122,78 @@ class ExecutorTile extends StatelessWidget {
   void _showEditDialog(BuildContext context) {
     final nameController = TextEditingController(text: office.name);
     final addressController = TextEditingController(text: office.address);
+    bool isPrimary = office.isPrimary;
+    final executorCubit = context.read<ExecutorOfficeCubit>(); // Зберігаємо посилання
 
     showDialog(
       context: context,
-      builder: (context) => Align(
-        alignment: Alignment.centerRight,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (statefulContext, setState) => AlertDialog(
+          title: const Text('Редагувати службу'),
+          content: SizedBox(
             width: 300,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Theme.of(context).dialogBackgroundColor,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Редагувати офіс', style: TextStyle(fontSize: 18)),
-                const SizedBox(height: 16),
                 TextField(
                   controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Назва офісу'),
+                  decoration: const InputDecoration(
+                    labelText: 'Назва служби',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 TextField(
                   controller: addressController,
-                  decoration: const InputDecoration(labelText: 'Адреса'),
+                  decoration: const InputDecoration(
+                    labelText: 'Адреса',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 2,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Скасувати'),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<ExecutorCubit>().updateExecutor(
-                          office.copyWith(
-                            name: nameController.text,
-                            address: addressController.text,
-                          ),
-                        );
-                        Navigator.pop(context);
-                        nameController.dispose();
-                        addressController.dispose();
+                    Checkbox(
+                      value: isPrimary,
+                      onChanged: (value) {
+                        setState(() {
+                          isPrimary = value ?? false;
+                        });
                       },
-                      child: const Text('Зберегти'),
                     ),
+                    const Text('Основна служба'),
                   ],
                 ),
               ],
             ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                nameController.dispose();
+                addressController.dispose();
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('Скасувати'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final updatedOffice = office.copyWith(
+                  name: nameController.text,
+                  address: addressController.text,
+                  isPrimary: isPrimary,
+                );
+
+                executorCubit.editOffice(updatedOffice); // Використовуємо збережене посилання
+
+                nameController.dispose();
+                addressController.dispose();
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('Зберегти'),
+            ),
+          ],
         ),
       ),
     );

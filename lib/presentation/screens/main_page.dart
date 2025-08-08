@@ -1,9 +1,13 @@
+import 'package:execu_docs/core/di/di.dart';
+import 'package:execu_docs/domain/usecases/get_region_by_id_usecase.dart';
+import 'package:execu_docs/domain/usecases/update_region_usecase.dart';
 import 'package:execu_docs/presentation/widgets/main_panel.dart';
 import 'package:execu_docs/presentation/widgets/region_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/region_entity.dart';
+import '../blocs/executor_office_cubit.dart';
 import '../blocs/panels_cubit.dart';
 import '../blocs/region_selection_cubit.dart';
 import '../widgets/executors_offices_panel.dart';
@@ -89,24 +93,32 @@ class MainPage extends StatelessWidget {
                     (state) => state.state.selectedRegion,
               );
 
-              return AnimatedSlide(
-                duration: const Duration(milliseconds: 300),
-                offset: panelState.isExecutorPanelOpen
-                    ? const Offset(0, 0)
-                    : const Offset(1.0, 0),
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: SizedBox(
-                    width: MediaQuery
-                        .of(context)
-                        .size
-                        .width * 0.4,
-                    height: double.infinity,
-                    child: Material(
-                      elevation: 8,
-                      child: selectedRegion != null
-                          ? ExecutorOfficesPanel(regionId: selectedRegion.id)
-                          : const SizedBox(),
+              return BlocProvider(
+                  key: ValueKey(selectedRegion?.id),
+                create: (context) => ExecutorOfficeCubit(
+                  regionId: selectedRegion!.id,
+                  getRegionById: getIt<GetRegionByIdUseCase>(),
+                  updateRegion: getIt<UpdateRegionUseCase>()
+                ),
+                child: AnimatedSlide(
+                  duration: const Duration(milliseconds: 300),
+                  offset: panelState.isExecutorPanelOpen
+                      ? const Offset(0, 0)
+                      : const Offset(1.0, 0),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: SizedBox(
+                      width: MediaQuery
+                          .of(context)
+                          .size
+                          .width * 0.4,
+                      height: double.infinity,
+                      child: Material(
+                        elevation: 8,
+                        child: selectedRegion != null
+                            ? ExecutorOfficesPanel(regionId: selectedRegion.id)
+                            : const SizedBox(),
+                      ),
                     ),
                   ),
                 ),
