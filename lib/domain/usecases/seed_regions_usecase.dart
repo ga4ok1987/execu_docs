@@ -1,4 +1,3 @@
-import 'package:execu_docs/domain/entities/region_entity.dart';
 import 'package:injectable/injectable.dart';
 
 import '../repositories/region_repository.dart';
