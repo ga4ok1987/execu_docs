@@ -11,7 +11,9 @@ class RegionPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Регіони'), actions: [
+      appBar: AppBar(title: const Text('Регіони'),
+        backgroundColor: Colors.white,
+        actions: [
         BlocBuilder<RegionCubit, List<RegionEntity>>(
           builder: (context, state) {
             return Padding(
@@ -28,23 +30,17 @@ class RegionPanel extends StatelessWidget {
           },
         )
       ],),
-      body: Column(
-        children: [
-          Expanded(
-            child: BlocBuilder<RegionCubit, List<RegionEntity>>(
-              builder: (context, regions) {
-                return ListView.separated(
-                  itemCount: regions.length,
-                  itemBuilder: (context, index) {
-                    return RegionTile(region: regions[index]);
-                  },
-                  separatorBuilder: (_, __) =>
-                      Divider(height: 0, color: Colors.grey.shade500,),
-                );
-              },
-            ),
-          ),
-                  ],
+      body: BlocBuilder<RegionCubit, List<RegionEntity>>(
+        builder: (context, regions) {
+          return ListView.separated(
+            itemCount: regions.length,
+            itemBuilder: (context, index) {
+              return RegionTile(region: regions[index]);
+            },
+            separatorBuilder: (_, __) =>
+                Divider(height: 0, color: Colors.grey.shade500,),
+          );
+        },
       ),
     );
   }

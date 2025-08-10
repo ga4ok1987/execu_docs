@@ -1,3 +1,9 @@
+import 'package:execu_docs/domain/usecases/add_debtor_usecase.dart';
+import 'package:execu_docs/domain/usecases/delete_debtor_usecase.dart';
+import 'package:execu_docs/domain/usecases/get_debtors_usecase.dart';
+import 'package:execu_docs/domain/usecases/update_debtor_usecase.dart';
+import 'package:execu_docs/presentation/blocs/debtor_cubit.dart';
+import 'package:execu_docs/presentation/blocs/executor_office_cubit.dart';
 import 'package:execu_docs/presentation/blocs/folder_cubit.dart';
 import 'package:execu_docs/presentation/blocs/panels_cubit.dart';
 import 'package:execu_docs/presentation/blocs/region_cubit.dart';
@@ -14,8 +20,10 @@ import 'core/router.dart';
 import 'domain/usecases/add_region_usacase.dart';
 import 'domain/usecases/del_region_usecase.dart';
 import 'domain/usecases/get_all_region_usecase.dart';
+import 'domain/usecases/get_region_by_id_usecase.dart';
 import 'domain/usecases/seed_regions_usecase.dart';
 import 'domain/usecases/update_region_name_usecase.dart';
+import 'domain/usecases/update_region_usecase.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +44,7 @@ class AppWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return MultiBlocProvider(
       providers: [
         BlocProvider<FolderCubit>(create: (_) => getIt<FolderCubit>()),
@@ -47,11 +56,24 @@ class AppWrapper extends StatelessWidget {
             updateRegionNameUseCase: getIt<UpdateRegionNameUseCase>(),
           )..loadRegions(),
         ),
+        BlocProvider<DebtorCubit>(
+          create: (context) => DebtorCubit(
+            addDebtorUseCase: getIt<AddDebtorUseCase>(),
+            updateDebtorUseCase: getIt<UpdateDebtorUseCase>(),
+            deleteDebtorUseCase: getIt<DeleteDebtorUseCase>(),
+            getDebtorsUseCase: getIt<GetDebtorsUseCase>(),
+          )..loadDebtors(),
+        ),
 
         BlocProvider<RegionSelectionCubit>(
           create: (_) => getIt<RegionSelectionCubit>(),
         ),
         BlocProvider<PanelsCubit>(create: (_) => getIt<PanelsCubit>()),
+    BlocProvider<ExecutorOfficeCubit>(
+    create: (context) => ExecutorOfficeCubit(
+    getRegionById: getIt<GetRegionByIdUseCase>(),
+    updateRegion: getIt<UpdateRegionUseCase>(),
+    ),),
       ],
 
       child: const MyApp(),

@@ -21,7 +21,8 @@ class ExecutorTile extends StatelessWidget {
           _showContextMenu(context, position);
         }
       },
-      child: Card(
+      child: Container(
+        color: Colors.white,
         child: ListTile(
           title: Text(office.name),
           subtitle: Column(
@@ -30,12 +31,7 @@ class ExecutorTile extends StatelessWidget {
               Text(office.address),
               if (office.isPrimary)
                 Container(
-                  margin: const EdgeInsets.only(top: 4),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  color: Colors.white,
                   child: const Text(
                     'Основна',
                     style: TextStyle(color: Colors.white, fontSize: 12),

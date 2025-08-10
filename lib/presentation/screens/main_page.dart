@@ -61,7 +61,7 @@ class MainPage extends StatelessWidget {
               // Обчислюємо наскільки треба зсунути RegionPanel
               final regionSlideOffset = panelState.isRegionPanelOpen
                   ? (panelState.isExecutorPanelOpen
-                  ? const Offset(-0.4, 0) // посунути вліво на 40%
+                  ? const Offset(-0.2, 0) // посунути вліво на 40%
                   : const Offset(0, 0))
                   : const Offset(1.0, 0); // повністю прихована праворуч
               return AnimatedSlide(
@@ -116,7 +116,7 @@ class MainPage extends StatelessWidget {
                       child: Material(
                         elevation: 8,
                         child: selectedRegion != null
-                            ? ExecutorOfficesPanel(regionId: selectedRegion.id)
+                            ? ExecutorOfficesPanel(region: selectedRegion)
                             : const SizedBox(),
                       ),
                     ),

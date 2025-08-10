@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/di/di.dart';
 import '../../domain/entities/executor_office_entity.dart';
+import '../../domain/entities/region_entity.dart';
 import '../../domain/usecases/get_region_by_id_usecase.dart';
 import '../../domain/usecases/update_region_usecase.dart';
 import '../blocs/executor_office_cubit.dart';
@@ -10,23 +11,28 @@ import '../blocs/region_selection_cubit.dart';
 import 'executor_office_tile.dart';
 
 class ExecutorOfficesPanel extends StatelessWidget {
-  final int? regionId;
+  final RegionEntity region;
 
-  const ExecutorOfficesPanel({super.key, required this.regionId});
+  const ExecutorOfficesPanel({super.key, required this.region});
 
   @override
   Widget build(BuildContext context) {
-    if (regionId == null) return const SizedBox();
+
 
     return BlocProvider(
       create: (context) => ExecutorOfficeCubit(
-        regionId: regionId!,
+        regionId: region.id,
         getRegionById: getIt<GetRegionByIdUseCase>(),
         updateRegion: getIt<UpdateRegionUseCase>(),
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Виконавці'),
+          backgroundColor: Colors.white,
+
+          title:  Text(
+            'Виконавчі служби регіону ${region.name}',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           actions: [
             BlocBuilder<ExecutorOfficeCubit, List<ExecutorOfficeEntity>>(
   builder: (context, state) {
@@ -36,28 +42,15 @@ class ExecutorOfficesPanel extends StatelessWidget {
             );
   },
 ),
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => context.read<RegionSelectionCubit>().clear(),
+            ),
           ],
         ),
         body: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Виконавчі служби регіону #$regionId',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => context.read<RegionSelectionCubit>().clear(),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(),
+
             Expanded(
               child: BlocBuilder<ExecutorOfficeCubit, List<ExecutorOfficeEntity>>(
                 builder: (context, offices) {
@@ -68,12 +61,11 @@ class ExecutorOfficesPanel extends StatelessWidget {
                   }
 
                   return ListView.separated(
-                    padding: const EdgeInsets.all(8.0),
                     itemCount: offices.length,
                     itemBuilder: (context, index) {
                       return ExecutorTile(office: offices[index]);
                     },
-                    separatorBuilder: (_, __) => const Divider(),
+                    separatorBuilder: (_, __) => const Divider(height: 0,),
                   );
                 },
               ),
@@ -154,7 +146,7 @@ class ExecutorOfficesPanel extends StatelessWidget {
                     name: nameController.text,
                     address: addressController.text,
                     isPrimary: isPrimary,
-                    regionId: regionId!,
+                    regionId: region.id,
                   );
 
                   context.read<ExecutorOfficeCubit>().addOffice(newOffice); // Використовуємо збережене посилання
