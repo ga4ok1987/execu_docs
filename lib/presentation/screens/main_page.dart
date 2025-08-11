@@ -1,6 +1,7 @@
 import 'package:execu_docs/core/di/di.dart';
 import 'package:execu_docs/domain/usecases/get_region_by_id_usecase.dart';
 import 'package:execu_docs/domain/usecases/update_region_usecase.dart';
+import 'package:execu_docs/presentation/blocs/region_cubit.dart';
 import 'package:execu_docs/presentation/widgets/main_panel.dart';
 import 'package:execu_docs/presentation/widgets/region_panel.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,8 @@ class MainPage extends StatelessWidget {
         .width * 0.35;
 
 
-    return BlocListener<RegionSelectionCubit, RegionSelectionState>(
+    return MultiBlocListener(listeners: [
+    BlocListener<RegionSelectionCubit, RegionSelectionState>(
       listener: (context, state) {
         if (state.isExecutorPanelOpen) {
           context.read<PanelsCubit>().openExecutorPanel();
@@ -31,6 +33,20 @@ class MainPage extends StatelessWidget {
           context.read<PanelsCubit>().closeExecutorPanel();
         }
       },
+      
+    ),
+    BlocListener<PanelsCubit, PanelsState>(
+      listenWhen: (previous, current) {
+        // Слухаємо тільки момент, коли панель закрилась
+        final wasOpen = previous.isRegionPanelOpen || previous.isExecutorPanelOpen;
+        final isNowClosed = !current.isRegionPanelOpen && !current.isExecutorPanelOpen;
+        return wasOpen && isNowClosed;
+      },
+      listener: (context, state) {
+        context.read<RegionCubit>().loadRegions();
+      },
+    ),
+    ],
       child: Stack(
         children: [
           MainPanel(),
@@ -128,6 +144,7 @@ class MainPage extends StatelessWidget {
         ],
       ),
     );
+    
   }
 }
 

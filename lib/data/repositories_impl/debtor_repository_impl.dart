@@ -1,44 +1,72 @@
+import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../core/failure.dart';
 import '../../domain/entities/debtor_entity.dart';
 import '../../domain/repositories/debtor_repository.dart';
-import '../datasources/local/database.dart';
 import '../datasources/local/debtors_dao.dart';
-import 'package:drift/drift.dart';
 
 @LazySingleton(as: DebtorRepository)
-
 class DebtorRepositoryImpl implements DebtorRepository {
   final DebtorsDao dao;
 
   DebtorRepositoryImpl(this.dao);
 
   @override
-  Future<int> insertDebtor(DebtorEntity debtor) {
-    return dao.insertDebtor(
-      DebtorsCompanion(
-        fullName: Value(debtor.fullName),
-        decree: Value(debtor.decree),
-        amount: Value(debtor.amount),
-        address: Value(debtor.address),
-        regionId: Value(debtor.regionId),
-        executorId: Value(debtor.executorId),
-      ),
-    );
+  Future<Either<Failure, Unit>> insertDebtor(DebtorEntity debtor) async {
+    try {
+      await dao.insertDebtor(debtor);
+      return const Right(unit);
+    } catch (_) {
+      return Left(DatabaseFailure());
+    }
   }
 
   @override
-  Future<bool> updateDebtor(DebtorEntity debtor) {
-    return dao.updateDebtor(debtor);
+  Future<Either<Failure, Unit>> updateDebtor(DebtorEntity debtor) async {
+    try {
+       await dao.updateDebtor(debtor);
+           return const Right(unit);
+    } catch (_) {
+      return Left(DatabaseFailure());
+    }
   }
 
   @override
-  Future<int> deleteDebtor(int id) {
-    return dao.deleteDebtor(id);
+  Future<Either<Failure, Unit>> deleteDebtor(int id) async {
+    try {
+      await dao.deleteDebtor(id);
+      return const Right(unit);
+    } catch (_) {
+      return Left(DatabaseFailure());
+    }
   }
 
   @override
-  Future<List<DebtorEntity>> getAllDebtors() {
-    return dao.getAllDebtors();
+  Future<Either<Failure, List<DebtorEntity>>> getAllDebtors() async {
+    try {
+      final debtors = await dao.getAllDebtors();
+      return Right(debtors);
+    } catch (_) {
+      return Left(DatabaseFailure());
+    }
+  }
+
+  Future<Either<Failure, List<DebtorEntity>>> getDebtorsByRegion(int regionId) async {
+    try {
+      final debtors = await dao.getDebtorsByRegion(regionId);
+      return Right(debtors);
+    } catch (_) {
+      return Left(DatabaseFailure());
+    }
+  }
+
+  Future<Either<Failure, List<DebtorEntity>>> getDebtorsByExecutor(int executorId) async {
+    try {
+      final debtors = await dao.getDebtorsByExecutor(executorId);
+      return Right(debtors);
+    } catch (_) {
+      return Left(DatabaseFailure());
+    }
   }
 }

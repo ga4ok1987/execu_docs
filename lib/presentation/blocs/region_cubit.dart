@@ -7,7 +7,7 @@ import 'package:injectable/injectable.dart';
 import '../../domain/usecases/del_region_usecase.dart';
 import '../../domain/usecases/get_all_region_usecase.dart';
 @injectable
-class RegionCubit extends Cubit<List<RegionEntity>> {
+class RegionCubit extends Cubit<RegionState> {
   final GetAllRegionsUseCase getAllRegionsUseCase;
   final DelRegionUseCase deleteRegionUseCase;
   final AddRegionUseCase addRegionUseCase;
@@ -18,27 +18,58 @@ class RegionCubit extends Cubit<List<RegionEntity>> {
     required this.deleteRegionUseCase,
     required this.addRegionUseCase,
     required this.updateRegionNameUseCase,
-  }) : super([]);
+  }) : super(RegionInitial());
 
   Future<void> loadRegions() async {
+    emit(RegionLoading());
     final result = await getAllRegionsUseCase();
-    result.sort((a,b) => a.name.compareTo(b.name));
-    emit(result);
+    result.fold(
+            (failure) => emit(RegionError(failure.message)),
+            (regions) {
+          regions.sort((a, b) => a.name.compareTo(b.name));
+          emit(RegionLoaded(regions));
+        }
+    );
   }
 
   Future<void> removeRegion(int id) async {
-    await deleteRegionUseCase(id);
-    await loadRegions();
+    final result = await deleteRegionUseCase(id);
+    result.fold(
+          (failure) => emit(RegionError(failure.message)),
+          (_) async => await loadRegions(),
+    );
   }
 
   Future<void> addRegion(RegionEntity region) async {
-    await addRegionUseCase(region);
-    await loadRegions();
+    emit(RegionLoading());
+    final result = await addRegionUseCase(region);
+    result.fold(
+          (failure) => emit(RegionError(failure.message)),
+          (_) async => await loadRegions(),
+    );
   }
-Future<void> updateRegionName(int id, region) async {
-    await updateRegionNameUseCase(id,region);
-    await loadRegions();
+
+  Future<void> updateRegionName(int id, String newName) async {
+    emit(RegionLoading());
+    final result = await updateRegionNameUseCase(id, newName);
+    result.fold(
+          (failure)  => emit(RegionError(failure.message)),
+          (_) async => await loadRegions(),
+    );
   }
+
 
 }
 
+sealed class RegionState {}
+
+class RegionInitial extends RegionState {}
+class RegionLoading extends RegionState {}
+class RegionLoaded extends RegionState {
+  final List<RegionEntity> regions;
+  RegionLoaded(this.regions);
+}
+class RegionError extends RegionState {
+  final String message;
+  RegionError(this.message);
+}

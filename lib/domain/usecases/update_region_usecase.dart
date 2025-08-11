@@ -1,5 +1,7 @@
+import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../core/failure.dart';
 import '../entities/region_entity.dart';
 import '../repositories/region_repository.dart';
 
@@ -9,8 +11,8 @@ class UpdateRegionUseCase {
 
   UpdateRegionUseCase(this.repository);
 
-  Future<void> call(RegionEntity region) async {
-    await repository.updateExecutorOffices(region.id, region.executorOffices);
+  Future<Either<Failure, Unit>> call(RegionEntity region) async {
+    return  repository.updateRegionUseCase(region.id, region.executorOffices);
 
 
   }

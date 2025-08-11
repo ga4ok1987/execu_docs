@@ -1,3 +1,5 @@
+import 'package:dartz/dartz.dart';
+import 'package:execu_docs/core/failure.dart';
 import 'package:injectable/injectable.dart';
 import '../entities/debtor_entity.dart';
 import '../repositories/debtor_repository.dart';
@@ -8,7 +10,7 @@ class UpdateDebtorUseCase {
 
   UpdateDebtorUseCase(this.repository);
 
-  Future<bool> call(DebtorEntity debtor) {
-    return repository.updateDebtor(debtor);
+  Future<Either<Failure, Unit>> call(DebtorEntity debtor) async{
+    return await repository.updateDebtor(debtor);
   }
 }

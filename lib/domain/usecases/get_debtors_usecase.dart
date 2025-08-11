@@ -1,3 +1,5 @@
+import 'package:dartz/dartz.dart';
+import 'package:execu_docs/core/failure.dart';
 import 'package:injectable/injectable.dart';
 import '../entities/debtor_entity.dart';
 import '../repositories/debtor_repository.dart';
@@ -8,7 +10,7 @@ class GetDebtorsUseCase {
 
   GetDebtorsUseCase(this.repository);
 
-  Future<List<DebtorEntity>> call() {
-    return repository.getAllDebtors();
+  Future<Either<Failure, List<DebtorEntity>>> call() async {
+    return await repository.getAllDebtors();
   }
 }

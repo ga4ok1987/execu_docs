@@ -1,3 +1,5 @@
+import 'package:dartz/dartz.dart';
+import 'package:execu_docs/core/failure.dart';
 import 'package:injectable/injectable.dart';
 import '../repositories/debtor_repository.dart';
 
@@ -7,7 +9,7 @@ class DeleteDebtorUseCase {
 
   DeleteDebtorUseCase(this.repository);
 
-  Future<int> call(int id) {
+  Future<Either<Failure, Unit>> call(int id) {
     return repository.deleteDebtor(id);
   }
 }

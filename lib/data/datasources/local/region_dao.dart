@@ -102,6 +102,12 @@ class RegionDao extends DatabaseAccessor<AppDatabase> with _$RegionDaoMixin {
     final count = result.read(countExp);
     return count == 0;
   }
+  Future<bool> existsByName(String name) async {
+  final query = await (select(regions)
+        ..where((tbl) => tbl.name.equals(name)))
+      .getSingleOrNull();
+  return query != null;
+}
 }
 
 
