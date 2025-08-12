@@ -50,6 +50,7 @@ dependencies:
   path: ^1.9.1
   docx_template: ^0.4.0
   dartz: ^0.10.1
+  dropdown_button2: ^2.3.9
 
 dev_dependencies:
   flutter_test:

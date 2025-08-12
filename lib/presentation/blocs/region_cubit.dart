@@ -21,45 +21,70 @@ class RegionCubit extends Cubit<RegionState> {
   }) : super(RegionInitial());
 
   Future<void> loadRegions() async {
+    final prevRegions = state is RegionLoaded
+        ? (state as RegionLoaded).regions
+        : <RegionEntity>[];
     emit(RegionLoading());
     final result = await getAllRegionsUseCase();
     result.fold(
-            (failure) => emit(RegionError(failure.message)),
-            (regions) {
-          regions.sort((a, b) => a.name.compareTo(b.name));
-          emit(RegionLoaded(regions));
-        }
-    );
-  }
-
-  Future<void> removeRegion(int id) async {
-    final result = await deleteRegionUseCase(id);
-    result.fold(
-          (failure) => emit(RegionError(failure.message)),
-          (_) async => await loadRegions(),
+          (failure) {
+        emit(RegionError(failure.message, prevRegions));
+      },
+          (regions) {
+        regions.sort((a,b) => a.name.compareTo(b.name));
+        emit(RegionLoaded(regions));
+      },
     );
   }
 
   Future<void> addRegion(RegionEntity region) async {
+    final prevRegions = state is RegionLoaded
+        ? (state as RegionLoaded).regions
+        : <RegionEntity>[];
     emit(RegionLoading());
-    final result = await addRegionUseCase(region);
-    result.fold(
-          (failure) => emit(RegionError(failure.message)),
-          (_) async => await loadRegions(),
+    final res = await addRegionUseCase(region);
+    res.fold(
+          (failure) {
+        emit(RegionError(failure.message, prevRegions));
+      },
+          (_) async {
+        await loadRegions();
+      },
+    );
+  }
+
+  Future<void> removeRegion(int id) async {
+    final prevRegions = state is RegionLoaded
+        ? (state as RegionLoaded).regions
+        : <RegionEntity>[];
+    emit(RegionLoading());
+    final res = await deleteRegionUseCase(id);
+    res.fold(
+          (failure) {
+        emit(RegionError(failure.message, prevRegions));
+      },
+          (_) async {
+        await loadRegions();
+      },
     );
   }
 
   Future<void> updateRegionName(int id, String newName) async {
+    final prevRegions = state is RegionLoaded
+        ? (state as RegionLoaded).regions
+        : <RegionEntity>[];
+
     emit(RegionLoading());
-    final result = await updateRegionNameUseCase(id, newName);
-    result.fold(
-          (failure)  => emit(RegionError(failure.message)),
+
+    final res = await updateRegionNameUseCase(id, newName);
+    res.fold(
+          (failure) => emit(RegionError(failure.message, prevRegions)),
           (_) async => await loadRegions(),
     );
   }
 
-
 }
+
 
 sealed class RegionState {}
 
@@ -71,5 +96,6 @@ class RegionLoaded extends RegionState {
 }
 class RegionError extends RegionState {
   final String message;
-  RegionError(this.message);
+  final List<RegionEntity> previousRegions; // щоб не втрачати список
+  RegionError(this.message, [this.previousRegions = const []]);
 }
