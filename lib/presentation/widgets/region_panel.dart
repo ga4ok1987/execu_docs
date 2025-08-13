@@ -1,3 +1,4 @@
+import 'package:execu_docs/core/widgets/hover_button.dart';
 import 'package:execu_docs/presentation/widgets/region_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,9 +44,10 @@ class RegionPanel extends StatelessWidget {
                 }
                 return Padding(
                   padding: const EdgeInsets.only(right: 22.0),
-                  child: IconButton(
+                  child: HoverButton(
+                    isCircle: true,
                     onPressed: () => _showAddDialog(context),
-                    icon: const Icon(Icons.add),
+                    child: const Icon(Icons.add),
                   ),
                 );
               },

@@ -8,6 +8,7 @@ import 'package:execu_docs/presentation/blocs/folder_cubit.dart';
 import 'package:execu_docs/presentation/blocs/panels_cubit.dart';
 import 'package:execu_docs/presentation/blocs/region_cubit.dart';
 import 'package:execu_docs/presentation/blocs/region_selection_cubit.dart';
+import 'package:execu_docs/presentation/blocs/windows_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,6 +37,8 @@ void main() async {
   await configureDependencies();
   final regionRepo = getIt<SeedRegionsUseCase>();
   await regionRepo.call(ukrainianRegions);
+  WindowCubit().init();
+
   runApp(const AppWrapper());
 }
 
@@ -44,9 +47,9 @@ class AppWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return MultiBlocProvider(
       providers: [
+        BlocProvider<WindowCubit>(create: (_) => getIt<WindowCubit>()),
         BlocProvider<FolderCubit>(create: (_) => getIt<FolderCubit>()),
         BlocProvider<RegionCubit>(
           create: (context) => RegionCubit(
@@ -69,11 +72,12 @@ class AppWrapper extends StatelessWidget {
           create: (_) => getIt<RegionSelectionCubit>(),
         ),
         BlocProvider<PanelsCubit>(create: (_) => getIt<PanelsCubit>()),
-    BlocProvider<ExecutorOfficeCubit>(
-    create: (context) => ExecutorOfficeCubit(
-    getRegionById: getIt<GetRegionByIdUseCase>(),
-    updateRegion: getIt<UpdateRegionUseCase>(),
-    ),),
+        BlocProvider<ExecutorOfficeCubit>(
+          create: (context) => ExecutorOfficeCubit(
+            getRegionById: getIt<GetRegionByIdUseCase>(),
+            updateRegion: getIt<UpdateRegionUseCase>(),
+          ),
+        ),
       ],
 
       child: const MyApp(),

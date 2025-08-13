@@ -1,3 +1,4 @@
+import 'package:execu_docs/core/widgets/hover_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,7 +40,7 @@ class MainPanel extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
-                  ElevatedButton(
+                  HoverButton(
                     onPressed: () => _selectFolder(context),
                     child: const Text('Вибрати папку'),
                   ),
