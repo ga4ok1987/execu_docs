@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 
+import '../database.dart';
+
 
 class ExecutorOffices extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -9,5 +11,5 @@ class ExecutorOffices extends Table {
   BoolColumn get isPrimary =>boolean().withDefault(Constant(false))();
 
   IntColumn get regionId => integer()
-      .customConstraint('NOT NULL REFERENCES regions(id) ON DELETE CASCADE')();
+      .references(Regions, #id, onDelete: KeyAction.cascade)();
 }

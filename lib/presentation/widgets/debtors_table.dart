@@ -36,56 +36,62 @@ class DebtorsTable extends StatelessWidget {
                       final totalWidth = constraints.maxWidth;
                       final colWidths = [
                         totalWidth * 0.15, // ПІБ
-                        totalWidth * 0.01, // Постанова
-                        totalWidth * 0.01,  // Сума
-                        totalWidth * 0.25, // Адреса
-                        totalWidth * 0.05, // Область
-                        totalWidth * 0.1,  // Виконавець
+                        totalWidth * 0.06, // Постанова
+                        totalWidth * 0.04,  // Сума
+                        totalWidth * 0.15, // Адреса
+                        totalWidth * 0.1, // Область
+                        totalWidth * 0.4,  // Виконавець
                       ];
                   return SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width,
+                    scrollDirection: Axis.horizontal,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        //height: MediaQuery.of(context).size.height,
 
-                      child: DataTable(
-                        dataRowColor: WidgetStateProperty.resolveWith<Color?>(
-                              (Set<WidgetState> states) {
-                            // Чередування кольору для парних і непарних рядків
-                            int index = states.contains(WidgetState.selected) ? 0 : -1;
-                            if (index == -1) return null; // default
+                        child: DataTable(
+                          columnSpacing: 0,
+                          headingRowHeight: 20,
+                          dataRowColor: WidgetStateProperty.resolveWith<Color?>(
+                                (Set<WidgetState> states) {
+                              // Чередування кольору для парних і непарних рядків
+                              int index = states.contains(WidgetState.selected) ? 0 : -1;
+                              if (index == -1) return null; // default
 
-                            // Але DataTable не передає індекс, тому робимо трюк нижче
-                            return null; // стандартний, нижче реалізуємо в rows
-                          },
-                        ),
-                        columns: [
-                          DataColumn(label: SizedBox(width: colWidths[0], child: const Text('ПІБ'))),
-                          DataColumn(label: SizedBox(width: colWidths[1], child: const Text('Постанова'))),
-                          DataColumn(label: SizedBox(width: colWidths[2], child: const Text('Сума'))),
-                          DataColumn(label: SizedBox(width: colWidths[3], child: const Text('Адреса'))),
-                          DataColumn(label: SizedBox(width: colWidths[4], child: const Text('Область'))),
-                          DataColumn(label: SizedBox(width: colWidths[5], child: const Text('Виконавець'))),
-                        ],
-                        rows: List<DataRow>.generate(
-                          debtors.length,
-                              (index) {
-                            final debtor = debtors[index];
-                            final isEven = index % 2 == 0;
+                              // Але DataTable не передає індекс, тому робимо трюк нижче
+                              return null; // стандартний, нижче реалізуємо в rows
+                            },
+                          ),
+                          columns: [
+                            DataColumn(label: ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[0],), child: const Text('ПІБ'))),
+                            DataColumn(label: ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[1],), child: const Text('Постанова'))),
+                            DataColumn(label: ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[2],), child: const Text('Сума'))),
+                            DataColumn(label: ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[3],), child: const Text('Адреса'))),
+                            DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: colWidths[4],), child: const Text('Область'))),
+                            DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: colWidths[5],), child: const Text('Виконавець'))),
+                          ],
+                          rows: List<DataRow>.generate(
+                            debtors.length,
+                                (index) {
+                              final debtor = debtors[index];
+                              final isEven = index % 2 == 0;
 
-                            return DataRow(
-                              color: WidgetStateProperty.all(
-                                isEven ? Colors.grey.shade100 : Colors.grey.shade200,
-                              ),
-                              cells: [
-                                DataCell(SizedBox(width: colWidths[0], child: _buildWrappedText(debtor.fullName))),
-                                DataCell(SizedBox(width: colWidths[1], child: _buildWrappedText(debtor.decree))),
-                                DataCell(SizedBox(width: colWidths[2], child: _buildWrappedText(debtor.amount))),
-                                DataCell(SizedBox(width: colWidths[3], child: _buildWrappedText(debtor.address))),
-                                DataCell(SizedBox(width: colWidths[4], child: _regionDropdown(context, regions, debtor))),
-                                DataCell(SizedBox(width: colWidths[5], child: _executorDropdown(context, regions, debtor))),
-                              ],
-                            );
-                          },
+                              return DataRow(
+                                color: WidgetStateProperty.all(
+                                  isEven ? Colors.grey.shade100 : Colors.grey.shade200,
+                                ),
+                                cells: [
+                                  DataCell(ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[0],), child: _buildWrappedText(debtor.fullName))),
+                                  DataCell(ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[1],), child: _buildWrappedText(debtor.decree))),
+                                  DataCell(ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[2],), child: _buildWrappedText(debtor.amount))),
+                                  DataCell(ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[3],), child: _buildWrappedText(debtor.address))),
+                                  DataCell(ConstrainedBox(constraints: BoxConstraints(maxWidth: colWidths[4],), child: _regionDropdown(context, regions, debtor))),
+                                  DataCell(ConstrainedBox(constraints: BoxConstraints(maxWidth: colWidths[5],), child: _executorDropdown(context, regions, debtor))),
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -120,7 +126,6 @@ class DebtorsTable extends StatelessWidget {
     return DropdownButtonHideUnderline(
       child: DropdownButton2<String>(
         buttonStyleData: ButtonStyleData(width: MediaQuery.of(context).size.width),
-        iconStyleData: IconStyleData(icon: SizedBox.shrink()),
         isExpanded: true,  // щоб випадаюче меню розтягувалось по ширині контейнера
 
         value: _regionNameById(regions, debtor.regionId) ?? 'не вибрано',
