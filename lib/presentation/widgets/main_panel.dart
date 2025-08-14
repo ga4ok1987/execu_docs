@@ -19,79 +19,177 @@ class MainPanel extends StatelessWidget {
     final folderPath = context.watch<FolderCubit>().state;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Перегляд документів')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// 📁 Шлях до папки в рамці
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      folderPath ?? 'Папку не вибрано',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              HighlightContainer(
+                child: Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Center(
+                          child: const Text(
+                            'Підготовка документів для подання до виконавчих органів',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                         HoverButton(
+                          onPressed: () =>
+                              context.read<PanelsCubit>().toggleRegionPanel(),
+                          child: const Text('Виконавчі'),
+                        ),
+
+
+                    ],
                   ),
-                  HoverButton(
-                    onPressed: () => _selectFolder(context),
-                    child: const Text('Вибрати папку'),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            /// ➕ Кнопка додавання регіонів
-            Align(
-              alignment: Alignment.centerLeft,
-              child: ElevatedButton(
-                onPressed: () =>
-                    context.read<PanelsCubit>().toggleRegionPanel(),
-                child: const Text('Додати регіони'),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            /// ➕ Кнопка додавання боржника
-            Align(
-              alignment: Alignment.centerLeft,
-              child: ElevatedButton(
-                onPressed: () => showAddDebtorDialog(context),
-                child: const Text('Додати боржника'),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            /// 📄 Таблиця з рамкою
-            const Text(
-              'Документи',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(8),
                 ),
-                padding: const EdgeInsets.all(8),
-                child: const DebtorsTable(),
               ),
+              HighlightContainer(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Шлях до папки вихідних документів:'),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              folderPath ?? 'Папку не вибрано',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 20),
+
+                        HoverButton(
+                          onPressed: () => _selectFolder(context),
+                          child: const Text('Вибрати папку'),
+                        ),
+                      ],
+                    ),
+                    Text('Шлях до папки результатів:'),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              folderPath ?? 'Папку не вибрано',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 20),
+                        HoverButton(
+                          onPressed: () => _selectFolder(context),
+                          child: const Text('Вибрати папку'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              /// ➕ Кнопка додавання регіонів
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  onPressed: () =>
+                      context.read<PanelsCubit>().toggleRegionPanel(),
+                  child: const Text('Додати регіони'),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              /// ➕ Кнопка додавання боржника
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  onPressed: () => showAddDebtorDialog(context),
+                  child: const Text('Додати боржника'),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              /// 📄 Таблиця з рамкою
+              const Text(
+                'Документи',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: const DebtorsTable(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class HighlightContainer extends StatelessWidget {
+  final Widget child;
+
+  const HighlightContainer({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(9),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 6,
+              offset: Offset(0, 3),
             ),
           ],
         ),
+        child: child,
       ),
     );
   }
@@ -104,8 +202,6 @@ Future<void> _selectFolder(BuildContext context) async {
     folderCubit.setFolder(result);
   }
 }
-
-
 
 void showAddDebtorDialog(BuildContext context) {
   final fullNameController = TextEditingController();
@@ -129,7 +225,7 @@ void showAddDebtorDialog(BuildContext context) {
           // Оновлення виконавців при виборі регіону
           if (selectedRegionId != null) {
             final selectedRegion = regions.firstWhere(
-                  (r) => r.id == selectedRegionId,
+              (r) => r.id == selectedRegionId,
               orElse: () => RegionEntity(id: 0, name: '', executorOffices: []),
             );
             executors = selectedRegion.executorOffices;
@@ -176,10 +272,12 @@ void showAddDebtorDialog(BuildContext context) {
                         value: null,
                         child: Text('не вибрано'),
                       ),
-                      ...regions.map((r) => DropdownMenuItem<int>(
-                        value: r.id,
-                        child: Text(r.name),
-                      )),
+                      ...regions.map(
+                        (r) => DropdownMenuItem<int>(
+                          value: r.id,
+                          child: Text(r.name),
+                        ),
+                      ),
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -196,10 +294,12 @@ void showAddDebtorDialog(BuildContext context) {
                         value: null,
                         child: Text('не вибрано'),
                       ),
-                      ...executors.map((e) => DropdownMenuItem<int>(
-                        value: e.id,
-                        child: Text(e.name),
-                      )),
+                      ...executors.map(
+                        (e) => DropdownMenuItem<int>(
+                          value: e.id,
+                          child: Text(e.name),
+                        ),
+                      ),
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -230,7 +330,7 @@ void showAddDebtorDialog(BuildContext context) {
                   final newDebtor = DebtorEntity(
                     id: 0,
                     fullName: fullNameController.text.trim(),
-                      address: addressController.text.trim(),
+                    address: addressController.text.trim(),
                     decree: decreeController.text.trim(),
                     amount: amountController.text.trim(),
                     regionId: selectedRegionId,
@@ -251,5 +351,3 @@ void showAddDebtorDialog(BuildContext context) {
     },
   );
 }
-
-

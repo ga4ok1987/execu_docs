@@ -49,7 +49,7 @@ class HoverButton extends StatelessWidget {
                   ? const EdgeInsets.all(
                       5,
                     ) // робимо квадратну область для кола
-                  : const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                  : const EdgeInsets.symmetric(horizontal: 25, vertical: 6),
               decoration: BoxDecoration(
                 color: color,
                 borderRadius: BorderRadius.circular(isCircle ? 1000 : 12),
