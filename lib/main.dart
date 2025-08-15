@@ -96,6 +96,7 @@ class MyApp extends StatelessWidget {
       routerConfig: router,
       title: 'Violation App',
       theme: ThemeData(
+        dividerColor: Colors.transparent,
         brightness: Brightness.light,
         primaryColor: Colors.white,
         scaffoldBackgroundColor: AppColors.backgroundColor,

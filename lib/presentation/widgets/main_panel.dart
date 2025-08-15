@@ -1,4 +1,6 @@
+import 'package:execu_docs/core/utils/extensions.dart';
 import 'package:execu_docs/core/widgets/hover_button.dart';
+import 'package:execu_docs/presentation/widgets/custom_expansion_tile.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,11 +22,12 @@ class MainPanel extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: Container(
+
           padding: const EdgeInsets.all(16),
 
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               HighlightContainer(
                 child: Padding(
@@ -44,76 +47,87 @@ class MainPanel extends StatelessWidget {
                         ),
                       ),
 
-                         HoverButton(
-                          onPressed: () =>
-                              context.read<PanelsCubit>().toggleRegionPanel(),
-                          child: const Text('Виконавчі'),
-                        ),
-
-
+                      HoverButton(
+                        onPressed: () =>
+                            context.read<PanelsCubit>().toggleRegionPanel(),
+                        child: const Text('Виконавчі'),
+                      ),
                     ],
                   ),
                 ),
               ),
-              HighlightContainer(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Шлях до папки вихідних документів:'),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              folderPath ?? 'Папку не вибрано',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+              SizedBox(
+                width: MediaQuery.of(context).size.width/2,
+
+              child: HighlightContainer(
+                  child: CustomExpansionTile(
+
+                    title: "Налаштування",
+                    expandedNotifier: settingsExpanded,
+
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Шлях до папки вихідних документів:'),
+                          Row(
+
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    (folderPath ?? 'Папку не вибрано').shortenFolderPath(),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 20),
+
+                              HoverButton(
+                                onPressed: () => _selectFolder(context),
+                                child: const Text('Вибрати папку'),
+                              ),
+                              SizedBox(width: 10),
+                            ],
+                          ),
+                          Text('Шлях до папки результатів:'),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                (folderPath ?? 'Папку не вибрано').shortenFolderPath(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 20),
-
-                        HoverButton(
-                          onPressed: () => _selectFolder(context),
-                          child: const Text('Вибрати папку'),
-                        ),
-                      ],
-                    ),
-                    Text('Шлях до папки результатів:'),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              folderPath ?? 'Папку не вибрано',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                          SizedBox(width: 20),
+                          HoverButton(
+                            onPressed: () => _selectFolder(context),
+                            child: const Text('Вибрати папку'),
                           ),
-                        ),
-                        SizedBox(width: 20),
-                        HoverButton(
-                          onPressed: () => _selectFolder(context),
-                          child: const Text('Вибрати папку'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                          SizedBox(width: 10),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
               ),
 
