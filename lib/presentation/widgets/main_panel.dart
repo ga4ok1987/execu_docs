@@ -23,55 +23,114 @@ class MainPanel extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Container(
-
           padding: const EdgeInsets.all(16),
 
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.start,
+
             children: [
-              HighlightContainer(
-                child: Padding(
-                  padding: EdgeInsets.all(10),
+              SizedBox(
+                height: 80,
+                width: 953,
+                child: HighlightContainer(
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Center(
-                          child: const Text(
-                            'Підготовка документів для подання до виконавчих органів',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                      const Text(
+                        'Підготовка документів для подання до виконавчих органів',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
 
                       HoverButton(
                         onPressed: () =>
                             context.read<PanelsCubit>().toggleRegionPanel(),
-                        child: const Text('Виконавчі'),
+                        child: Text(
+                          'Виконавці',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width/2,
-
-              child: HighlightContainer(
-                  child: CustomExpansionTile(
-
-                    title: "Налаштування",
-                    expandedNotifier: settingsExpanded,
-
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 66,
+                    width: 1000 / 2.1,
+                    child: HighlightContainer(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Шлях до папки вихідних документів:'),
-                          Row(
+                          HoverButton(
+                            child: Text(
+                              'Завантажити файли',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
 
+                          HoverButton(
+                            child: Text(
+                              'Створити супровідні',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 1000 / 2.1,
+
+                    child: HighlightContainer(
+                      child: CustomExpansionTile(
+                        title: "Налаштування",
+                        expandedNotifier: settingsExpanded,
+
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Шлях до папки вихідних документів:'),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        (folderPath ?? 'Папку не вибрано')
+                                            .shortenFolderPath(),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 20),
+
+                                  HoverButton(
+                                    onPressed: () => _selectFolder(context),
+                                    child: const Text('Вибрати папку'),
+                                  ),
+                                  SizedBox(width: 10),
+                                ],
+                              ),
+                              Text('Шлях до папки результатів:'),
+                            ],
+                          ),
+                          Row(
                             children: [
                               Expanded(
                                 child: Container(
@@ -81,7 +140,8 @@ class MainPanel extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    (folderPath ?? 'Папку не вибрано').shortenFolderPath(),
+                                    (folderPath ?? 'Папку не вибрано')
+                                        .shortenFolderPath(),
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -89,7 +149,6 @@ class MainPanel extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(width: 20),
-
                               HoverButton(
                                 onPressed: () => _selectFolder(context),
                                 child: const Text('Вибрати папку'),
@@ -97,82 +156,48 @@ class MainPanel extends StatelessWidget {
                               SizedBox(width: 10),
                             ],
                           ),
-                          Text('Шлях до папки результатів:'),
+                          const SizedBox(height: 16),
+
                         ],
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                (folderPath ?? 'Папку не вибрано').shortenFolderPath(),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 20),
-                          HoverButton(
-                            onPressed: () => _selectFolder(context),
-                            child: const Text('Вибрати папку'),
-                          ),
-                          SizedBox(width: 10),
-                        ],
+                    ),
+                  ),
+
+                ],
+              ),
+
+              
+              SizedBox(
+                width: 240,
+                child: HighlightContainer(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: HoverButton(
+                          onPressed: () => showAddDebtorDialog(context),
+                            isCircle: true,
+                            child: Icon(Icons.add,color: Colors.white,)),
                       ),
-                      const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: HoverButton(
+                            isCircle: true,
+                            child: Icon(Icons.edit,color: Colors.white,)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: HoverButton(
+                            isCircle: true,
+                            child: Icon(Icons.delete,color: Colors.white,)),
+                      ),
                     ],
                   ),
                 ),
               ),
 
-              const SizedBox(height: 16),
-
-              /// ➕ Кнопка додавання регіонів
-              Align(
-                alignment: Alignment.centerLeft,
-                child: ElevatedButton(
-                  onPressed: () =>
-                      context.read<PanelsCubit>().toggleRegionPanel(),
-                  child: const Text('Додати регіони'),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              /// ➕ Кнопка додавання боржника
-              Align(
-                alignment: Alignment.centerLeft,
-                child: ElevatedButton(
-                  onPressed: () => showAddDebtorDialog(context),
-                  child: const Text('Додати боржника'),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              /// 📄 Таблиця з рамкою
-              const Text(
-                'Документи',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade400),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  child: const DebtorsTable(),
-                ),
-              ),
+              Expanded(child: HighlightContainer(child: const DebtorsTable())),
             ],
           ),
         ),
@@ -189,7 +214,7 @@ class HighlightContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(9),
+      padding: const EdgeInsets.all(10),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
