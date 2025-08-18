@@ -66,6 +66,7 @@ class AppWrapper extends StatelessWidget {
             updateDebtorUseCase: getIt<UpdateDebtorUseCase>(),
             deleteDebtorUseCase: getIt<DeleteDebtorUseCase>(),
             getDebtorsUseCase: getIt<GetDebtorsUseCase>(),
+            getAllRegionsUseCase: getIt<GetAllRegionsUseCase>(),
           )..loadDebtors(),
         ),
 

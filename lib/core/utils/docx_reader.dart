@@ -1,10 +1,25 @@
+import 'dart:convert';
 import 'dart:io';
-
-import 'package:docx_template/docx_template.dart';
+import 'package:archive/archive.dart';
+import 'package:xml/xml.dart';
 
 class DocxReader {
-  Future<String> readFile(String path) async {
-    final docx = await  DocxTemplate.fromBytes(await File(path).readAsBytes());
-    return docx.toString();
+  Future<List<String>> readDocxParagraphs(String path) async {
+    final bytes = File(path).readAsBytesSync();
+    final archive = ZipDecoder().decodeBytes(bytes);
+
+    // Знайдемо document.xml
+    final docFile = archive.files.firstWhere(
+      (f) => f.name == 'word/document.xml',
+    );
+    final xmlString = utf8.decode(docFile.content as List<int>);
+    final xmlDoc = XmlDocument.parse(xmlString);
+
+    // Кожен <w:p> — параграф
+    final paragraphs = xmlDoc.findAllElements('w:p').map((p) {
+      return p.innerText; // текст параграфа
+    }).toList();
+
+    return paragraphs;
   }
 }

@@ -1,8 +1,15 @@
+import 'dart:io';
+
+import 'package:collection/collection.dart';
+import 'package:execu_docs/core/utils/extensions.dart';
+import 'package:execu_docs/domain/usecases/get_all_region_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:dartz/dartz.dart';
 
+import '../../core/utils/docx_reader.dart';
 import '../../domain/entities/debtor_entity.dart';
+import '../../domain/entities/region_entity.dart';
 import '../../domain/usecases/add_debtor_usecase.dart';
 import '../../domain/usecases/delete_debtor_usecase.dart';
 import '../../domain/usecases/get_debtors_usecase.dart';
@@ -15,20 +22,23 @@ class DebtorCubit extends Cubit<DebtorState> {
   final UpdateDebtorUseCase updateDebtorUseCase;
   final DeleteDebtorUseCase deleteDebtorUseCase;
   final GetDebtorsUseCase getDebtorsUseCase;
+  final GetAllRegionsUseCase getAllRegionsUseCase;
 
   DebtorCubit({
     required this.addDebtorUseCase,
     required this.updateDebtorUseCase,
     required this.deleteDebtorUseCase,
     required this.getDebtorsUseCase,
+    required this.getAllRegionsUseCase,
   }) : super(DebtorInitial());
 
   Future<void> loadDebtors() async {
     emit(DebtorLoading());
-    final Either<Failure, List<DebtorEntity>> result = await getDebtorsUseCase();
+    final Either<Failure, List<DebtorEntity>> result =
+        await getDebtorsUseCase();
     result.fold(
-          (failure) => emit(DebtorError(failure.message)),
-          (debtors) => emit(DebtorLoaded(debtors)),
+      (failure) => emit(DebtorError(failure.message)),
+      (debtors) => emit(DebtorLoaded(debtors)),
     );
   }
 
@@ -36,8 +46,8 @@ class DebtorCubit extends Cubit<DebtorState> {
     emit(DebtorLoading());
     final Either<Failure, Unit> result = await updateDebtorUseCase(debtor);
     result.fold(
-          (failure) => emit(DebtorError(failure.message)),
-          (_) => loadDebtors(),
+      (failure) => emit(DebtorError(failure.message)),
+      (_) => loadDebtors(),
     );
   }
 
@@ -45,8 +55,8 @@ class DebtorCubit extends Cubit<DebtorState> {
     emit(DebtorLoading());
     final Either<Failure, Unit> result = await addDebtorUseCase(debtor);
     result.fold(
-          (failure) => emit(DebtorError(failure.message)),
-          (_) => loadDebtors(),
+      (failure) => emit(DebtorError(failure.message)),
+      (_) => loadDebtors(),
     );
   }
 
@@ -54,9 +64,66 @@ class DebtorCubit extends Cubit<DebtorState> {
     emit(DebtorLoading());
     final Either<Failure, Unit> result = await deleteDebtorUseCase(id);
     result.fold(
-          (failure) => emit(DebtorError(failure.message)),
-          (_) => loadDebtors(),
+      (failure) => emit(DebtorError(failure.message)),
+      (_) => loadDebtors(),
     );
+  }
+
+  Future<void> importFromDocx(String dirPath) async {
+    emit(DebtorImporting(0));
+    List<RegionEntity>? regions;
+    final Either<Failure, List<RegionEntity>> result =
+        await getAllRegionsUseCase();
+    result.fold(
+      (failure) => regions = null,
+      (loadedRegions) => regions = loadedRegions,
+    );
+
+    final directory = Directory(dirPath);
+    final files = directory
+        .listSync()
+        .where((f) => f.path.endsWith('.docx'))
+        .toList();
+
+    if (files.isEmpty) {
+      emit(DebtorError("Не знайдено DOCX файлів"));
+      return;
+    }
+
+    final total = files.length;
+    int processed = 0;
+
+    for (var file in files) {
+      final text = await DocxReader().readDocxParagraphs(file.path);
+
+      final fullName = text[15].extractName;
+      final decree = text[2].extractDecree;
+      final address = text[8].extractAddress;
+      final amount = text[15].extractAmount;
+      final regionId = address.extractRegion(regions);
+      final executorsList = (regionId != null)
+          ? regions
+          ?.firstWhere((element) => element.id == regionId)
+          .executorOffices:[];
+      final executorId = executorsList?.firstWhereOrNull(
+        (element) => element.isPrimary,
+      )?.id;
+
+      final debtor = DebtorEntity(
+        id: 0,
+        fullName: fullName,
+        decree: decree,
+        amount: amount,
+        address: address,
+        regionId: regionId,
+        executorId: executorId,
+      );
+      await addDebtor(debtor);
+    }
+
+    await loadDebtors();
+    processed++;
+    emit(DebtorImporting(processed / total));
   }
 
   // Якщо треба оновити локальний стан без перезавантаження з бази:
@@ -77,7 +144,8 @@ class DebtorCubit extends Cubit<DebtorState> {
         newExecutorId = null;
       }
 
-      if (newRegionId != debtor.regionId || newExecutorId != debtor.executorId) {
+      if (newRegionId != debtor.regionId ||
+          newExecutorId != debtor.executorId) {
         return debtor.copyWith(
           regionId: newRegionId,
           executorId: newExecutorId,
@@ -97,12 +165,20 @@ class DebtorInitial extends DebtorState {}
 
 class DebtorLoading extends DebtorState {}
 
+class DebtorImporting extends DebtorState {
+  final double progress;
+
+  DebtorImporting(this.progress);
+}
+
 class DebtorLoaded extends DebtorState {
   final List<DebtorEntity> debtors;
+
   DebtorLoaded(this.debtors);
 }
 
 class DebtorError extends DebtorState {
   final String message;
+
   DebtorError(this.message);
 }

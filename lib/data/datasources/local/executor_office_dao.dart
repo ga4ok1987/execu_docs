@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:execu_docs/data/datasources/local/database.dart';
-import 'package:execu_docs/domain/entities/executor_office_entity.dart';
 
 part 'executor_office_dao.g.dart';
 

@@ -9,7 +9,7 @@ class DeleteDebtorUseCase {
 
   DeleteDebtorUseCase(this.repository);
 
-  Future<Either<Failure, Unit>> call(int id) {
-    return repository.deleteDebtor(id);
+  Future<Either<Failure, Unit>> call(int id) async{
+    return await repository.deleteDebtor(id);
   }
 }

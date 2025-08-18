@@ -18,6 +18,8 @@ class MainPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selectedRowNotifier = ValueNotifier<List<int>?>(null);
+
     final folderPath = context.watch<FolderCubit>().state;
 
     return Scaffold(
@@ -75,6 +77,11 @@ class MainPanel extends StatelessWidget {
                               'Завантажити файли',
                               style: TextStyle(color: Colors.white),
                             ),
+                            onPressed: () async {
+                              if(folderPath != null){
+                                showDocxImportProgressDialog(context, folderPath);
+                              }
+                            },
                           ),
 
                           HoverButton(
@@ -157,16 +164,13 @@ class MainPanel extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 16),
-
                         ],
                       ),
                     ),
                   ),
-
                 ],
               ),
 
-              
               SizedBox(
                 width: 240,
                 child: HighlightContainer(
@@ -177,27 +181,54 @@ class MainPanel extends StatelessWidget {
                         padding: const EdgeInsets.all(8.0),
                         child: HoverButton(
                           onPressed: () => showAddDebtorDialog(context),
-                            isCircle: true,
-                            child: Icon(Icons.add,color: Colors.white,)),
+                          isCircle: true,
+                          child: Icon(Icons.add, color: Colors.white),
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: HoverButton(
-                            isCircle: true,
-                            child: Icon(Icons.edit,color: Colors.white,)),
+                          isCircle: true,
+                          child: Icon(Icons.edit, color: Colors.white),
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: HoverButton(
-                            isCircle: true,
-                            child: Icon(Icons.delete,color: Colors.white,)),
+                          onPressed: () async {
+                            final selectedId = selectedRowNotifier.value;
+                            if (selectedId != null) {
+                              await context.read<DebtorCubit>().deleteDebtor(
+                                selectedId[0],
+                              );
+                              selectedRowNotifier.value = null;
+
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Спочатку виберіть боржника'),
+                                ),
+                              );
+                            }
+
+                          },
+                          isCircle: true,
+                          child: Icon(Icons.delete, color: Colors.white),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
 
-              Expanded(child: HighlightContainer(child: const DebtorsTable())),
+              Expanded(
+                child: HighlightContainer(
+                  child: DebtorsTable(
+                    selectedRowNotifier: selectedRowNotifier,
+                    rowCount: 2,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -390,3 +421,43 @@ void showAddDebtorDialog(BuildContext context) {
     },
   );
 }
+void showDocxImportProgressDialog(BuildContext context, String dir) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // забороняємо закривати діалог користувачем
+    builder: (dialogContext) {
+      // запускаємо імпорт після відкриття діалогу
+      context.read<DebtorCubit>().importFromDocx(dir);
+
+      return AlertDialog(
+        title: const Text('Імпорт з DOCX'),
+        content: BlocConsumer<DebtorCubit, DebtorState>(
+          listener: (context, state) {
+            // коли імпорт завершився, закриваємо діалог
+            if (state is DebtorLoaded || state is DebtorError) {
+              Navigator.of(dialogContext).pop();
+            }
+          },
+          builder: (context, state) {
+            if (state is DebtorImporting) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text("Імпорт даних..."),
+                  const SizedBox(height: 16),
+                  LinearProgressIndicator(value: state.progress),
+                  const SizedBox(height: 8),
+                  Text("${(state.progress * 100).toStringAsFixed(0)}%"),
+                ],
+              );
+            }
+
+            // якщо стан не DebtorImporting, можна показати повідомлення
+            return const Text('Підготовка до імпорту...');
+          },
+        ),
+      );
+    },
+  );
+}
+

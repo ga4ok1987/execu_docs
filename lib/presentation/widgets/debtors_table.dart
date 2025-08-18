@@ -9,7 +9,17 @@ import '../blocs/debtor_cubit.dart';
 import '../blocs/region_cubit.dart';
 
 class DebtorsTable extends StatelessWidget {
-  const DebtorsTable({super.key});
+  final ValueNotifier<List<int>?> selectedRowNotifier; // для вибору рядка
+  final List<ValueNotifier<bool>> hoverNotifiers; // для hover-ефекту
+
+  DebtorsTable({
+    super.key,
+    required this.selectedRowNotifier,
+    required int rowCount,
+  }) : hoverNotifiers = List.generate(
+         rowCount,
+         (_) => ValueNotifier<bool>(false),
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -32,70 +42,143 @@ class DebtorsTable extends StatelessWidget {
                 final debtors = debtorState.debtors;
 
                 return LayoutBuilder(
-                    builder: (context, constraints) {
-                      final totalWidth = constraints.maxWidth;
-                      final colWidths = [
-                        totalWidth * 0.15, // ПІБ
-                        totalWidth * 0.06, // Постанова
-                        totalWidth * 0.04,  // Сума
-                        totalWidth * 0.15, // Адреса
-                        totalWidth * 0.1, // Область
-                        totalWidth * 0.4,  // Виконавець
-                      ];
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width,
-                        //height: MediaQuery.of(context).size.height,
+                  builder: (context, constraints) {
+                    final totalWidth = constraints.maxWidth;
+                    final colWidths = [
+                      totalWidth * 0.02, // №
+                      totalWidth * 0.15, // ПІБ
+                      totalWidth * 0.1, // Постанова
+                      totalWidth * 0.06, // Сума
+                      totalWidth * 0.2, // Адреса
+                      totalWidth * 0.24, // Область
+                      totalWidth * 0.24, // Виконавець
+                    ];
 
-                        child: DataTable(
-                          columnSpacing: 0,
-                          headingRowHeight: 20,
-                          dataRowColor: WidgetStateProperty.resolveWith<Color?>(
-                                (Set<WidgetState> states) {
-                              // Чередування кольору для парних і непарних рядків
-                              int index = states.contains(WidgetState.selected) ? 0 : -1;
-                              if (index == -1) return null; // default
-
-                              // Але DataTable не передає індекс, тому робимо трюк нижче
-                              return null; // стандартний, нижче реалізуємо в rows
-                            },
-                          ),
-                          columns: [
-                            DataColumn(label: ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[0],), child: const Text('ПІБ'))),
-                            DataColumn(label: ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[1],), child: const Text('Постанова'))),
-                            DataColumn(label: ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[2],), child: const Text('Сума'))),
-                            DataColumn(label: ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[3],), child: const Text('Адреса'))),
-                            DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: colWidths[4],), child: const Text('Область'))),
-                            DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: colWidths[5],), child: const Text('Виконавець'))),
-                          ],
-                          rows: List<DataRow>.generate(
-                            debtors.length,
-                                (index) {
-                              final debtor = debtors[index];
-                              final isEven = index % 2 == 0;
-
-                              return DataRow(
-                                color: WidgetStateProperty.all(
-                                  isEven ? Colors.grey.shade100 : Colors.grey.shade200,
-                                ),
-                                cells: [
-                                  DataCell(ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[0],), child: _buildWrappedText(debtor.fullName))),
-                                  DataCell(ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[1],), child: _buildWrappedText(debtor.decree))),
-                                  DataCell(ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[2],), child: _buildWrappedText(debtor.amount))),
-                                  DataCell(ConstrainedBox(constraints: BoxConstraints(minWidth: colWidths[3],), child: _buildWrappedText(debtor.address))),
-                                  DataCell(ConstrainedBox(constraints: BoxConstraints(maxWidth: colWidths[4],), child: _regionDropdown(context, regions, debtor))),
-                                  DataCell(ConstrainedBox(constraints: BoxConstraints(maxWidth: colWidths[5],), child: _executorDropdown(context, regions, debtor))),
+                    return ValueListenableBuilder<List<int>?>(
+                      valueListenable: selectedRowNotifier,
+                      builder: (context, selectedIndex, _) {
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            child: SizedBox(
+                              width: totalWidth,
+                              child: DataTable(
+                                columnSpacing: 0,
+                                headingRowHeight: 28,
+                                columns: [
+                                  _col('№', colWidths[0]),
+                                  _col('ПІБ', colWidths[1]),
+                                  _col('Постанова', colWidths[2]),
+                                  _col('Сума', colWidths[3]),
+                                  _col('Адреса', colWidths[4]),
+                                  _col('Область', 210),
+                                  _col('Виконавець', colWidths[6]),
                                 ],
-                              );
-                            },
+                                rows: List.generate(debtors.length, (index) {
+                                  final debtor = debtors[index];
+                                  final isEven = index % 2 == 0;
+
+                                  return DataRow(
+                                    color: WidgetStateProperty.resolveWith((
+                                      states,
+                                    ) {
+                                      return _resolveRowColor(
+                                        index,
+                                        isEven,
+                                        selectedIndex?[1],
+                                      );
+                                    }),
+                                    cells: [
+                                      DataCell(
+                                        _wrapText(
+                                          (index + 1).toString(),
+                                          colWidths[0],
+                                        ),
+                                        onTap: () {
+                                          selectedRowNotifier.value = [
+                                            debtor.id,
+                                            index,
+                                          ];
+                                        },
+                                      ),
+                                      DataCell(
+                                        _wrapText(
+                                          debtor.fullName,
+                                          colWidths[1],
+                                        ),
+                                        onTap: () {
+                                          selectedRowNotifier.value = [
+                                            debtor.id,
+                                            index,
+                                          ];
+                                        },
+                                      ),
+                                      DataCell(
+                                        _wrapText(debtor.decree, colWidths[2]),
+                                        onTap: () {
+                                          selectedRowNotifier.value = [
+                                            debtor.id,
+                                            index,
+                                          ];
+                                        },
+                                      ),
+                                      DataCell(
+                                        _wrapText(debtor.amount, colWidths[3]),
+                                        onTap: () {
+                                          selectedRowNotifier.value = [
+                                            debtor.id,
+                                            index,
+                                          ];
+                                        },
+                                      ),
+                                      DataCell(
+                                        _wrapText(debtor.address, colWidths[4]),
+                                        onTap: () {
+                                          selectedRowNotifier.value = [
+                                            debtor.id,
+                                            index,
+                                          ];
+                                        },
+                                      ),
+                                      DataCell(
+                                        _regionDropdown(
+                                          context,
+                                          regions,
+                                          debtor,
+                                          210,
+                                        ),
+                                        onTap: () {
+                                          selectedRowNotifier.value = [
+                                            debtor.id,
+                                            index,
+                                          ];
+                                        },
+                                      ),
+                                      DataCell(
+                                        _executorDropdown(
+                                          context,
+                                          regions,
+                                          debtor,
+                                          colWidths[6],
+                                        ),
+                                        onTap: () {
+                                          selectedRowNotifier.value = [
+                                            debtor.id,
+                                            index,
+                                          ];
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                }),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  );}
+                        );
+                      },
+                    );
+                  },
                 );
               }
               return const SizedBox.shrink();
@@ -107,45 +190,79 @@ class DebtorsTable extends StatelessWidget {
     );
   }
 
-  Widget _buildWrappedText(String text) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 150),
-      child: Text(
-        text,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        softWrap: true,
-        style: const TextStyle(
-          fontSize: 12,
+  // ==============================
+  // Хелпери
+  // ==============================
+
+  DataColumn _col(String label, double width) {
+    return DataColumn(
+      label: ConstrainedBox(
+        constraints: BoxConstraints(minWidth: width),
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );
   }
 
-  Widget _regionDropdown(BuildContext context, List<RegionEntity> regions, DebtorEntity debtor) {
+  Widget _wrapText(String text, double width) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: width),
+      child: Center(
+        child: Text(
+          text,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          softWrap: true,
+          style: const TextStyle(fontSize: 12),
+        ),
+      ),
+    );
+  }
+
+  Color _resolveRowColor(int index, bool isEven, int? selectedIndex) {
+    if (selectedIndex == index) {
+      return Colors.blue.withOpacity(0.3); // виділений рядок
+    }
+    return isEven ? Colors.grey.shade100 : Colors.grey.shade200;
+  }
+
+  // ==============================
+  // Dropdown
+  // ==============================
+
+  Widget _regionDropdown(
+    BuildContext context,
+    List<RegionEntity> regions,
+    DebtorEntity debtor,
+    double width,
+  ) {
     return DropdownButtonHideUnderline(
       child: DropdownButton2<String>(
-        buttonStyleData: ButtonStyleData(width: MediaQuery.of(context).size.width),
-        isExpanded: true,  // щоб випадаюче меню розтягувалось по ширині контейнера
-
+        buttonStyleData: ButtonStyleData(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          height: 32,
+          width: width,
+        ),
         value: _regionNameById(regions, debtor.regionId) ?? 'не вибрано',
         items: [
-          const DropdownMenuItem<String>(
+          const DropdownMenuItem(
             value: 'не вибрано',
             child: Text(
               'не вибрано',
-              softWrap: true,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 12),
             ),
           ),
           ...regions.map(
-                (r) => DropdownMenuItem<String>(
+            (r) => DropdownMenuItem(
               value: r.name,
               child: Text(
                 r.name,
-                softWrap: true,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 12),
@@ -153,106 +270,135 @@ class DebtorsTable extends StatelessWidget {
             ),
           ),
         ],
-        selectedItemBuilder: (context) {
-          return [
-            const Text(
-              'не вибрано',
-              softWrap: true,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 12, color: Colors.black87),
-            ),
-            ...regions.map((r) => Text(
-              r.name,
-              softWrap: true,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, color: Colors.black87),
-            )),
-          ];
-        },
         onChanged: (value) {
           final selectedRegion = regions.firstWhere(
-                (r) => r.name == value,
-            orElse: () => const RegionEntity(id: 0, name: '', executorOffices: []),
+            (r) => r.name == value,
+            orElse: () =>
+                const RegionEntity(id: 0, name: '', executorOffices: []),
           );
 
           final newRegionId = selectedRegion.id == 0 ? null : selectedRegion.id;
 
           final primaryExecutor = selectedRegion.executorOffices.firstWhere(
-                (e) => e.isPrimary,
-            orElse: () => const ExecutorOfficeEntity(id: 0, name: '', address: '', isPrimary: false, regionId: 0),
+            (e) => e.isPrimary,
+            orElse: () => const ExecutorOfficeEntity(
+              id: 0,
+              name: '',
+              address: '',
+              isPrimary: false,
+              regionId: 0,
+            ),
           );
 
-          final newExecutorId = primaryExecutor.id == 0 ? null : primaryExecutor.id;
+          final newExecutorId = primaryExecutor.id == 0
+              ? null
+              : primaryExecutor.id;
 
-          final updatedDebtor = debtor.copyWith(regionId: newRegionId, executorId: newExecutorId);
+          final updatedDebtor = debtor.copyWith(
+            regionId: newRegionId,
+            executorId: newExecutorId,
+          );
           context.read<DebtorCubit>().updateDebtor(updatedDebtor);
         },
       ),
     );
   }
 
-
-  Widget _executorDropdown(BuildContext context, List<RegionEntity> regions, DebtorEntity debtor) {
+  Widget _executorDropdown(
+    BuildContext context,
+    List<RegionEntity> regions,
+    DebtorEntity debtor,
+    double width,
+  ) {
     final executors = _executorsByRegionId(regions, debtor.regionId);
 
     return DropdownButtonHideUnderline(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          border: Border.all(color: Colors.grey.shade400),
-          borderRadius: BorderRadius.circular(8),
+      child: DropdownButton2<String>(
+        isExpanded: true,
+        buttonStyleData: ButtonStyleData(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          height: 32,
+          width: width,
         ),
-        child: DropdownButton<String>(
-          isDense: true,
-          style: const TextStyle(fontSize: 12, color: Colors.black87),
-          value: _executorNameById(executors, debtor.executorId) ?? 'не вибрано',
-          items: [
-            const DropdownMenuItem(value: 'не вибрано', child: Text('не вибрано')),
-            ...executors.map((e) => DropdownMenuItem(value: e.name, child: Text(e.name))),
-          ],
-          onChanged: (value) {
-            final selectedExecutor = executors.firstWhere(
-                  (e) => e.name == value,
-              orElse: () => const ExecutorOfficeEntity(id: 0, name: '', address: '', isPrimary: false, regionId: 0),
-            );
+        value: _executorNameById(executors, debtor.executorId) ?? 'не вибрано',
+        items: [
+          const DropdownMenuItem(
+            value: 'не вибрано',
+            child: Text('не вибрано', style: TextStyle(fontSize: 12)),
+          ),
+          ...executors.map(
+            (e) => DropdownMenuItem(
+              value: e.name,
+              child: Text(e.name, style: const TextStyle(fontSize: 12)),
+            ),
+          ),
+        ],
+        onChanged: (value) {
+          final selectedExecutor = executors.firstWhere(
+            (e) => e.name == value,
+            orElse: () => const ExecutorOfficeEntity(
+              id: 0,
+              name: '',
+              address: '',
+              isPrimary: false,
+              regionId: 0,
+            ),
+          );
 
-            final newExecutorId = selectedExecutor.id == 0 ? null : selectedExecutor.id;
+          final newExecutorId = selectedExecutor.id == 0
+              ? null
+              : selectedExecutor.id;
 
-            final updatedDebtor = debtor.copyWith(executorId: newExecutorId);
-            context.read<DebtorCubit>().updateDebtor(updatedDebtor);
-          },
-        ),
+          final updatedDebtor = debtor.copyWith(executorId: newExecutorId);
+          context.read<DebtorCubit>().updateDebtor(updatedDebtor);
+        },
       ),
     );
   }
 
-
   String? _regionNameById(List<RegionEntity> regions, int? id) {
     if (id == null) return null;
-    return regions.firstWhere(
+    return regions
+        .firstWhere(
           (r) => r.id == id,
-      orElse: () => const RegionEntity(id: 0, name: '', executorOffices: []),
-    ).name;
+          orElse: () =>
+              const RegionEntity(id: 0, name: '', executorOffices: []),
+        )
+        .name;
   }
 
   String? _executorNameById(List<ExecutorOfficeEntity> executors, int? id) {
     if (id == null) return null;
-    return executors.firstWhere(
+    return executors
+        .firstWhere(
           (e) => e.id == id,
-      orElse: () => const ExecutorOfficeEntity(id: 0, name: '', address: '', isPrimary: false, regionId: 0),
-    ).name;
+          orElse: () => const ExecutorOfficeEntity(
+            id: 0,
+            name: '',
+            address: '',
+            isPrimary: false,
+            regionId: 0,
+          ),
+        )
+        .name;
   }
 
-  List<ExecutorOfficeEntity> _executorsByRegionId(List<RegionEntity> regions, int? regionId) {
+  List<ExecutorOfficeEntity> _executorsByRegionId(
+    List<RegionEntity> regions,
+    int? regionId,
+  ) {
     if (regionId == null) return [];
     final region = regions.firstWhere(
-          (r) => r.id == regionId,
+      (r) => r.id == regionId,
       orElse: () => const RegionEntity(id: 0, name: '', executorOffices: []),
     );
     return region.executorOffices;
   }
 }
 
+class SelectedItem {
+  final int regionId;
+  final int index;
+
+  SelectedItem({required this.regionId, required this.index});
+}
