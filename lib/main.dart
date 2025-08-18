@@ -1,10 +1,8 @@
 import 'package:execu_docs/domain/usecases/add_debtor_usecase.dart';
 import 'package:execu_docs/domain/usecases/delete_debtor_usecase.dart';
-import 'package:execu_docs/domain/usecases/executors_crud_usecases.dart';
 import 'package:execu_docs/domain/usecases/get_debtors_usecase.dart';
 import 'package:execu_docs/domain/usecases/update_debtor_usecase.dart';
 import 'package:execu_docs/presentation/blocs/debtor_cubit.dart';
-import 'package:execu_docs/presentation/blocs/executor_office_cubit.dart';
 import 'package:execu_docs/presentation/blocs/folder_cubit.dart';
 import 'package:execu_docs/presentation/blocs/panels_cubit.dart';
 import 'package:execu_docs/presentation/blocs/region_cubit.dart';
@@ -23,10 +21,8 @@ import 'core/router.dart';
 import 'domain/usecases/add_region_usacase.dart';
 import 'domain/usecases/del_region_usecase.dart';
 import 'domain/usecases/get_all_region_usecase.dart';
-import 'domain/usecases/get_region_by_id_usecase.dart';
 import 'domain/usecases/seed_regions_usecase.dart';
 import 'domain/usecases/update_region_name_usecase.dart';
-import 'domain/usecases/update_region_usecase.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,15 +71,7 @@ class AppWrapper extends StatelessWidget {
           create: (_) => getIt<RegionSelectionCubit>(),
         ),
         BlocProvider<PanelsCubit>(create: (_) => getIt<PanelsCubit>()),
-        BlocProvider<ExecutorOfficeCubit>(
-          create: (context) => ExecutorOfficeCubit(
-            addExecutorUseCase: getIt<AddExecutorUseCase>(),
-            updateExecutorUseCase: getIt<UpdateExecutorUseCase>(),
-            getExecutorsByRegionIdUseCase:
-                getIt<GetExecutorsByRegionIdUseCase>(),
-            delExecutorUseCase: getIt<DelExecutorUseCase>(),
-          ),
-        ),
+
       ],
 
       child: const MyApp(),

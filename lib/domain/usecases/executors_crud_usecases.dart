@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:execu_docs/core/failure.dart';
-import 'package:execu_docs/domain/entities/executor_office_entity.dart';
+import 'package:execu_docs/domain/entities/executor_entity.dart';
 import 'package:execu_docs/domain/repositories/executor_repository.dart';
 import 'package:injectable/injectable.dart';
 
@@ -10,7 +10,7 @@ class AddExecutorUseCase {
 
   AddExecutorUseCase(this.repository);
 
-  Future<Either<Failure, Unit>> call(ExecutorOfficeEntity executor) async {
+  Future<Either<Failure, Unit>> call(ExecutorEntity executor) async {
     return await repository.addExecutor(executor);
   }
 }
@@ -32,7 +32,7 @@ class GetExecutorsByRegionIdUseCase {
 
   GetExecutorsByRegionIdUseCase(this.repository);
 
-  Future<Either<Failure, List<ExecutorOfficeEntity>>> call(int regionId) async {
+  Future<Either<Failure, List<ExecutorEntity>>> call(int regionId) async {
     return await repository.getExecutorsById(regionId);
   }
 }
@@ -43,7 +43,7 @@ class UpdateExecutorUseCase {
 
   UpdateExecutorUseCase(this.repository);
 
-  Future<Either<Failure, Unit>> call(ExecutorOfficeEntity executor) async {
+  Future<Either<Failure, Unit>> call(ExecutorEntity executor) async {
     return await repository.updateExecutor(executor);
   }
 }

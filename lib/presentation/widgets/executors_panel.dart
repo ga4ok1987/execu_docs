@@ -2,34 +2,37 @@ import 'package:execu_docs/core/widgets/hover_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/entities/executor_office_entity.dart';
+import '../../domain/entities/executor_entity.dart';
 import '../../domain/entities/region_entity.dart';
 import '../blocs/executor_office_cubit.dart';
 import '../blocs/region_selection_cubit.dart';
-import 'executor_office_tile.dart';
+import 'executor_tile.dart';
 
-class ExecutorOfficesPanel extends StatelessWidget {
+class ExecutorsPanel extends StatelessWidget {
   final RegionEntity region;
 
-  const ExecutorOfficesPanel({super.key, required this.region});
+  const ExecutorsPanel({super.key, required this.region});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 90,
+
         backgroundColor: Colors.white,
         title: Text(
           'Виконавчі служби регіону ${region.name}',
           style: Theme.of(context).textTheme.titleLarge,
         ),
         actions: [
-          BlocBuilder<ExecutorOfficeCubit, ExecutorOfficeState>(
+          BlocBuilder<ExecutorCubit, ExecutorState>(
             builder: (context, state) {
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: HoverButton(
                   isCircle: true,
-                  onPressed: () => _showAddDialog(context),
+                  onPressed: () =>
+                      _showAddDialog(context, context.read<ExecutorCubit>()),
                   child: const Icon(Icons.add),
                 ),
               );
@@ -45,13 +48,13 @@ class ExecutorOfficesPanel extends StatelessWidget {
           ),
         ],
       ),
-      body: BlocBuilder<ExecutorOfficeCubit, ExecutorOfficeState>(
+      body: BlocBuilder<ExecutorCubit, ExecutorState>(
         builder: (context, state) {
-          if (state is ExecutorOfficeLoading) {
+          if (state is ExecutorLoading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (state is ExecutorOfficeError) {
+          } else if (state is ExecutorError) {
             return Center(child: Text('Помилка: ${state.message}'));
-          } else if (state is ExecutorOfficeLoaded) {
+          } else if (state is ExecutorLoaded) {
             if (state.offices.isEmpty) {
               return const Center(child: Text('Виконавчих служб ще не додано'));
             }
@@ -70,7 +73,7 @@ class ExecutorOfficesPanel extends StatelessWidget {
     );
   }
 
-  void _showAddDialog(BuildContext context) {
+  void _showAddDialog(BuildContext context, ExecutorCubit cubit) {
     final nameController = TextEditingController();
     final addressController = TextEditingController();
     bool isPrimary = false;
@@ -108,11 +111,8 @@ class ExecutorOfficesPanel extends StatelessWidget {
                       children: [
                         Checkbox(
                           value: isPrimary,
-                          onChanged: (value) {
-                            setState(() {
-                              isPrimary = value ?? false;
-                            });
-                          },
+                          onChanged: (value) =>
+                              setState(() => isPrimary = value ?? false),
                         ),
                         const Text('Основна служба'),
                       ],
@@ -122,28 +122,24 @@ class ExecutorOfficesPanel extends StatelessWidget {
               ),
               actions: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.pop(dialogContext);
-                    nameController.dispose();
-                    addressController.dispose();
-                  },
+                  onPressed: () => Navigator.pop(dialogContext),
                   child: const Text('Скасувати'),
                 ),
                 ElevatedButton(
                   onPressed: () {
                     if (nameController.text.isNotEmpty &&
                         addressController.text.isNotEmpty) {
-                      final newOffice = ExecutorOfficeEntity(
+                      final newOffice = ExecutorEntity(
                         id: 0,
                         name: nameController.text.trim(),
                         address: addressController.text.trim(),
                         isPrimary: isPrimary,
-                        regionId: region.id,
+                        regionId: cubit.regionId,
                       );
-                      context.read<ExecutorOfficeCubit>().addOffice(newOffice);
+                      cubit.addOffice(
+                        newOffice,
+                      ); // <-- використовуємо переданий кубіт
                       Navigator.pop(dialogContext);
-                      nameController.dispose();
-                      addressController.dispose();
                     }
                   },
                   child: const Text('Додати'),

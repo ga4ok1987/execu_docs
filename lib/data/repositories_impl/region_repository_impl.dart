@@ -5,7 +5,7 @@ import 'package:execu_docs/data/datasources/local/database.dart';
 import 'package:execu_docs/domain/entities/region_entity.dart';
 import 'package:execu_docs/domain/repositories/region_repository.dart';
 import 'package:injectable/injectable.dart';
-import '../../domain/entities/executor_office_entity.dart';
+import '../../domain/entities/executor_entity.dart';
 import '../datasources/local/region_dao.dart';
 
 @LazySingleton(as: RegionRepository)
@@ -84,7 +84,7 @@ class RegionRepositoryImpl implements RegionRepository {
   @override
   Future<Either<Failure, Unit>> updateRegion(
     int regionId,
-    List<ExecutorOfficeEntity> offices,
+    List<ExecutorEntity> offices,
   ) async {
     try {
       await _regionDao.updateExecutorOffices(regionId, offices);

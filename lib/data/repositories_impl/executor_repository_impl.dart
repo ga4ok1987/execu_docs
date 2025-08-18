@@ -2,8 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:drift/drift.dart';
 import 'package:execu_docs/core/failure.dart';
 import 'package:execu_docs/data/datasources/local/database.dart';
-import 'package:execu_docs/data/datasources/local/executor_office_dao.dart';
-import 'package:execu_docs/domain/entities/executor_office_entity.dart';
+import 'package:execu_docs/data/datasources/local/executor_dao.dart';
+import 'package:execu_docs/domain/entities/executor_entity.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../domain/repositories/executor_repository.dart';
@@ -15,8 +15,9 @@ class ExecutorRepositoryImpl implements ExecutorRepository {
   ExecutorRepositoryImpl(this._executorDao);
 
   @override
-  Future<Either<Failure, Unit>> addExecutor(ExecutorOfficeEntity entity) async {
+  Future<Either<Failure, Unit>> addExecutor(ExecutorEntity entity) async {
     try {
+
       final companion = ExecutorOfficesCompanion(
         name: Value(entity.name),
         address: Value(entity.address),
@@ -24,6 +25,24 @@ class ExecutorRepositoryImpl implements ExecutorRepository {
         regionId: Value(entity.regionId),
       );
       await _executorDao.insertExecutor(companion);
+      return const Right(unit);
+    } catch (e) {
+      return Left(DatabaseFailure());
+    }
+  }
+  @override
+  Future<Either<Failure, Unit>> updateExecutor(
+      ExecutorEntity entity,
+      ) async {
+    try {
+      final companion = ExecutorOfficesCompanion(
+        id: Value(entity.id),
+        name: Value(entity.name),
+        address: Value(entity.address),
+        isPrimary: Value(entity.isPrimary),
+        regionId: Value(entity.regionId),
+      );
+      await _executorDao.updateExecutor(companion);
       return const Right(unit);
     } catch (e) {
       return Left(DatabaseFailure());
@@ -41,7 +60,7 @@ class ExecutorRepositoryImpl implements ExecutorRepository {
   }
 
   @override
-  Future<Either<Failure, List<ExecutorOfficeEntity>>> getExecutorsById(
+  Future<Either<Failure, List<ExecutorEntity>>> getExecutorsById(
     int regionId,
   ) async {
     final data = await _executorDao.getExecutorsByRegion(regionId);
@@ -55,21 +74,5 @@ class ExecutorRepositoryImpl implements ExecutorRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, Unit>> updateExecutor(
-    ExecutorOfficeEntity entity,
-  ) async {
-    try {
-      final companion = ExecutorOfficesCompanion(
-        name: Value(entity.name),
-        address: Value(entity.address),
-        isPrimary: Value(entity.isPrimary),
-        regionId: Value(entity.regionId),
-      );
-      await _executorDao.updateExecutor(companion);
-      return const Right(unit);
-    } catch (e) {
-      return Left(DatabaseFailure());
-    }
-  }
+
 }

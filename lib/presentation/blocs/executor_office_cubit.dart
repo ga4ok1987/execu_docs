@@ -1,102 +1,86 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import '../../domain/entities/executor_office_entity.dart';
+import '../../domain/entities/executor_entity.dart';
 import '../../domain/usecases/executors_crud_usecases.dart';
-import '../../domain/usecases/get_region_by_id_usecase.dart';
-import '../../domain/usecases/update_region_usecase.dart';
 
 @injectable
-class ExecutorOfficeCubit extends Cubit<ExecutorOfficeState> {
+class ExecutorCubit extends Cubit<ExecutorState> {
   final AddExecutorUseCase addExecutorUseCase;
   final UpdateExecutorUseCase updateExecutorUseCase;
   final DelExecutorUseCase delExecutorUseCase;
   final GetExecutorsByRegionIdUseCase getExecutorsByRegionIdUseCase;
 
-  int? regionId;
+  final int regionId;
 
-  ExecutorOfficeCubit({
-    this.regionId,
-    required this.addExecutorUseCase,
-    required this.updateExecutorUseCase,
-    required this.delExecutorUseCase,
-    required this.getExecutorsByRegionIdUseCase,
-  }) : super(ExecutorOfficeInitial()) {
-    if (regionId != null) {
-      loadOffices(regionId!);
+  ExecutorCubit(
+    @factoryParam this.regionId,
+     this.addExecutorUseCase,
+     this.updateExecutorUseCase,
+     this.delExecutorUseCase,
+     this.getExecutorsByRegionIdUseCase,
+  ) : super(ExecutorInitial()) {
+    loadOffices(regionId);
     }
-  }
-
-
 
   Future<void> loadOffices(int id) async {
+    emit(ExecutorLoading());
 
-    emit(ExecutorOfficeLoading());
-
-    final result = await getExecutorsByRegionIdUseCase(regionId!);
+    final result = await getExecutorsByRegionIdUseCase(regionId);
 
     result.fold(
-      (failure) => emit(ExecutorOfficeError(failure.message)),
-      (executors) => emit(ExecutorOfficeLoaded(executors)),
+      (failure) => emit(ExecutorError(failure.message)),
+      (executors) => emit(ExecutorLoaded(executors)),
     );
   }
 
-  Future<void> addOffice(ExecutorOfficeEntity office) async {
-    emit(ExecutorOfficeLoading());
+  Future<void> addOffice(ExecutorEntity office) async {
+    emit(ExecutorLoading());
 
     final result = await addExecutorUseCase(office);
 
     result.fold(
-      (failure) => emit(ExecutorOfficeError(failure.message)),
+      (failure) => emit(ExecutorError(failure.message)),
       (_) => loadOffices(office.regionId),
     );
   }
 
-  Future<void> editOffice(ExecutorOfficeEntity updatedOffice) async {
-    if (regionId == null) {
-      emit(ExecutorOfficeError("Region ID не встановлений"));
-      return;
-    }
-
-    emit(ExecutorOfficeLoading());
+  Future<void> editOffice(ExecutorEntity updatedOffice) async {
+    emit(ExecutorLoading());
 
     final result = await updateExecutorUseCase(updatedOffice);
 
-    result.fold((failure) => emit(ExecutorOfficeError(failure.message)), (
-      region,
-    ) {
-      (_) => loadOffices(updatedOffice.regionId);
-    });
+    result.fold(
+          (failure) => emit(ExecutorError(failure.message)),
+          (_) => loadOffices(updatedOffice.regionId),
+    );
   }
 
-  Future<void> removeOffice(ExecutorOfficeEntity entity) async {
+  Future<void> removeOffice(ExecutorEntity entity) async {
+    emit(ExecutorLoading());
 
-    emit(ExecutorOfficeLoading());
+    final result = await delExecutorUseCase(entity.id);
 
-    final regionResult = await delExecutorUseCase(regionId!);
-
-     regionResult.fold(
-      (failure)  => emit(ExecutorOfficeError(failure.message)),
-      (region)  {
-        (_)  =>  loadOffices(entity.regionId);
-      },
+    result.fold(
+          (failure) => emit(ExecutorError(failure.message)),
+          (_) => loadOffices(entity.regionId),
     );
   }
 }
 
-sealed class ExecutorOfficeState {}
+sealed class ExecutorState {}
 
-class ExecutorOfficeInitial extends ExecutorOfficeState {}
+class ExecutorInitial extends ExecutorState {}
 
-class ExecutorOfficeLoading extends ExecutorOfficeState {}
+class ExecutorLoading extends ExecutorState {}
 
-class ExecutorOfficeLoaded extends ExecutorOfficeState {
-  final List<ExecutorOfficeEntity> offices;
+class ExecutorLoaded extends ExecutorState {
+  final List<ExecutorEntity> offices;
 
-  ExecutorOfficeLoaded(this.offices);
+  ExecutorLoaded(this.offices);
 }
 
-class ExecutorOfficeError extends ExecutorOfficeState {
+class ExecutorError extends ExecutorState {
   final String message;
 
-  ExecutorOfficeError(this.message);
+  ExecutorError(this.message);
 }

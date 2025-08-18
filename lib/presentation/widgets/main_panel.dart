@@ -5,7 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/debtor_entity.dart';
-import '../../domain/entities/executor_office_entity.dart';
+import '../../domain/entities/executor_entity.dart';
 import '../../domain/entities/region_entity.dart';
 import '../blocs/debtor_cubit.dart';
 import '../blocs/folder_cubit.dart';
@@ -292,7 +292,7 @@ void showAddDebtorDialog(BuildContext context) {
 
   int? selectedRegionId;
   int? selectedExecutorId;
-  List<ExecutorOfficeEntity> executors = [];
+  List<ExecutorEntity> executors = [];
 
   showDialog(
     context: context,

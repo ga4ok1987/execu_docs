@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/debtor_entity.dart';
-import '../../domain/entities/executor_office_entity.dart';
+import '../../domain/entities/executor_entity.dart';
 import '../../domain/entities/region_entity.dart';
 import '../blocs/debtor_cubit.dart';
 import '../blocs/region_cubit.dart';
@@ -281,7 +281,7 @@ class DebtorsTable extends StatelessWidget {
 
           final primaryExecutor = selectedRegion.executorOffices.firstWhere(
             (e) => e.isPrimary,
-            orElse: () => const ExecutorOfficeEntity(
+            orElse: () => const ExecutorEntity(
               id: 0,
               name: '',
               address: '',
@@ -336,7 +336,7 @@ class DebtorsTable extends StatelessWidget {
         onChanged: (value) {
           final selectedExecutor = executors.firstWhere(
             (e) => e.name == value,
-            orElse: () => const ExecutorOfficeEntity(
+            orElse: () => const ExecutorEntity(
               id: 0,
               name: '',
               address: '',
@@ -367,12 +367,12 @@ class DebtorsTable extends StatelessWidget {
         .name;
   }
 
-  String? _executorNameById(List<ExecutorOfficeEntity> executors, int? id) {
+  String? _executorNameById(List<ExecutorEntity> executors, int? id) {
     if (id == null) return null;
     return executors
         .firstWhere(
           (e) => e.id == id,
-          orElse: () => const ExecutorOfficeEntity(
+          orElse: () => const ExecutorEntity(
             id: 0,
             name: '',
             address: '',
@@ -383,7 +383,7 @@ class DebtorsTable extends StatelessWidget {
         .name;
   }
 
-  List<ExecutorOfficeEntity> _executorsByRegionId(
+  List<ExecutorEntity> _executorsByRegionId(
     List<RegionEntity> regions,
     int? regionId,
   ) {

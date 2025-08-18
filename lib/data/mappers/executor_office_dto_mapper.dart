@@ -1,10 +1,10 @@
 import 'package:drift/drift.dart';
-import 'package:execu_docs/domain/entities/executor_office_entity.dart';
+import 'package:execu_docs/domain/entities/executor_entity.dart';
 import '../datasources/local/database.dart';
 
 extension ExecutorOfficeDtoMapper on ExecutorOfficeDto {
-  ExecutorOfficeEntity toEntity() {
-    return ExecutorOfficeEntity(
+  ExecutorEntity toEntity() {
+    return ExecutorEntity(
       id: id,
       name: name,
       address: address,
@@ -14,7 +14,7 @@ extension ExecutorOfficeDtoMapper on ExecutorOfficeDto {
   }
 }
 
-extension ExecutorOfficeEntityMapper on ExecutorOfficeEntity {
+extension ExecutorOfficeEntityMapper on ExecutorEntity {
   ExecutorOfficesCompanion toDto({required int regionId}) {
     return ExecutorOfficesCompanion(
       name: Value(name),
@@ -26,7 +26,7 @@ extension ExecutorOfficeEntityMapper on ExecutorOfficeEntity {
 }
 
 extension ExecutorOfficeDtoMapperExt on ExecutorOfficeDto {
-  static ExecutorOfficeDto fromEntity(ExecutorOfficeEntity entity,) {
+  static ExecutorOfficeDto fromEntity(ExecutorEntity entity,) {
     return ExecutorOfficeDto(
       id: entity.id,
       name: entity.name,

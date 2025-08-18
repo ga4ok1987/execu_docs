@@ -31,8 +31,11 @@ class RegionPanel extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Регіони'),
+          toolbarHeight: 90,
+
+          title: const Text('Області',style: TextStyle(color: Colors.black),),
           backgroundColor: Colors.white,
+
           actions: [
             BlocBuilder<RegionCubit, RegionState>(
               builder: (context, state) {

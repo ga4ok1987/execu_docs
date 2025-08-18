@@ -15,6 +15,16 @@ extension PathShortener on String {
     return '$left\\...\\$right';
   }
 }
+extension StringCleaner on String {
+  /// Прибрати всі нові рядки (\n, \r\n, \r)
+  String removeNewLines() => replaceAll(RegExp(r'(\r\n|\r|\n)'), '');
+
+  /// Замінити нові рядки на пробіл
+  String replaceNewLinesWithSpace() => replaceAll(RegExp(r'(\r\n|\r|\n)'), ' ');
+
+  /// Прибрати зайві пробіли і переноси, залишивши один пробіл
+  String normalizeSpaces() => replaceAll(RegExp(r'\s+'), ' ').trim();
+}
 
 extension ExtractFromString on String {
   /// Повертає текст після першої двокрапки, обрізає пробіли

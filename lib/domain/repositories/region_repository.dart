@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:execu_docs/core/failure.dart';
 import 'package:execu_docs/domain/entities/region_entity.dart';
 
-import '../entities/executor_office_entity.dart';
+import '../entities/executor_entity.dart';
 
 abstract class RegionRepository {
   Future<Either<Failure, List<RegionEntity>>> getAllRegions();
@@ -12,7 +12,7 @@ abstract class RegionRepository {
   Future<Either<Failure, Unit>> updateRegionName(int regionId, String newName);
   Future<Either<Failure, Unit>> updateRegion(
     int regionId,
-    List<ExecutorOfficeEntity> offices,
+    List<ExecutorEntity> offices,
   );
   Future<Either<Failure, Unit>> seedRegions(List<String> regionNames);
 }

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/entities/executor_office_entity.dart';
+import '../../domain/entities/executor_entity.dart';
 import '../blocs/executor_office_cubit.dart';
 
 class ExecutorTile extends StatelessWidget {
-  final ExecutorOfficeEntity office;
+  final ExecutorEntity office;
 
   const ExecutorTile({super.key, required this.office});
 
@@ -18,7 +18,7 @@ class ExecutorTile extends StatelessWidget {
         if (event.kind == PointerDeviceKind.mouse &&
             event.buttons == kSecondaryMouseButton) {
           final position = event.position;
-          _showContextMenu(context, position);
+          _showContextMenu(context, position,context.read<ExecutorCubit>());
         }
       },
       child: Container(
@@ -44,11 +44,11 @@ class ExecutorTile extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.edit),
-                onPressed: () => _showEditDialog(context),
+                onPressed: () => _showEditDialog(context,context.read<ExecutorCubit>()),
               ),
               IconButton(
                 icon: const Icon(Icons.delete),
-                onPressed: () => _confirmDeletion(context),
+                onPressed: () => _confirmDeletion(context,context.read<ExecutorCubit>()),
               ),
             ],
           ),
@@ -57,7 +57,7 @@ class ExecutorTile extends StatelessWidget {
     );
   }
 
-  void _confirmDeletion(BuildContext context) {
+  void _confirmDeletion(BuildContext context,ExecutorCubit cubit,) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -71,7 +71,7 @@ class ExecutorTile extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              //context.read<ExecutorOfficeCubit>().removeOffice(office.id);
+              cubit.removeOffice(office);
             },
             child: const Text('Видалити'),
           ),
@@ -80,7 +80,11 @@ class ExecutorTile extends StatelessWidget {
     );
   }
 
-  void _showContextMenu(BuildContext context, Offset position) {
+  void _showContextMenu(
+    BuildContext context,
+    Offset position,
+    ExecutorCubit cubit,
+  ) {
     final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
     final offset = overlay.localToGlobal(Offset.zero);
 
@@ -106,20 +110,19 @@ class ExecutorTile extends StatelessWidget {
       if (selected != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (selected.startsWith('edit')) {
-            _showEditDialog(context);
+            _showEditDialog(context, cubit);
           } else if (selected.startsWith('delete')) {
-            //context.read<ExecutorOfficeCubit>().removeOffice(office.id);
+            cubit.removeOffice(office);
           }
         });
       }
     });
   }
 
-  void _showEditDialog(BuildContext context) {
+  void _showEditDialog(BuildContext context, ExecutorCubit cubit) {
     final nameController = TextEditingController(text: office.name);
     final addressController = TextEditingController(text: office.address);
     bool isPrimary = office.isPrimary;
-    final executorCubit = context.read<ExecutorOfficeCubit>(); // Зберігаємо посилання
 
     showDialog(
       context: context,
@@ -175,16 +178,15 @@ class ExecutorTile extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                final updatedOffice = office.copyWith(
+                final updatedOffice = ExecutorEntity(
+                  id: office.id,
                   name: nameController.text,
                   address: addressController.text,
                   isPrimary: isPrimary,
+                  regionId: office.regionId,
                 );
 
-                executorCubit.editOffice(updatedOffice); // Використовуємо збережене посилання
-
-                nameController.dispose();
-                addressController.dispose();
+                cubit.editOffice(updatedOffice);
                 Navigator.pop(dialogContext);
               },
               child: const Text('Зберегти'),

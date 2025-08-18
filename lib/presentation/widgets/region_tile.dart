@@ -19,7 +19,7 @@ class RegionTile extends StatelessWidget {
 
     final isSelected = selectedRegion?.id == region.id;
     return GestureDetector(
-      onDoubleTap: () {
+      onTap: () {
         context.read<RegionSelectionCubit>().selectRegion(region);
       },
       child: Listener(

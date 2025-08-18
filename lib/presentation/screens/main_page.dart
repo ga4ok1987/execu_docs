@@ -1,7 +1,4 @@
 import 'package:execu_docs/core/di/di.dart';
-import 'package:execu_docs/domain/usecases/executors_crud_usecases.dart';
-import 'package:execu_docs/domain/usecases/get_region_by_id_usecase.dart';
-import 'package:execu_docs/domain/usecases/update_region_usecase.dart';
 import 'package:execu_docs/presentation/blocs/region_cubit.dart';
 import 'package:execu_docs/presentation/widgets/main_panel.dart';
 import 'package:execu_docs/presentation/widgets/region_panel.dart';
@@ -12,7 +9,7 @@ import '../../domain/entities/region_entity.dart';
 import '../blocs/executor_office_cubit.dart';
 import '../blocs/panels_cubit.dart';
 import '../blocs/region_selection_cubit.dart';
-import '../widgets/executors_offices_panel.dart';
+import '../widgets/executors_panel.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
@@ -101,17 +98,13 @@ class MainPage extends StatelessWidget {
                   .select<RegionSelectionCubit, RegionEntity?>(
                     (state) => state.state.selectedRegion,
                   );
+              if (selectedRegion == null) return const SizedBox();
 
               return BlocProvider(
-                key: ValueKey(selectedRegion?.id),
-                create: (context) => ExecutorOfficeCubit(
-                  regionId: selectedRegion!.id,
-                  addExecutorUseCase: getIt<AddExecutorUseCase>(),
-                  updateExecutorUseCase: getIt<UpdateExecutorUseCase>(),
-                  delExecutorUseCase: getIt<DelExecutorUseCase>(),
-                  getExecutorsByRegionIdUseCase:
-                      getIt<GetExecutorsByRegionIdUseCase>(),
-                ),
+                key: ValueKey(selectedRegion.id),
+                create: (context) =>
+                    getIt<ExecutorCubit>(param1: selectedRegion.id)
+                      ..loadOffices(selectedRegion.id),
                 child: AnimatedSlide(
                   duration: const Duration(milliseconds: 300),
                   offset: panelState.isExecutorPanelOpen
@@ -124,9 +117,7 @@ class MainPage extends StatelessWidget {
                       height: double.infinity,
                       child: Material(
                         elevation: 8,
-                        child: selectedRegion != null
-                            ? ExecutorOfficesPanel(region: selectedRegion)
-                            : const SizedBox(),
+                        child: ExecutorsPanel(region: selectedRegion),
                       ),
                     ),
                   ),

@@ -4,7 +4,7 @@ import 'package:execu_docs/data/mappers/region_dto_mapper.dart';
 import 'package:injectable/injectable.dart';
 import '../local/database.dart';
 import '../../../domain/entities/region_entity.dart';
-import '../../../domain/entities/executor_office_entity.dart';
+import '../../../domain/entities/executor_entity.dart';
 
 part 'region_dao.g.dart';
 @lazySingleton
@@ -23,7 +23,7 @@ class RegionDao extends DatabaseAccessor<AppDatabase> with _$RegionDaoMixin {
     final rows = await query.get();
 
     final Map<int, RegionDto> regionMap = {};
-    final Map<int, List<ExecutorOfficeEntity>> officeMap = {};
+    final Map<int, List<ExecutorEntity>> officeMap = {};
 
     for (final row in rows) {
       final region = row.readTable(regions);
@@ -56,7 +56,7 @@ class RegionDao extends DatabaseAccessor<AppDatabase> with _$RegionDaoMixin {
   }
 
   Future<void> updateExecutorOffices(int regionId,
-      List<ExecutorOfficeEntity> newOffices,) async {
+      List<ExecutorEntity> newOffices,) async {
     await transaction(() async {
       final existingOffices = await (select(
         executorOffices,
