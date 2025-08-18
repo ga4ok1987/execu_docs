@@ -1,5 +1,6 @@
 import 'package:execu_docs/domain/usecases/add_debtor_usecase.dart';
 import 'package:execu_docs/domain/usecases/delete_debtor_usecase.dart';
+import 'package:execu_docs/domain/usecases/executors_crud_usecases.dart';
 import 'package:execu_docs/domain/usecases/get_debtors_usecase.dart';
 import 'package:execu_docs/domain/usecases/update_debtor_usecase.dart';
 import 'package:execu_docs/presentation/blocs/debtor_cubit.dart';
@@ -76,8 +77,11 @@ class AppWrapper extends StatelessWidget {
         BlocProvider<PanelsCubit>(create: (_) => getIt<PanelsCubit>()),
         BlocProvider<ExecutorOfficeCubit>(
           create: (context) => ExecutorOfficeCubit(
-            getRegionById: getIt<GetRegionByIdUseCase>(),
-            updateRegion: getIt<UpdateRegionUseCase>(),
+            addExecutorUseCase: getIt<AddExecutorUseCase>(),
+            updateExecutorUseCase: getIt<UpdateExecutorUseCase>(),
+            getExecutorsByRegionIdUseCase:
+                getIt<GetExecutorsByRegionIdUseCase>(),
+            delExecutorUseCase: getIt<DelExecutorUseCase>(),
           ),
         ),
       ],

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:execu_docs/core/utils/extensions.dart';
+import 'package:execu_docs/domain/usecases/executors_crud_usecases.dart';
 import 'package:execu_docs/domain/usecases/get_all_region_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -24,12 +25,14 @@ class DebtorCubit extends Cubit<DebtorState> {
   final GetDebtorsUseCase getDebtorsUseCase;
   final GetAllRegionsUseCase getAllRegionsUseCase;
 
+
   DebtorCubit({
     required this.addDebtorUseCase,
     required this.updateDebtorUseCase,
     required this.deleteDebtorUseCase,
     required this.getDebtorsUseCase,
     required this.getAllRegionsUseCase,
+
   }) : super(DebtorInitial());
 
   Future<void> loadDebtors() async {
@@ -70,7 +73,7 @@ class DebtorCubit extends Cubit<DebtorState> {
   }
 
   Future<void> importFromDocx(String dirPath) async {
-    emit(DebtorImporting(0));
+    emit(DebtorLoading());
     List<RegionEntity>? regions;
     final Either<Failure, List<RegionEntity>> result =
         await getAllRegionsUseCase();
@@ -90,8 +93,6 @@ class DebtorCubit extends Cubit<DebtorState> {
       return;
     }
 
-    final total = files.length;
-    int processed = 0;
 
     for (var file in files) {
       final text = await DocxReader().readDocxParagraphs(file.path);
@@ -122,8 +123,7 @@ class DebtorCubit extends Cubit<DebtorState> {
     }
 
     await loadDebtors();
-    processed++;
-    emit(DebtorImporting(processed / total));
+
   }
 
   // Якщо треба оновити локальний стан без перезавантаження з бази:

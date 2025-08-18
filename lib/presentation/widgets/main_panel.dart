@@ -78,8 +78,17 @@ class MainPanel extends StatelessWidget {
                               style: TextStyle(color: Colors.white),
                             ),
                             onPressed: () async {
-                              if(folderPath != null){
-                                showDocxImportProgressDialog(context, folderPath);
+                              if (folderPath != null) {
+                                context.read<DebtorCubit>().importFromDocx(
+                                  folderPath,
+                                );
+                              }
+                              else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Спочатку виберіть папку'),
+                                  ),
+                                );
                               }
                             },
                           ),
@@ -202,7 +211,6 @@ class MainPanel extends StatelessWidget {
                                 selectedId[0],
                               );
                               selectedRowNotifier.value = null;
-
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -210,7 +218,6 @@ class MainPanel extends StatelessWidget {
                                 ),
                               );
                             }
-
                           },
                           isCircle: true,
                           child: Icon(Icons.delete, color: Colors.white),
@@ -417,45 +424,6 @@ void showAddDebtorDialog(BuildContext context) {
             ],
           );
         },
-      );
-    },
-  );
-}
-void showDocxImportProgressDialog(BuildContext context, String dir) {
-  showDialog(
-    context: context,
-    barrierDismissible: false, // забороняємо закривати діалог користувачем
-    builder: (dialogContext) {
-      // запускаємо імпорт після відкриття діалогу
-      context.read<DebtorCubit>().importFromDocx(dir);
-
-      return AlertDialog(
-        title: const Text('Імпорт з DOCX'),
-        content: BlocConsumer<DebtorCubit, DebtorState>(
-          listener: (context, state) {
-            // коли імпорт завершився, закриваємо діалог
-            if (state is DebtorLoaded || state is DebtorError) {
-              Navigator.of(dialogContext).pop();
-            }
-          },
-          builder: (context, state) {
-            if (state is DebtorImporting) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text("Імпорт даних..."),
-                  const SizedBox(height: 16),
-                  LinearProgressIndicator(value: state.progress),
-                  const SizedBox(height: 8),
-                  Text("${(state.progress * 100).toStringAsFixed(0)}%"),
-                ],
-              );
-            }
-
-            // якщо стан не DebtorImporting, можна показати повідомлення
-            return const Text('Підготовка до імпорту...');
-          },
-        ),
       );
     },
   );

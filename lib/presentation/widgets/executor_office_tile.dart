@@ -71,7 +71,7 @@ class ExecutorTile extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              context.read<ExecutorOfficeCubit>().removeOffice(office.id);
+              //context.read<ExecutorOfficeCubit>().removeOffice(office.id);
             },
             child: const Text('Видалити'),
           ),
@@ -108,7 +108,7 @@ class ExecutorTile extends StatelessWidget {
           if (selected.startsWith('edit')) {
             _showEditDialog(context);
           } else if (selected.startsWith('delete')) {
-            context.read<ExecutorOfficeCubit>().removeOffice(office.id);
+            //context.read<ExecutorOfficeCubit>().removeOffice(office.id);
           }
         });
       }

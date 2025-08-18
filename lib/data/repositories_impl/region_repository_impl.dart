@@ -82,7 +82,7 @@ class RegionRepositoryImpl implements RegionRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> updateRegionUseCase(
+  Future<Either<Failure, Unit>> updateRegion(
     int regionId,
     List<ExecutorOfficeEntity> offices,
   ) async {

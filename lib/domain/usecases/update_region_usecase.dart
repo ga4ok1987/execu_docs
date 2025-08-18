@@ -12,7 +12,7 @@ class UpdateRegionUseCase {
   UpdateRegionUseCase(this.repository);
 
   Future<Either<Failure, Unit>> call(RegionEntity region) async {
-    return  repository.updateRegionUseCase(region.id, region.executorOffices);
+    return  repository.updateRegion(region.id, region.executorOffices);
 
 
   }

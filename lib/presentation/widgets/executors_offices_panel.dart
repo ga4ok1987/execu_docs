@@ -1,11 +1,9 @@
+import 'package:execu_docs/core/widgets/hover_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../core/di/di.dart';
 import '../../domain/entities/executor_office_entity.dart';
 import '../../domain/entities/region_entity.dart';
-import '../../domain/usecases/get_region_by_id_usecase.dart';
-import '../../domain/usecases/update_region_usecase.dart';
 import '../blocs/executor_office_cubit.dart';
 import '../blocs/region_selection_cubit.dart';
 import 'executor_office_tile.dart';
@@ -17,56 +15,57 @@ class ExecutorOfficesPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ExecutorOfficeCubit(
-        regionId: region.id,
-        getRegionById: getIt<GetRegionByIdUseCase>(),
-        updateRegion: getIt<UpdateRegionUseCase>(),
-      )..loadOffices(),
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Text(
-            'Виконавчі служби регіону ${region.name}',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          actions: [
-            BlocBuilder<ExecutorOfficeCubit, ExecutorOfficeState>(
-              builder: (context, state) {
-                return IconButton(
-                  icon: const Icon(Icons.add),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: Text(
+          'Виконавчі служби регіону ${region.name}',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        actions: [
+          BlocBuilder<ExecutorOfficeCubit, ExecutorOfficeState>(
+            builder: (context, state) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: HoverButton(
+                  isCircle: true,
                   onPressed: () => _showAddDialog(context),
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => context.read<RegionSelectionCubit>().clear(),
-            ),
-          ],
-        ),
-        body: BlocBuilder<ExecutorOfficeCubit, ExecutorOfficeState>(
-          builder: (context, state) {
-            if (state is ExecutorOfficeLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is ExecutorOfficeError) {
-              return Center(child: Text('Помилка: ${state.message}'));
-            } else if (state is ExecutorOfficeLoaded) {
-              if (state.offices.isEmpty) {
-                return const Center(child: Text('Виконавчих служб ще не додано'));
-              }
-              return ListView.separated(
-                itemCount: state.offices.length,
-                itemBuilder: (context, index) {
-                  return ExecutorTile(office: state.offices[index]);
-                },
-                separatorBuilder: (_, __) => const Divider(height: 0),
+                  child: const Icon(Icons.add),
+                ),
               );
-            } else {
-              return const SizedBox();
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: HoverButton(
+              isCircle: true,
+              onPressed: () => context.read<RegionSelectionCubit>().clear(),
+              child: const Icon(Icons.close),
+            ),
+          ),
+        ],
+      ),
+      body: BlocBuilder<ExecutorOfficeCubit, ExecutorOfficeState>(
+        builder: (context, state) {
+          if (state is ExecutorOfficeLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is ExecutorOfficeError) {
+            return Center(child: Text('Помилка: ${state.message}'));
+          } else if (state is ExecutorOfficeLoaded) {
+            if (state.offices.isEmpty) {
+              return const Center(child: Text('Виконавчих служб ще не додано'));
             }
-          },
-        ),
+            return ListView.separated(
+              itemCount: state.offices.length,
+              itemBuilder: (context, index) {
+                return ExecutorTile(office: state.offices[index]);
+              },
+              separatorBuilder: (_, __) => const Divider(height: 0),
+            );
+          } else {
+            return const SizedBox();
+          }
+        },
       ),
     );
   }
