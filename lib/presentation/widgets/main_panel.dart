@@ -78,9 +78,9 @@ class MainPanel extends StatelessWidget {
                               style: TextStyle(color: Colors.white),
                             ),
                             onPressed: () async {
-                              if (folderPath != null) {
+                              if (folderPath.path1 != null) {
                                 context.read<DebtorCubit>().importFromDocx(
-                                  folderPath,
+                                  folderPath.path1!,
                                 );
                               }
                               else {
@@ -126,7 +126,7 @@ class MainPanel extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
-                                        (folderPath ?? 'Папку не вибрано')
+                                        (folderPath.path1 ?? 'Папку не вибрано')
                                             .shortenFolderPath(),
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -137,7 +137,7 @@ class MainPanel extends StatelessWidget {
                                   SizedBox(width: 20),
 
                                   HoverButton(
-                                    onPressed: () => _selectFolder(context),
+                                    onPressed: () => _selectFolder(context,1),
                                     child: const Text('Вибрати папку'),
                                   ),
                                   SizedBox(width: 10),
@@ -156,7 +156,7 @@ class MainPanel extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    (folderPath ?? 'Папку не вибрано')
+                                    (folderPath.path2 ?? 'Папку не вибрано')
                                         .shortenFolderPath(),
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -166,7 +166,7 @@ class MainPanel extends StatelessWidget {
                               ),
                               SizedBox(width: 20),
                               HoverButton(
-                                onPressed: () => _selectFolder(context),
+                                onPressed: () => _selectFolder(context,2),
                                 child: const Text('Вибрати папку'),
                               ),
                               SizedBox(width: 10),
@@ -272,13 +272,18 @@ class HighlightContainer extends StatelessWidget {
   }
 }
 
-Future<void> _selectFolder(BuildContext context) async {
+Future<void> _selectFolder(BuildContext context, int index) async {
   final folderCubit = context.read<FolderCubit>();
   final result = await FilePicker.platform.getDirectoryPath();
   if (result != null) {
-    folderCubit.setFolder(result);
+    if (index == 1) {
+      folderCubit.setFolder1(result);
+    } else if (index == 2) {
+      folderCubit.setFolder2(result);
+    }
   }
 }
+
 
 void showAddDebtorDialog(BuildContext context) {
   final fullNameController = TextEditingController();
