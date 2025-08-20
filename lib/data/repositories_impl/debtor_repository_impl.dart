@@ -22,6 +22,14 @@ class DebtorRepositoryImpl implements DebtorRepository {
     }
   }
 
+  Future<Either<Failure, Unit>> clearDebtors() async {
+    try {
+      await dao.clearDebtors();
+      return const Right(unit);
+    } catch (_) {
+      return Left(DatabaseFailure());
+    }
+  }
   @override
   Future<Either<Failure, Unit>> updateDebtor(DebtorEntity debtor) async {
     try {

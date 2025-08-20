@@ -1,4 +1,5 @@
 import 'package:execu_docs/core/utils/extensions.dart';
+import 'package:execu_docs/core/widgets/confirm_dialog.dart';
 import 'package:execu_docs/core/widgets/hover_button.dart';
 import 'package:execu_docs/presentation/widgets/custom_expansion_tile.dart';
 import 'package:file_picker/file_picker.dart';
@@ -82,8 +83,7 @@ class MainPanel extends StatelessWidget {
                                 context.read<DebtorCubit>().importFromDocx(
                                   folderPath.path1!,
                                 );
-                              }
-                              else {
+                              } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Спочатку виберіть папку'),
@@ -126,9 +126,11 @@ class MainPanel extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
-                                        (folderPath.path1 ?? 'Папку не вибрано')
-                                            .shortenFolderPath(),
+                                        (folderPath.path1 ??
+                                            'Папку не вибрано'),
+                                        maxLines: 1,
                                         style: const TextStyle(
+                                          overflow: TextOverflow.ellipsis,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -137,7 +139,7 @@ class MainPanel extends StatelessWidget {
                                   SizedBox(width: 20),
 
                                   HoverButton(
-                                    onPressed: () => _selectFolder(context,1),
+                                    onPressed: () => _selectFolder(context, 1),
                                     child: const Text('Вибрати папку'),
                                   ),
                                   SizedBox(width: 10),
@@ -156,17 +158,19 @@ class MainPanel extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    (folderPath.path2 ?? 'Папку не вибрано')
-                                        .shortenFolderPath(),
+                                    (folderPath.path2 ?? 'Папку не вибрано'),
+                                    maxLines: 1,
                                     style: const TextStyle(
+                                      overflow: TextOverflow.ellipsis,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                               ),
+
                               SizedBox(width: 20),
                               HoverButton(
-                                onPressed: () => _selectFolder(context,2),
+                                onPressed: () => _selectFolder(context, 2),
                                 child: const Text('Вибрати папку'),
                               ),
                               SizedBox(width: 10),
@@ -181,7 +185,7 @@ class MainPanel extends StatelessWidget {
               ),
 
               SizedBox(
-                width: 240,
+                width: 450,
                 child: HighlightContainer(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -221,6 +225,16 @@ class MainPanel extends StatelessWidget {
                           },
                           isCircle: true,
                           child: Icon(Icons.delete, color: Colors.white),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: HoverButton(
+                          onPressed: () => showConfirmDialog(context: context, title: 'title', message: 'message', onConfirm: () => context.read<DebtorCubit>().clearDebtors()),
+                          child: Text(
+                            'Очистити все',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                     ],
@@ -283,7 +297,6 @@ Future<void> _selectFolder(BuildContext context, int index) async {
     }
   }
 }
-
 
 void showAddDebtorDialog(BuildContext context) {
   final fullNameController = TextEditingController();
@@ -433,4 +446,3 @@ void showAddDebtorDialog(BuildContext context) {
     },
   );
 }
-

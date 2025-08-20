@@ -1,4 +1,5 @@
 import 'package:execu_docs/domain/entities/region_entity.dart';
+import 'package:flutter/material.dart';
 
 extension PathShortener on String {
   /// Залишає ліву частину до другого '\' і праву частину після останніх двох '\', між ними '...'
@@ -79,5 +80,56 @@ extension ExtractFromString on String {
     }
 
     return null; // якщо не знайдено
+  }
+}
+
+extension MiddleEllipsis on String {
+  Widget middleEllipsisText({TextStyle? style}) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+
+        final span = TextSpan(text: this, style: style);
+        final tp = TextPainter(
+          text: span,
+          maxLines: 1,
+          textDirection: TextDirection.ltr,
+        )..layout(maxWidth: maxWidth);
+
+        if (!tp.didExceedMaxLines) {
+          return Text(this,
+              style: style, maxLines: 1, overflow: TextOverflow.clip);
+        }
+
+        // Якщо не влазить — обрізаємо середину
+        int leftCount = (length / 2).floor();
+        int rightCount = length - leftCount;
+
+        String trimmed = this;
+        while (true) {
+          final candidate =
+              "${substring(0, leftCount)}...${substring(length - rightCount)}";
+
+          final candidateSpan = TextSpan(text: candidate, style: style);
+          final candidateTp = TextPainter(
+            text: candidateSpan,
+            maxLines: 1,
+            textDirection: TextDirection.ltr,
+          )..layout(maxWidth: maxWidth);
+
+          if (!candidateTp.didExceedMaxLines) {
+            trimmed = candidate;
+            break;
+          }
+
+          leftCount--;
+          rightCount--;
+          if (leftCount <= 1 || rightCount <= 1) break;
+        }
+
+        return Text(trimmed,
+            style: style, maxLines: 1, overflow: TextOverflow.clip);
+      },
+    );
   }
 }

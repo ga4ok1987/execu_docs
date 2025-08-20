@@ -1,4 +1,5 @@
 import 'package:execu_docs/domain/usecases/add_debtor_usecase.dart';
+import 'package:execu_docs/domain/usecases/claer_debtors_usecase.dart';
 import 'package:execu_docs/domain/usecases/delete_debtor_usecase.dart';
 import 'package:execu_docs/domain/usecases/get_debtors_usecase.dart';
 import 'package:execu_docs/domain/usecases/update_debtor_usecase.dart';
@@ -64,6 +65,7 @@ class AppWrapper extends StatelessWidget {
             deleteDebtorUseCase: getIt<DeleteDebtorUseCase>(),
             getDebtorsUseCase: getIt<GetDebtorsUseCase>(),
             getAllRegionsUseCase: getIt<GetAllRegionsUseCase>(),
+            clearDebtorsUseCase: getIt<ClearDebtorsUseCase>(),
           )..loadDebtors(),
         ),
 

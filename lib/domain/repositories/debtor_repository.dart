@@ -8,6 +8,7 @@ abstract class DebtorRepository {
   Future<Either<Failure, Unit>> updateDebtor(DebtorEntity debtor);
 
   Future<Either<Failure, Unit>> deleteDebtor(int id);
+  Future<Either<Failure, Unit>> clearDebtors();
 
   Future<Either<Failure, List<DebtorEntity>>> getAllDebtors();
   Future<Either<Failure, List<DebtorEntity>>> getDebtorsByRegion(int regionId);

@@ -22,6 +22,10 @@ class DebtorsDao extends DatabaseAccessor<AppDatabase> with _$DebtorsDaoMixin {
         ),
       );
 
+  Future<void> clearDebtors() async {
+    await delete(debtors).go();
+  }
+
   Future<void> updateDebtor(DebtorEntity debtor) async =>
       await (update(debtors)..where((tbl) => tbl.id.equals(debtor.id))).write(
         DebtorsCompanion(
@@ -91,4 +95,6 @@ class DebtorsDao extends DatabaseAccessor<AppDatabase> with _$DebtorsDaoMixin {
         )
         .toList();
   }
+
+
 }

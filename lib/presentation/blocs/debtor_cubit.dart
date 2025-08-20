@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:execu_docs/core/utils/extensions.dart';
+import 'package:execu_docs/domain/usecases/claer_debtors_usecase.dart';
 import 'package:execu_docs/domain/usecases/executors_crud_usecases.dart';
 import 'package:execu_docs/domain/usecases/get_all_region_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,6 +25,7 @@ class DebtorCubit extends Cubit<DebtorState> {
   final DeleteDebtorUseCase deleteDebtorUseCase;
   final GetDebtorsUseCase getDebtorsUseCase;
   final GetAllRegionsUseCase getAllRegionsUseCase;
+  final ClearDebtorsUseCase clearDebtorsUseCase;
 
 
   DebtorCubit({
@@ -32,6 +34,7 @@ class DebtorCubit extends Cubit<DebtorState> {
     required this.deleteDebtorUseCase,
     required this.getDebtorsUseCase,
     required this.getAllRegionsUseCase,
+    required this.clearDebtorsUseCase,
 
   }) : super(DebtorInitial());
 
@@ -69,6 +72,15 @@ class DebtorCubit extends Cubit<DebtorState> {
     result.fold(
       (failure) => emit(DebtorError(failure.message)),
       (_) => loadDebtors(),
+    );
+  }
+
+  Future<void> clearDebtors() async {
+    emit(DebtorLoading());
+    final Either<Failure, Unit> result = await clearDebtorsUseCase();
+    result.fold(
+          (failure) => emit(DebtorError(failure.message)),
+          (_) => loadDebtors(),
     );
   }
 
