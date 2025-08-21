@@ -16,6 +16,7 @@ extension PathShortener on String {
     return '$left\\...\\$right';
   }
 }
+
 extension StringCleaner on String {
   /// Прибрати всі нові рядки (\n, \r\n, \r)
   String removeNewLines() => replaceAll(RegExp(r'(\r\n|\r|\n)'), '');
@@ -28,6 +29,12 @@ extension StringCleaner on String {
 }
 
 extension ExtractFromString on String {
+  String get decreeConvert {
+    if (length > 2) {
+      return '${substring(0, 2)} № ${substring(2)}';
+    }
+    return this; // якщо рядок менше 3 символів, залишаємо як є
+  }
   /// Повертає текст після першої двокрапки, обрізає пробіли
   String get extractName {
     final regex = RegExp(
@@ -36,11 +43,14 @@ extension ExtractFromString on String {
       dotAll: true,
     );
     final match = regex.firstMatch(this);
-    return match?.group(1)?.trim()??'';
+    return match?.group(1)?.trim() ?? '';
   }
 
   String get extractDecree {
-    return replaceAll('серія ', '')  // видаляємо тільки слово "серія " з пробілом
+    return replaceAll(
+          'серія ',
+          '',
+        ) // видаляємо тільки слово "серія " з пробілом
         .replaceAll('№ ', '') // видаляємо "№ " з пробілом
         .replaceAll(' ', ''); // видаляємо решту пробілів
   }
@@ -65,7 +75,10 @@ extension ExtractFromString on String {
     final regExp = RegExp(r'(\d+(?:\.\d+)?)\s*грн');
     final matches = regExp.allMatches(this);
     if (matches.isEmpty) return '';
-    return matches.last.group(1)?.substring(0,matches.last.group(1)!.length-3) ?? '';
+    return matches.last
+            .group(1)
+            ?.substring(0, matches.last.group(1)!.length - 3) ??
+        '';
   }
 
   int? extractRegion(List<RegionEntity>? regions) {
@@ -83,53 +96,87 @@ extension ExtractFromString on String {
   }
 }
 
-extension MiddleEllipsis on String {
-  Widget middleEllipsisText({TextStyle? style}) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth;
+extension StringNumbersToUkrainianWords on String {
+  String toWords() {
+    if (isEmpty) return '';
 
-        final span = TextSpan(text: this, style: style);
-        final tp = TextPainter(
-          text: span,
-          maxLines: 1,
-          textDirection: TextDirection.ltr,
-        )..layout(maxWidth: maxWidth);
+    final number = int.tryParse(this);
+    if (number == null) return '';
 
-        if (!tp.didExceedMaxLines) {
-          return Text(this,
-              style: style, maxLines: 1, overflow: TextOverflow.clip);
-        }
+    if (number == 0) return 'нуль';
 
-        // Якщо не влазить — обрізаємо середину
-        int leftCount = (length / 2).floor();
-        int rightCount = length - leftCount;
+    final units = [
+      "",
+      "один",
+      "два",
+      "три",
+      "чотири",
+      "п’ять",
+      "шість",
+      "сім",
+      "вісім",
+      "дев’ять",
+    ];
+    final teens = [
+      "десять",
+      "одинадцять",
+      "дванадцять",
+      "тринадцять",
+      "чотирнадцять",
+      "п’ятнадцять",
+      "шістнадцять",
+      "сімнадцять",
+      "вісімнадцять",
+      "дев’ятнадцять",
+    ];
+    final tens = [
+      "",
+      "десять",
+      "двадцять",
+      "тридцять",
+      "сорок",
+      "п’ятдесят",
+      "шістдесят",
+      "сімдесят",
+      "вісімдесят",
+      "дев’яносто",
+    ];
+    final hundreds = [
+      "",
+      "сто",
+      "двісті",
+      "триста",
+      "чотириста",
+      "п’ятсот",
+      "шістсот",
+      "сімсот",
+      "вісімсот",
+      "дев’ятсот",
+    ];
 
-        String trimmed = this;
-        while (true) {
-          final candidate =
-              "${substring(0, leftCount)}...${substring(length - rightCount)}";
+    var n = number;
+    var parts = <String>[];
 
-          final candidateSpan = TextSpan(text: candidate, style: style);
-          final candidateTp = TextPainter(
-            text: candidateSpan,
-            maxLines: 1,
-            textDirection: TextDirection.ltr,
-          )..layout(maxWidth: maxWidth);
+    // сотні
+    if (n >= 100) {
+      parts.add(hundreds[n ~/ 100]);
+      n %= 100;
+    }
 
-          if (!candidateTp.didExceedMaxLines) {
-            trimmed = candidate;
-            break;
-          }
+    // десятки
+    if (n >= 20) {
+      parts.add(tens[n ~/ 10]);
+      n %= 10;
+    } else if (n >= 10) {
+      parts.add(teens[n - 10]);
+      n = 0;
+    }
 
-          leftCount--;
-          rightCount--;
-          if (leftCount <= 1 || rightCount <= 1) break;
-        }
+    // одиниці
+    if (n > 0) {
+      parts.add(units[n]);
+    }
 
-        return Text(trimmed,
-            style: style, maxLines: 1, overflow: TextOverflow.clip);
-      },
-    );
+    return parts.join(' ').trim();
   }
 }

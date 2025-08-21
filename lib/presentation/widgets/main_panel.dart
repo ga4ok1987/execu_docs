@@ -98,6 +98,10 @@ class MainPanel extends StatelessWidget {
                               'Створити супровідні',
                               style: TextStyle(color: Colors.white),
                             ),
+                            onPressed: () async {
+
+                              context.read<DebtorCubit>().exportDebtors(folderPath.path2!);
+                            },
                           ),
                         ],
                       ),

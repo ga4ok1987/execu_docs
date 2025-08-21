@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:execu_docs/core/utils/extensions.dart';
 import 'package:execu_docs/domain/usecases/claer_debtors_usecase.dart';
-import 'package:execu_docs/domain/usecases/executors_crud_usecases.dart';
 import 'package:execu_docs/domain/usecases/get_all_region_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../core/utils/docx_reader.dart';
+import '../../core/utils/generate_docx.dart';
 import '../../domain/entities/debtor_entity.dart';
 import '../../domain/entities/region_entity.dart';
 import '../../domain/usecases/add_debtor_usecase.dart';
@@ -84,6 +84,24 @@ class DebtorCubit extends Cubit<DebtorState> {
     );
   }
 
+  Future<void> exportDebtors(String path) async {
+    List<RegionEntity>? regions;
+    List<DebtorEntity>? debtors;
+    final Either<Failure, List<RegionEntity>> result =
+    await getAllRegionsUseCase();
+    result.fold(
+          (failure) => regions = null,
+          (loadedRegions) => regions = loadedRegions,
+    );
+    final Either<Failure, List<DebtorEntity>> resultDebtors =
+    await getDebtorsUseCase();
+    resultDebtors.fold((failure)=>null,
+        (loadedDebtors) => debtors = loadedDebtors);
+    final generator = DebtorDocxGenerator(regions??[]);
+    await generator.generateDebtorsDoc(debtors!,path);
+
+  }
+
   Future<void> importFromDocx(String dirPath) async {
     emit(DebtorLoading());
     List<RegionEntity>? regions;
@@ -107,7 +125,7 @@ class DebtorCubit extends Cubit<DebtorState> {
 
 
     for (var file in files) {
-      final text = await DocxReader().readDocxParagraphs(file.path);
+      final text = await '';//DocxReader().readDocxParagraphs(file.path);
 
       final fullName = text[15].extractName;
       final decree = text[2].extractDecree;

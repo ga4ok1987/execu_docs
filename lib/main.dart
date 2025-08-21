@@ -36,7 +36,7 @@ void main() async {
   await configureDependencies();
   final regionRepo = getIt<SeedRegionsUseCase>();
   await regionRepo.call(ukrainianRegions);
-  WindowCubit().init();
+  //WindowCubit().init();
 
   runApp(const AppWrapper());
 }
