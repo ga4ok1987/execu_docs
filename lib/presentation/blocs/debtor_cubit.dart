@@ -10,6 +10,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../core/utils/docx_reader.dart';
 import '../../core/utils/generate_docx.dart';
+import '../../core/utils/word_merger.dart';
 import '../../domain/entities/debtor_entity.dart';
 import '../../domain/entities/region_entity.dart';
 import '../../domain/usecases/add_debtor_usecase.dart';
@@ -99,6 +100,8 @@ class DebtorCubit extends Cubit<DebtorState> {
         (loadedDebtors) => debtors = loadedDebtors);
     final generator = DebtorDocxGenerator(regions??[]);
     await generator.generateDebtorsDoc(debtors!,path);
+    await WordMerger.mergeDocs(path);
+
 
   }
 

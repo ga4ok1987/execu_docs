@@ -96,87 +96,20 @@ extension ExtractFromString on String {
   }
 }
 
-extension StringNumbersToUkrainianWords on String {
+extension SimpleNumberToWords on String {
   String toWords() {
-    if (isEmpty) return '';
+    switch (this) {
 
-    final number = int.tryParse(this);
-    if (number == null) return '';
-
-    if (number == 0) return 'нуль';
-
-    final units = [
-      "",
-      "один",
-      "два",
-      "три",
-      "чотири",
-      "п’ять",
-      "шість",
-      "сім",
-      "вісім",
-      "дев’ять",
-    ];
-    final teens = [
-      "десять",
-      "одинадцять",
-      "дванадцять",
-      "тринадцять",
-      "чотирнадцять",
-      "п’ятнадцять",
-      "шістнадцять",
-      "сімнадцять",
-      "вісімнадцять",
-      "дев’ятнадцять",
-    ];
-    final tens = [
-      "",
-      "десять",
-      "двадцять",
-      "тридцять",
-      "сорок",
-      "п’ятдесят",
-      "шістдесят",
-      "сімдесят",
-      "вісімдесят",
-      "дев’яносто",
-    ];
-    final hundreds = [
-      "",
-      "сто",
-      "двісті",
-      "триста",
-      "чотириста",
-      "п’ятсот",
-      "шістсот",
-      "сімсот",
-      "вісімсот",
-      "дев’ятсот",
-    ];
-
-    var n = number;
-    var parts = <String>[];
-
-    // сотні
-    if (n >= 100) {
-      parts.add(hundreds[n ~/ 100]);
-      n %= 100;
+      case '600':
+        return '(шістсот) гривень';
+      case '680':
+        return '(шістсот вісімдесят) гривень';
+      case '1360':
+        return '(одна тисяча триста шістдесят) гривень';
+      default:
+        return '$this грн'; // на випадок інших чисел
     }
-
-    // десятки
-    if (n >= 20) {
-      parts.add(tens[n ~/ 10]);
-      n %= 10;
-    } else if (n >= 10) {
-      parts.add(teens[n - 10]);
-      n = 0;
-    }
-
-    // одиниці
-    if (n > 0) {
-      parts.add(units[n]);
-    }
-
-    return parts.join(' ').trim();
   }
 }
+
+

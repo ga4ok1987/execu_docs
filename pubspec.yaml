@@ -32,6 +32,7 @@ dependencies:
   xml: ^6.6.1
   freezed_annotation: ^3.1.0
   collection: ^1.19.1
+  cleartec_docx_template: ^0.4.1
 
 dev_dependencies:
   flutter_test:
@@ -46,6 +47,10 @@ dev_dependencies:
 
 
 flutter:
+  assets:
+    - assets/scripts/merge_docs.vbs
+    - assets/templates/template.docx
+    - assets/templates/empty_template.docx
 
 
   uses-material-design: true
