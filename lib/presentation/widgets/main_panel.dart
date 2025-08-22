@@ -1,4 +1,3 @@
-import 'package:execu_docs/core/utils/extensions.dart';
 import 'package:execu_docs/core/widgets/confirm_dialog.dart';
 import 'package:execu_docs/core/widgets/hover_button.dart';
 import 'package:execu_docs/presentation/widgets/custom_expansion_tile.dart';

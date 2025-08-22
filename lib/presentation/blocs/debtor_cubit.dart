@@ -128,7 +128,7 @@ class DebtorCubit extends Cubit<DebtorState> {
 
 
     for (var file in files) {
-      final text = await '';//DocxReader().readDocxParagraphs(file.path);
+      final text = await DocxReader().readDocxParagraphs(file.path);
 
       final fullName = text[15].extractName;
       final decree = text[2].extractDecree;

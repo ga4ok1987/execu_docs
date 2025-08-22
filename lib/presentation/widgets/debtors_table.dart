@@ -305,56 +305,69 @@ class DebtorsTable extends StatelessWidget {
   }
 
   Widget _executorDropdown(
-    BuildContext context,
-    List<RegionEntity> regions,
-    DebtorEntity debtor,
-    double width,
-  ) {
+      BuildContext context,
+      List<RegionEntity> regions,
+      DebtorEntity debtor,
+      double width,
+      ) {
     final executors = _executorsByRegionId(regions, debtor.regionId);
+    final currentValue =
+        _executorNameById(executors, debtor.executorId) ?? 'не вибрано';
 
-    return DropdownButtonHideUnderline(
-      child: DropdownButton2<String>(
-        isExpanded: true,
-        buttonStyleData: ButtonStyleData(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          height: 32,
-          width: width,
+    final isNotSelected = currentValue == 'не вибрано';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isNotSelected ? Colors.red.shade100 : null,
+        border: Border.all(
+          color: isNotSelected ? Colors.red : Colors.grey.shade300,
         ),
-        value: _executorNameById(executors, debtor.executorId) ?? 'не вибрано',
-        items: [
-          const DropdownMenuItem(
-            value: 'не вибрано',
-            child: Text('не вибрано', style: TextStyle(fontSize: 12)),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton2<String>(
+          isExpanded: true,
+          buttonStyleData: ButtonStyleData(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            height: 32,
+            width: width,
           ),
-          ...executors.map(
-            (e) => DropdownMenuItem(
-              value: e.name,
-              child: Text(e.name, style: const TextStyle(fontSize: 12)),
+          value: currentValue,
+          items: [
+            const DropdownMenuItem(
+              value: 'не вибрано',
+              child: Text('не вибрано', style: TextStyle(fontSize: 12)),
             ),
-          ),
-        ],
-        onChanged: (value) {
-          final selectedExecutor = executors.firstWhere(
-            (e) => e.name == value,
-            orElse: () => const ExecutorEntity(
-              id: 0,
-              name: '',
-              address: '',
-              isPrimary: false,
-              regionId: 0,
+            ...executors.map(
+                  (e) => DropdownMenuItem(
+                value: e.name,
+                child: Text(e.name, style: const TextStyle(fontSize: 12)),
+              ),
             ),
-          );
+          ],
+          onChanged: (value) {
+            final selectedExecutor = executors.firstWhere(
+                  (e) => e.name == value,
+              orElse: () => const ExecutorEntity(
+                id: 0,
+                name: '',
+                address: '',
+                isPrimary: false,
+                regionId: 0,
+              ),
+            );
 
-          final newExecutorId = selectedExecutor.id == 0
-              ? null
-              : selectedExecutor.id;
+            final newExecutorId =
+            selectedExecutor.id == 0 ? null : selectedExecutor.id;
 
-          final updatedDebtor = debtor.copyWith(executorId: newExecutorId);
-          context.read<DebtorCubit>().updateDebtor(updatedDebtor);
-        },
+            final updatedDebtor = debtor.copyWith(executorId: newExecutorId);
+            context.read<DebtorCubit>().updateDebtor(updatedDebtor);
+          },
+        ),
       ),
     );
   }
+
 
   String? _regionNameById(List<RegionEntity> regions, int? id) {
     if (id == null) return null;
