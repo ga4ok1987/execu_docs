@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_colors.dart';
+
 class HoverButton extends StatelessWidget {
   final Widget child;
   final VoidCallback? onPressed;
@@ -11,7 +13,7 @@ class HoverButton extends StatelessWidget {
     super.key,
     required this.child,
     this.onPressed,
-    this.color = Colors.blue,
+    this.color = AppColors.backgroundButtonBlue,
     this.hoverTranslate = -3,
     this.isCircle = false,
   });

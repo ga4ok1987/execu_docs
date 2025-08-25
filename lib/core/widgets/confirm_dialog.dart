@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../presentation/widgets/main_panel.dart';
-
 import 'hover_button.dart';
 
-Future<void> showConfirmDialog({
+Future<void> confirmDialog({
   required BuildContext context,
   required String title,
   required String message,

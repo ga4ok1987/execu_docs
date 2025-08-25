@@ -34,6 +34,7 @@ dependencies:
   collection: ^1.19.1
   cleartec_docx_template: ^0.4.1
   archive: ^3.6.1
+  flutter_slidable: ^4.0.1
 
 dev_dependencies:
   flutter_test:

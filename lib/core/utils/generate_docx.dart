@@ -54,7 +54,6 @@ class DebtorDocxGenerator {
     List<DebtorEntity> debtors,
     String path,
   ) async {
-    // 1. Зчитуємо шаблон
     final templateBytes = await File(
       'assets/templates/template.docx',
     ).readAsBytes();

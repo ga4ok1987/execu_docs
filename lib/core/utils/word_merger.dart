@@ -12,7 +12,7 @@ class WordMerger {
       final scriptFile = File('${tempDir.path}/merge_docs.vbs');
       await scriptFile.writeAsBytes(scriptBytes.buffer.asUint8List());
 
-      // 2. Копіюємо Base.docx
+      // 2. Копіюємо empty_template.docx
       final baseBytes = await rootBundle.load('assets/templates/empty_template.docx');
       final baseFile = File('${tempDir.path}/Base.docx');
       await baseFile.writeAsBytes(baseBytes.buffer.asUint8List());

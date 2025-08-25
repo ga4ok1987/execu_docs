@@ -18,7 +18,7 @@ class ExecutorTile extends StatelessWidget {
         if (event.kind == PointerDeviceKind.mouse &&
             event.buttons == kSecondaryMouseButton) {
           final position = event.position;
-          _showContextMenu(context, position,context.read<ExecutorCubit>());
+          _showContextMenu(context, position, context.read<ExecutorCubit>());
         }
       },
       child: Container(
@@ -44,11 +44,13 @@ class ExecutorTile extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.edit),
-                onPressed: () => _showEditDialog(context,context.read<ExecutorCubit>()),
+                onPressed: () =>
+                    _showEditDialog(context, context.read<ExecutorCubit>()),
               ),
               IconButton(
                 icon: const Icon(Icons.delete),
-                onPressed: () => _confirmDeletion(context,context.read<ExecutorCubit>()),
+                onPressed: () =>
+                    _confirmDeletion(context, context.read<ExecutorCubit>()),
               ),
             ],
           ),
@@ -57,7 +59,7 @@ class ExecutorTile extends StatelessWidget {
     );
   }
 
-  void _confirmDeletion(BuildContext context,ExecutorCubit cubit,) {
+  void _confirmDeletion(BuildContext context, ExecutorCubit cubit) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
