@@ -10,3 +10,4 @@ export 'app_text_sizes.dart';
 export 'app_assets.dart';
 export 'app_paths.dart';
 export 'app_constraints.dart';
+export 'app_sizes.dart';

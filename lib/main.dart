@@ -1,3 +1,4 @@
+import 'package:execu_docs/core/constants/app_border_radius.dart';
 import 'package:execu_docs/domain/usecases/add_debtor_usecase.dart';
 import 'package:execu_docs/domain/usecases/claer_debtors_usecase.dart';
 import 'package:execu_docs/domain/usecases/delete_debtor_usecase.dart';
@@ -73,7 +74,6 @@ class AppWrapper extends StatelessWidget {
           create: (_) => getIt<RegionSelectionCubit>(),
         ),
         BlocProvider<PanelsCubit>(create: (_) => getIt<PanelsCubit>()),
-
       ],
 
       child: const MyApp(),
@@ -91,28 +91,35 @@ class MyApp extends StatelessWidget {
       routerConfig: router,
       title: 'Violation App',
       theme: ThemeData(
-        dividerColor: Colors.transparent,
+        dividerColor: AppColors.transparent,
         brightness: Brightness.light,
-        primaryColor: Colors.white,
+        primaryColor: AppColors.primaryWhite,
         scaffoldBackgroundColor: AppColors.backgroundColor,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
-        ),
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(fontSize: 18, color: Colors.black87),
-          bodyMedium: TextStyle(fontSize: 16, color: Colors.black54),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        inputDecorationTheme: InputDecorationTheme(
+          labelStyle: TextStyle(color: AppColors.primaryMainBlue),
+          filled: true,
+          fillColor: AppColors.primaryWhite,
+          border: OutlineInputBorder(
+            borderRadius: AppBorderRadius.all12,
+            borderSide: BorderSide(color: AppColors.primaryMainBlue, width: 1),
           ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: AppBorderRadius.all12,
+            borderSide: BorderSide(color: AppColors.primaryMainBlue, width: 2), // не активне
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: AppBorderRadius.all12,
+            borderSide: BorderSide(color: AppColors.primaryMainBlue, width: 2), // активне поле
+          ),
+
+
         ),
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: AppColors.primaryMainBlue, // глобальний колір курсора
+          selectionColor: AppColors.primaryMainBlue, // виділення тексту
+          selectionHandleColor: AppColors.primaryMainBlue, // ручки виділення
+        ),
+
       ),
     );
   }

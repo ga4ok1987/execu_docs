@@ -9,4 +9,5 @@ class AppConstraints {
   static const minHeight300 = BoxConstraints(minHeight: 300);
 
   static const box400x300 = BoxConstraints(maxWidth: 400, maxHeight: 300);
+  static const box500x500 = BoxConstraints(maxWidth: 500, maxHeight: 500);
 }

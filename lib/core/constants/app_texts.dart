@@ -21,14 +21,18 @@ class AppTexts {
   static const String folderNotSelected = 'Папку не вибрано';
 
   //debtors
+  static const String addDebtor = 'Додати боржника';
+  static const String editDebtor = 'Змінити дані боржника';
   static const String number = '№';
   static const String fullName = 'ПІБ';
+  static const String fullNameIsRequired = 'Поле ПІБ є обов’язковим';
   static const String decree = 'Постанова';
   static const String amount = 'Сума';
   static const String address = 'Адреса';
   static const String region = 'Область';
   static const String regions = 'Області';
   static const String executor = 'Виконавець';
+  static const String dropdownNotSelected = 'не вибрано';
 
   //region
   static const String addRegion = 'Додати область';

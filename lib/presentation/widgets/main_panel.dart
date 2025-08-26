@@ -2,6 +2,7 @@ import 'package:execu_docs/core/constants/index.dart';
 import 'package:execu_docs/core/widgets/confirm_dialog.dart';
 import 'package:execu_docs/core/widgets/hover_button.dart';
 import 'package:execu_docs/presentation/widgets/custom_expansion_tile.dart';
+import 'package:execu_docs/presentation/widgets/folder_selector.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +12,7 @@ import '../blocs/folder_cubit.dart';
 import '../blocs/panels_cubit.dart';
 import 'debtors_table.dart';
 import 'dialogs/add_debtor_dialog.dart';
+import 'dialogs/edit_debtor_dialog.dart';
 
 class MainPanel extends StatelessWidget {
   const MainPanel({super.key});
@@ -31,8 +33,8 @@ class MainPanel extends StatelessWidget {
 
             children: [
               SizedBox(
-                height: 80,
-                width: 953,
+                height: AppSizes.tittlePanelHeight,
+                width: AppSizes.tittlePanelWidth,
                 child: HighlightContainer(
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -65,8 +67,8 @@ class MainPanel extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    height: 66,
-                    width: 1000 / 2.1,
+                    height: AppSizes.mainPanelHeight,
+                    width: AppSizes.mainPanelWidth,
                     child: HighlightContainer(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -111,7 +113,7 @@ class MainPanel extends StatelessWidget {
                     ),
                   ),
                   SizedBox(
-                    width: 1000 / 2.1,
+                    width: AppSizes.mainPanelWidth,
 
                     child: HighlightContainer(
                       child: CustomExpansionTile(
@@ -123,71 +125,18 @@ class MainPanel extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(AppTexts.pathToDocs),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      padding: AppPadding.all8,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: AppColors.borderColorGrey,
-                                        ),
-                                        borderRadius: AppBorderRadius.all4,
-                                      ),
-                                      child: Text(
-                                        (folderPath.path1 ??
-                                            AppTexts.folderNotSelected),
-                                        maxLines: 1,
-                                        style: const TextStyle(
-                                          overflow: TextOverflow.ellipsis,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  AppGaps.w20,
-
-                                  HoverButton(
-                                    onPressed: () => _selectFolder(context, 1),
-                                    child: const Text(AppTexts.selectFolder),
-                                  ),
-                                  AppGaps.w12,
-                                ],
+                              FolderSelector(
+                                path: folderPath.path1,
+                                onSelect: () => _selectFolder(context, 1),
                               ),
                               Text(AppTexts.pathToResults),
+                              FolderSelector(
+                                path: folderPath.path2,
+                                onSelect: () => _selectFolder(context, 2),
+                              ),
                             ],
                           ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  padding: AppPadding.all8,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: AppColors.borderColorGrey,
-                                    ),
-                                    borderRadius: AppBorderRadius.all4,
-                                  ),
-                                  child: Text(
-                                    (folderPath.path2 ??
-                                        AppTexts.folderNotSelected),
-                                    maxLines: 1,
-                                    style: const TextStyle(
-                                      overflow: TextOverflow.ellipsis,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
 
-                              AppGaps.w20,
-                              HoverButton(
-                                onPressed: () => _selectFolder(context, 2),
-                                child: const Text('Вибрати папку'),
-                              ),
-                              AppGaps.w12,
-                            ],
-                          ),
                           AppGaps.h16,
                         ],
                       ),
@@ -197,7 +146,7 @@ class MainPanel extends StatelessWidget {
               ),
 
               SizedBox(
-                width: 450,
+                width: AppSizes.mainPanelWidth,
                 child: HighlightContainer(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -213,6 +162,19 @@ class MainPanel extends StatelessWidget {
                       Padding(
                         padding: AppPadding.all8,
                         child: HoverButton(
+                          onPressed: () async {
+                            final selected = selectedRowNotifier.value;
+                            if (selected != null) {
+                              editDebtorDialog(context, selected.debtor);
+                            }else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(AppTexts.firstSelectDebtor),
+                                ),
+                              );
+                            }
+                          },
+
                           isCircle: true,
                           child: Icon(
                             Icons.edit,

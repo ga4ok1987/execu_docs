@@ -1,5 +1,3 @@
-import 'package:execu_docs/core/constants/index.dart';
-import 'package:execu_docs/core/widgets/hover_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -9,18 +7,18 @@ import '../../../domain/entities/region_entity.dart';
 import '../../../presentation/blocs/debtor_cubit.dart';
 import '../../../presentation/blocs/region_cubit.dart';
 
-void addDebtorDialog(BuildContext context) {
-  final fullNameController = TextEditingController();
-  final decreeController = TextEditingController();
-  final amountController = TextEditingController();
-  final addressController = TextEditingController();
+void editDebtorDialog(BuildContext context, DebtorEntity debtor) {
+  final fullNameController = TextEditingController(text: debtor.fullName);
+  final decreeController = TextEditingController(text: debtor.decree);
+  final amountController = TextEditingController(text: debtor.amount);
+  final addressController = TextEditingController(text: debtor.address);
 
   final regions = context.read<RegionCubit>().state is RegionLoaded
       ? (context.read<RegionCubit>().state as RegionLoaded).regions
       : <RegionEntity>[];
 
-  int? selectedRegionId;
-  int? selectedExecutorId;
+  int? selectedRegionId = debtor.regionId;
+  int? selectedExecutorId = debtor.executorId;
   List<ExecutorEntity> executors = [];
 
   final formKey = GlobalKey<FormState>();
@@ -30,10 +28,10 @@ void addDebtorDialog(BuildContext context) {
     builder: (dialogContext) {
       return StatefulBuilder(
         builder: (context, setState) {
-          // Оновлення виконавців при виборі регіону
+          /// Оновлення виконавців при виборі регіону
           if (selectedRegionId != null) {
             final selectedRegion = regions.firstWhere(
-              (r) => r.id == selectedRegionId,
+                  (r) => r.id == selectedRegionId,
               orElse: () => RegionEntity(id: 0, name: '', executorOffices: []),
             );
             executors = selectedRegion.executorOffices;
@@ -46,89 +44,69 @@ void addDebtorDialog(BuildContext context) {
           }
 
           return Dialog(
-            backgroundColor: AppColors.primaryWhite,
+            backgroundColor: Colors.white,
             child: ConstrainedBox(
-              constraints: AppConstraints.box500x500,
+              constraints: const BoxConstraints(
+                maxWidth: 600,
+                maxHeight: 600,
+              ),
               child: Padding(
-                padding: AppPadding.all16,
+                padding: const EdgeInsets.all(16),
                 child: Form(
                   key: formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Text(
-                        AppTexts.addDebtor,
+                        'Редагувати боржника',
                         style: TextStyle(
-                          fontSize: AppTextSizes.big,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.texBlack,
                         ),
                       ),
-                      AppGaps.h16,
+                      const SizedBox(height: 16),
 
                       /// Поля вводу
                       TextFormField(
                         controller: fullNameController,
-                        decoration: const InputDecoration(
-                          labelText: AppTexts.fullName,
-                        ),
+                        decoration: const InputDecoration(labelText: 'ПІБ'),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return AppTexts.fullNameIsRequired;
+                            return 'Поле ПІБ є обов’язковим';
                           }
                           return null;
                         },
                       ),
-                      AppGaps.h16,
                       TextField(
                         controller: addressController,
-                        decoration: const InputDecoration(
-                          labelText: AppTexts.address,
-                        ),
+                        decoration: const InputDecoration(labelText: 'Адреса'),
                       ),
-                      AppGaps.h8,
+                      const SizedBox(height: 8),
                       TextField(
                         controller: decreeController,
-                        decoration: const InputDecoration(
-                          labelText: AppTexts.decree,
-                        ),
+                        decoration: const InputDecoration(labelText: 'Постанова'),
                       ),
-                      AppGaps.h8,
+                      const SizedBox(height: 8),
                       TextField(
                         controller: amountController,
-                        decoration: const InputDecoration(
-                          labelText: AppTexts.amount,
-                        ),
+                        decoration: const InputDecoration(labelText: 'Сума'),
                         keyboardType: TextInputType.number,
                       ),
-                      AppGaps.h16,
+                      const SizedBox(height: 16),
 
-                      /// Dropdown області
+                      /// Dropdown область
                       DropdownButtonFormField<int>(
-                        decoration: const InputDecoration(
-                          labelText: AppTexts.region,
-                        ),
-                        dropdownColor: AppColors.dropdownColorWhite,
-                        // фон випадаючого списку
+                        decoration: const InputDecoration(labelText: 'Область'),
                         value: selectedRegionId,
                         items: [
                           const DropdownMenuItem<int>(
                             value: null,
-                            child: Text(
-                              AppTexts.dropdownNotSelected,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
+                            child: Text('не вибрано'),
                           ),
                           ...regions.map(
-                            (r) => DropdownMenuItem<int>(
+                                (r) => DropdownMenuItem<int>(
                               value: r.id,
-                              child: Text(
-                                r.name,
-                                overflow: TextOverflow.ellipsis,
-                                // обрізає довгий текст
-                                maxLines: 1, // тільки 1 рядок
-                              ),
+                              child: Text(r.name),
                             ),
                           ),
                         ],
@@ -138,36 +116,22 @@ void addDebtorDialog(BuildContext context) {
                           });
                         },
                       ),
-                      AppGaps.h16,
+                      const SizedBox(height: 16),
 
-                      /// Dropdown виконавця
+                      /// Dropdown виконавець
                       DropdownButtonFormField<int>(
-                        decoration: const InputDecoration(
-                          labelText: AppTexts.executor,
-                        ),
-                        dropdownColor: AppColors.dropdownColorWhite,
-                        // фон списку
+                        decoration:
+                        const InputDecoration(labelText: 'Виконавець'),
                         value: selectedExecutorId,
-                        isExpanded: true,
                         items: [
                           const DropdownMenuItem<int>(
                             value: null,
-                            child: Text(
-                              AppTexts.dropdownNotSelected,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                            ),
+                            child: Text('не вибрано'),
                           ),
                           ...executors.map(
-                            (e) => DropdownMenuItem<int>(
+                                (e) => DropdownMenuItem<int>(
                               value: e.id,
-                              child: SizedBox(
-                                child: Text(
-                                  e.name,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 3,
-                                ),
-                              ),
+                              child: Text(e.name),
                             ),
                           ),
                         ],
@@ -178,33 +142,25 @@ void addDebtorDialog(BuildContext context) {
                         },
                       ),
 
-                      AppGaps.h16,
+                      const SizedBox(height: 24),
 
                       /// Кнопки
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          HoverButton(
-                            color: AppColors.backgroundButtonRed,
+                          TextButton(
                             onPressed: () {
                               Navigator.pop(dialogContext);
                             },
-                            child: const Text(
-                              AppTexts.cancel,
-                              style: TextStyle(
-                                color: AppColors.textButtonWhite,
-                              ),
-                            ),
+                            child: const Text('Скасувати'),
                           ),
-                          AppGaps.w12,
-
-                          HoverButton(
+                          const SizedBox(width: 12),
+                          ElevatedButton(
                             onPressed: () {
                               if (!formKey.currentState!.validate()) {
                                 return;
                               }
-                              final newDebtor = DebtorEntity(
-                                id: 0,
+                              final updatedDebtor = debtor.copyWith(
                                 fullName: fullNameController.text.trim(),
                                 address: addressController.text.trim(),
                                 decree: decreeController.text.trim(),
@@ -212,15 +168,10 @@ void addDebtorDialog(BuildContext context) {
                                 regionId: selectedRegionId,
                                 executorId: selectedExecutorId,
                               );
-                              context.read<DebtorCubit>().addDebtor(newDebtor);
+                              context.read<DebtorCubit>().updateDebtor(updatedDebtor);
                               Navigator.pop(dialogContext);
                             },
-                            child: const Text(
-                              AppTexts.add,
-                              style: TextStyle(
-                                color: AppColors.textButtonWhite,
-                              ),
-                            ),
+                            child: const Text('Зберегти'),
                           ),
                         ],
                       ),

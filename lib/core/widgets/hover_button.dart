@@ -1,6 +1,6 @@
+import 'package:execu_docs/core/constants/index.dart';
 import 'package:flutter/material.dart';
 
-import '../constants/app_colors.dart';
 
 class HoverButton extends StatelessWidget {
   final Widget child;
@@ -45,11 +45,13 @@ class HoverButton extends StatelessWidget {
               child: Material(
                 color: color,
                 elevation: isHovered ? 18 : 14,
-                borderRadius: BorderRadius.circular(isCircle ? 1000 : 6),
+                borderRadius: isCircle
+                    ? AppBorderRadius.circular
+                    : AppBorderRadius.all8,
                 child: Padding(
                   padding: isCircle
-                      ? const EdgeInsets.all(8)
-                      : const EdgeInsets.symmetric(horizontal: 25, vertical: 6),
+                      ? AppPadding.all8
+                      : AppPadding.hor25ver6,
                   child: child,
                 ),
               ),
