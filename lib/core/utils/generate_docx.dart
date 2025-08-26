@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cleartec_docx_template/cleartec_docx_template.dart';
+import 'package:execu_docs/core/constants/index.dart';
 import 'package:execu_docs/core/utils/extensions.dart';
 import '../../domain/entities/debtor_entity.dart';
 import '../../domain/entities/region_entity.dart';
@@ -55,7 +56,7 @@ class DebtorDocxGenerator {
     String path,
   ) async {
     final templateBytes = await File(
-      'assets/templates/template.docx',
+      AppAssets.template,
     ).readAsBytes();
     final template = await DocxTemplate.fromBytes(templateBytes);
 

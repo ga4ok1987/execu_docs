@@ -1,62 +1,67 @@
+import 'package:execu_docs/core/constants/index.dart';
 import 'package:flutter/material.dart';
 import 'hover_button.dart';
 
 Future<void> confirmDialog({
   required BuildContext context,
   required String title,
-  required String message,
+  String? message,
   required VoidCallback onConfirm,
 }) {
   return showDialog(
     context: context,
-    barrierDismissible: false,
+
     builder: (dialogContext) {
-      return Center(
-        child: Container(
-          padding: EdgeInsets.all(8),
-          color: Colors.white,
-          height: 200,
-          width: 400,
+      return Dialog(
+        child: ConstrainedBox(
+          constraints: AppConstraints.maxWidth400,
           child: Container(
-            padding: EdgeInsets.all(20),
+            padding: AppPadding.all16,
+            decoration: BoxDecoration(
+              color: AppColors.primaryWhite,
+              borderRadius: AppBorderRadius.all16,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                message == null ? AppGaps.h8 : AppGaps.shrink,
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: AppTextSizes.big,
                     fontWeight: FontWeight.bold,
                   ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  message,
-                  style: const TextStyle(fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 20),
+                message != null ? AppGaps.h12 : AppGaps.shrink,
+                message != null
+                    ? Text(
+                        message,
+                        style: const TextStyle(fontSize: AppTextSizes.big),
+                        textAlign: TextAlign.center,
+                      )
+                    : AppGaps.shrink,
+                AppGaps.h12,
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     HoverButton(
-                      color: Colors.red,
+                      color: AppColors.backgroundButtonRed,
                       onPressed: () => Navigator.pop(dialogContext),
                       child: const Text(
-                        'Відміна',
-                        style: TextStyle(color: Colors.white),
+                        AppTexts.cancel,
+                        style: TextStyle(color: AppColors.textButtonWhite),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    AppGaps.w12,
                     HoverButton(
-            
                       onPressed: () {
                         Navigator.pop(dialogContext);
                         onConfirm();
                       },
                       child: const Text(
-                        'Підтвердити',
-                        style: TextStyle(color: Colors.white),
+                        AppTexts.accept,
+                        style: TextStyle(color: AppColors.textButtonWhite),
                       ),
                     ),
                   ],

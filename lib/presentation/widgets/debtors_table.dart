@@ -9,7 +9,7 @@ import '../blocs/debtor_cubit.dart';
 import '../blocs/region_cubit.dart';
 
 class DebtorsTable extends StatelessWidget {
-  final ValueNotifier<List<int>?> selectedRowNotifier; // для вибору рядка
+  final ValueNotifier<SelectedDebtor?> selectedRowNotifier; // для вибору рядка
   final List<ValueNotifier<bool>> hoverNotifiers; // для hover-ефекту
 
   DebtorsTable({
@@ -54,7 +54,7 @@ class DebtorsTable extends StatelessWidget {
                       totalWidth * 0.24, // Виконавець
                     ];
 
-                    return ValueListenableBuilder<List<int>?>(
+                    return ValueListenableBuilder<SelectedDebtor?>(
                       valueListenable: selectedRowNotifier,
                       builder: (context, selectedIndex, _) {
                         return SingleChildScrollView(
@@ -86,7 +86,7 @@ class DebtorsTable extends StatelessWidget {
                                       return _resolveRowColor(
                                         index,
                                         isEven,
-                                        selectedIndex?[1],
+                                        selectedIndex,
                                       );
                                     }),
                                     cells: [
@@ -96,10 +96,11 @@ class DebtorsTable extends StatelessWidget {
                                           colWidths[0],
                                         ),
                                         onTap: () {
-                                          selectedRowNotifier.value = [
-                                            debtor.id,
-                                            index,
-                                          ];
+                                          selectedRowNotifier.value =
+                                              SelectedDebtor(
+                                                debtor: debtor,
+                                                index: index,
+                                              );
                                         },
                                       ),
                                       DataCell(
@@ -108,37 +109,40 @@ class DebtorsTable extends StatelessWidget {
                                           colWidths[1],
                                         ),
                                         onTap: () {
-                                          selectedRowNotifier.value = [
-                                            debtor.id,
-                                            index,
-                                          ];
+                                          SelectedDebtor(
+                                            debtor: debtor,
+                                            index: index,
+                                          );
                                         },
                                       ),
                                       DataCell(
                                         _wrapText(debtor.decree, colWidths[2]),
                                         onTap: () {
-                                          selectedRowNotifier.value = [
-                                            debtor.id,
-                                            index,
-                                          ];
+                                          selectedRowNotifier.value =
+                                              SelectedDebtor(
+                                                debtor: debtor,
+                                                index: index,
+                                              );
                                         },
                                       ),
                                       DataCell(
                                         _wrapText(debtor.amount, colWidths[3]),
                                         onTap: () {
-                                          selectedRowNotifier.value = [
-                                            debtor.id,
-                                            index,
-                                          ];
+                                          selectedRowNotifier.value =
+                                              SelectedDebtor(
+                                                debtor: debtor,
+                                                index: index,
+                                              );
                                         },
                                       ),
                                       DataCell(
                                         _wrapText(debtor.address, colWidths[4]),
                                         onTap: () {
-                                          selectedRowNotifier.value = [
-                                            debtor.id,
-                                            index,
-                                          ];
+                                          selectedRowNotifier.value =
+                                              SelectedDebtor(
+                                                debtor: debtor,
+                                                index: index,
+                                              );
                                         },
                                       ),
                                       DataCell(
@@ -149,10 +153,11 @@ class DebtorsTable extends StatelessWidget {
                                           210,
                                         ),
                                         onTap: () {
-                                          selectedRowNotifier.value = [
-                                            debtor.id,
-                                            index,
-                                          ];
+                                          selectedRowNotifier.value =
+                                              SelectedDebtor(
+                                                debtor: debtor,
+                                                index: index,
+                                              );
                                         },
                                       ),
                                       DataCell(
@@ -163,10 +168,11 @@ class DebtorsTable extends StatelessWidget {
                                           colWidths[6],
                                         ),
                                         onTap: () {
-                                          selectedRowNotifier.value = [
-                                            debtor.id,
-                                            index,
-                                          ];
+                                          selectedRowNotifier.value =
+                                              SelectedDebtor(
+                                                debtor: debtor,
+                                                index: index,
+                                              );
                                         },
                                       ),
                                     ],
@@ -223,8 +229,8 @@ class DebtorsTable extends StatelessWidget {
     );
   }
 
-  Color _resolveRowColor(int index, bool isEven, int? selectedIndex) {
-    if (selectedIndex == index) {
+  Color _resolveRowColor(int index, bool isEven, SelectedDebtor? selected) {
+    if (selected?.index == index) {
       return Colors.blue.withOpacity(0.3); // виділений рядок
     }
     return isEven ? Colors.grey.shade100 : Colors.grey.shade200;
@@ -305,11 +311,11 @@ class DebtorsTable extends StatelessWidget {
   }
 
   Widget _executorDropdown(
-      BuildContext context,
-      List<RegionEntity> regions,
-      DebtorEntity debtor,
-      double width,
-      ) {
+    BuildContext context,
+    List<RegionEntity> regions,
+    DebtorEntity debtor,
+    double width,
+  ) {
     final executors = _executorsByRegionId(regions, debtor.regionId);
     final currentValue =
         _executorNameById(executors, debtor.executorId) ?? 'не вибрано';
@@ -339,7 +345,7 @@ class DebtorsTable extends StatelessWidget {
               child: Text('не вибрано', style: TextStyle(fontSize: 12)),
             ),
             ...executors.map(
-                  (e) => DropdownMenuItem(
+              (e) => DropdownMenuItem(
                 value: e.name,
                 child: Text(e.name, style: const TextStyle(fontSize: 12)),
               ),
@@ -347,7 +353,7 @@ class DebtorsTable extends StatelessWidget {
           ],
           onChanged: (value) {
             final selectedExecutor = executors.firstWhere(
-                  (e) => e.name == value,
+              (e) => e.name == value,
               orElse: () => const ExecutorEntity(
                 id: 0,
                 name: '',
@@ -357,8 +363,9 @@ class DebtorsTable extends StatelessWidget {
               ),
             );
 
-            final newExecutorId =
-            selectedExecutor.id == 0 ? null : selectedExecutor.id;
+            final newExecutorId = selectedExecutor.id == 0
+                ? null
+                : selectedExecutor.id;
 
             final updatedDebtor = debtor.copyWith(executorId: newExecutorId);
             context.read<DebtorCubit>().updateDebtor(updatedDebtor);
@@ -367,7 +374,6 @@ class DebtorsTable extends StatelessWidget {
       ),
     );
   }
-
 
   String? _regionNameById(List<RegionEntity> regions, int? id) {
     if (id == null) return null;
@@ -409,9 +415,9 @@ class DebtorsTable extends StatelessWidget {
   }
 }
 
-class SelectedItem {
-  final int regionId;
+class SelectedDebtor {
+  final DebtorEntity debtor;
   final int index;
 
-  SelectedItem({required this.regionId, required this.index});
+  const SelectedDebtor({required this.debtor, required this.index});
 }

@@ -1,3 +1,4 @@
+import 'package:execu_docs/core/constants/index.dart';
 import 'package:execu_docs/domain/entities/region_entity.dart';
 
 extension StringCleaner on String {
@@ -84,13 +85,13 @@ extension SimpleNumberToWords on String {
     switch (this) {
 
       case '600':
-        return '(шістсот) гривень';
+        return AppTexts.fine600;
       case '680':
-        return '(шістсот вісімдесят) гривень';
+        return AppTexts.fine680;
       case '1360':
-        return '(одна тисяча триста шістдесят) гривень';
+        return AppTexts.fine1360;
       default:
-        return '$this грн'; // на випадок інших чисел
+        return '$this ${AppTexts.uah}'; // на випадок інших чисел
     }
   }
 }

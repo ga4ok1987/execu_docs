@@ -8,7 +8,6 @@ class DocxReader {
     final bytes = File(path).readAsBytesSync();
     final archive = ZipDecoder().decodeBytes(bytes);
 
-    // Знайдемо document.xml
     final docFile = archive.files.firstWhere(
       (f) => f.name == 'word/document.xml',
     );

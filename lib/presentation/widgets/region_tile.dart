@@ -167,7 +167,7 @@ class RegionTile extends StatelessWidget {
                     'Редагувати регіон',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  AppGaps.gap16,
+                  AppGaps.w16,
 
                   TextFormField(
                     controller: controller,
@@ -181,7 +181,7 @@ class RegionTile extends StatelessWidget {
                       return null;
                     },
                   ),
-                  AppGaps.gap16,
+                  AppGaps.w16,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -192,7 +192,7 @@ class RegionTile extends StatelessWidget {
                           style: TextStyle(color: AppColors.textButtonWhite),
                         ),
                       ),
-                      AppGaps.gap12,
+                      AppGaps.w12,
 
                       HoverButton(
                         onPressed: () {
