@@ -11,25 +11,20 @@ class AppColors {
   static const Color errorMain = Color(0xFFE01E12);
   static const Color headerBackgroundMain = Color(0xFF616A77);
 
-  static const Color primaryDark = Color(0xFF212121);
-  static const Color primaryDarkDark = Color(0xFF000000);
-  static const Color primaryLightDark = Color(0xFF484848);
-  static const Color accentDark = Color(0xFFEF6C00);
-  static const Color dividerDark = Color(0xFFBDBDBD);
-  static const Color errorDark = Color(0xFFAD0103);
-  static const Color headerBackgroundDark = Color(0xFF454954);
-
-
+  //button colors
   static const Color backgroundButtonBlue = Colors.blue;
   static const Color backgroundButtonRed = Colors.red;
   static const Color textButtonWhite = Colors.white;
   static const Color textButtonBlack = Colors.black;
 
+  //border colors
   static const Color borderColorGrey = Colors.grey;
 
+  //text colors
   static const Color texBlack = Colors.black;
   static const Color transparent = Colors.transparent;
 
+  //dropdown colors
   static const Color dropdownColorWhite = Colors.white;
 
 

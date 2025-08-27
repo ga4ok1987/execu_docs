@@ -41,7 +41,7 @@ class FolderSelector extends StatelessWidget {
           AppGaps.w20,
           HoverButton(
             onPressed: onSelect,
-            child: const Text(AppTexts.selectFolder),
+            child: const Text(AppTexts.selectFolder, style: TextStyle(color: AppColors.textButtonWhite),),
           ),
           AppGaps.w12,
         ],

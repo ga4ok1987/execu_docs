@@ -2,7 +2,6 @@ import 'package:execu_docs/core/constants/index.dart';
 import 'package:execu_docs/core/widgets/hover_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../domain/entities/debtor_entity.dart';
 import '../../../domain/entities/executor_entity.dart';
 import '../../../domain/entities/region_entity.dart';
@@ -109,8 +108,7 @@ void addDebtorDialog(BuildContext context) {
                           labelText: AppTexts.region,
                         ),
                         dropdownColor: AppColors.dropdownColorWhite,
-                        // фон випадаючого списку
-                        value: selectedRegionId,
+                        initialValue: selectedRegionId,
                         items: [
                           const DropdownMenuItem<int>(
                             value: null,
@@ -147,7 +145,7 @@ void addDebtorDialog(BuildContext context) {
                         ),
                         dropdownColor: AppColors.dropdownColorWhite,
                         // фон списку
-                        value: selectedExecutorId,
+                        initialValue: selectedExecutorId,
                         isExpanded: true,
                         items: [
                           const DropdownMenuItem<int>(
