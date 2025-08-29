@@ -108,7 +108,7 @@ void editDebtorDialog(BuildContext context, DebtorEntity debtor) {
                           labelText: AppTexts.region,
                         ),
                         dropdownColor: AppColors.dropdownColorWhite,
-                        initialValue: selectedRegionId,
+                        value: selectedRegionId,
                         items: [
                           const DropdownMenuItem<int>(
                             value: null,
@@ -145,7 +145,7 @@ void editDebtorDialog(BuildContext context, DebtorEntity debtor) {
                         ),
                         dropdownColor: AppColors.dropdownColorWhite,
                         // фон списку
-                        initialValue: selectedExecutorId,
+                        value: selectedExecutorId,
                         isExpanded: true,
                         items: [
                           const DropdownMenuItem<int>(

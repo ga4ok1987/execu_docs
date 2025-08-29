@@ -1,20 +1,28 @@
+import 'dart:ui';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
 class PanelsCubit extends Cubit<PanelsState> {
-  PanelsCubit() : super(const PanelsState());
+  PanelsCubit() : super(const PanelsState(isRegionPanelOpen: false, isExecutorPanelOpen: false));
 
-  void toggleRegionPanel() =>
-      emit(state.copyWith(isRegionPanelOpen: !state.isRegionPanelOpen));
+  void toggleRegionPanel() {
+    // Якщо відкриваємо RegionPanel, можна закрити ExecutorPanel
+    final newRegionState = !state.isRegionPanelOpen;
+    emit(state.copyWith(
+      isRegionPanelOpen: newRegionState,
+      isExecutorPanelOpen: newRegionState ? state.isExecutorPanelOpen : false,
+    ));
+  }
+
+  void closeExecutorPanel() => emit(state.copyWith(isExecutorPanelOpen: false));
 
   void openExecutorPanel() =>
       emit(state.copyWith(isExecutorPanelOpen: true));
 
-  void closeExecutorPanel() =>
-      emit(state.copyWith(isExecutorPanelOpen: false));
+  void closeAll() => emit(const PanelsState(isRegionPanelOpen: false, isExecutorPanelOpen: false));
 
-  void closeAll() => emit(const PanelsState());
 }
 
 class PanelsState {
@@ -35,5 +43,13 @@ class PanelsState {
       isExecutorPanelOpen: isExecutorPanelOpen ?? this.isExecutorPanelOpen,
     );
   }
+  Offset get regionOffset {
+    if (!isRegionPanelOpen) return const Offset(1.0, 0);
+    return isExecutorPanelOpen ? const Offset(-0.2, 0) : const Offset(0, 0);
+  }
+
+  Offset get executorOffset =>
+      isExecutorPanelOpen ? const Offset(0, 0) : const Offset(1.0, 0);
 }
+
 

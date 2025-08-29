@@ -166,7 +166,7 @@ class MainPanel extends StatelessWidget {
                             final selected = selectedRowNotifier.value;
                             if (selected != null) {
                               editDebtorDialog(context, selected.debtor);
-                            }else {
+                            } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(AppTexts.firstSelectDebtor),
@@ -197,10 +197,9 @@ class MainPanel extends StatelessWidget {
                                   context.read<DebtorCubit>().deleteDebtor(
                                     selected.debtor.id,
                                   );
+                                  selectedRowNotifier.value = null;
                                 },
                               );
-
-                              selectedRowNotifier.value = null;
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
