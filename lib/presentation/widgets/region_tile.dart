@@ -1,5 +1,6 @@
 import 'package:execu_docs/core/constants/index.dart';
 import 'package:execu_docs/core/widgets/hover_button.dart';
+import 'package:execu_docs/presentation/blocs/debtor_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -146,6 +147,7 @@ class RegionTile extends StatelessWidget {
             onPressed: () {
               Navigator.pop(context);
               context.read<RegionCubit>().removeRegion(region.id);
+
             },
             child: const Text(
               AppTexts.delete,

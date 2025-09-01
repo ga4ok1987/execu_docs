@@ -9,8 +9,7 @@ import '../blocs/debtor_cubit.dart';
 import '../blocs/region_cubit.dart';
 
 class DebtorsTable extends StatelessWidget {
-  final ValueNotifier<SelectedDebtor?> selectedRowNotifier; // для вибору рядка
-  final List<ValueNotifier<bool>> hoverNotifiers; // для hover-ефекту
+  final ValueNotifier<SelectedDebtor?> selectedRowNotifier;
 
   DebtorsTable({
     super.key,
@@ -21,37 +20,43 @@ class DebtorsTable extends StatelessWidget {
          (_) => ValueNotifier<bool>(false),
        );
 
+  final List<ValueNotifier<bool>> hoverNotifiers;
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<RegionCubit, RegionState>(
       builder: (context, regionState) {
         if (regionState is RegionLoading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (regionState is RegionError) {
+        }
+        if (regionState is RegionError) {
           return Center(child: Text('Помилка: ${regionState.message}'));
-        } else if (regionState is RegionLoaded) {
+        }
+        if (regionState is RegionLoaded) {
           final regions = regionState.regions;
 
           return BlocBuilder<DebtorCubit, DebtorState>(
             builder: (context, debtorState) {
               if (debtorState is DebtorLoading) {
                 return const Center(child: CircularProgressIndicator());
-              } else if (debtorState is DebtorError) {
+              }
+              if (debtorState is DebtorError) {
                 return Center(child: Text('Помилка: ${debtorState.message}'));
-              } else if (debtorState is DebtorLoaded) {
+              }
+              if (debtorState is DebtorLoaded) {
                 final debtors = debtorState.debtors;
 
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     final totalWidth = constraints.maxWidth;
                     final colWidths = [
-                      totalWidth * 0.02, // №
-                      totalWidth * 0.15, // ПІБ
-                      totalWidth * 0.1, // Постанова
-                      totalWidth * 0.06, // Сума
-                      totalWidth * 0.2, // Адреса
-                      totalWidth * 0.24, // Область
-                      totalWidth * 0.24, // Виконавець
+                      totalWidth * 0.02,
+                      totalWidth * 0.15,
+                      totalWidth * 0.1,
+                      totalWidth * 0.06,
+                      totalWidth * 0.2,
+                      totalWidth * 0.24,
+                      totalWidth * 0.24,
                     ];
 
                     return ValueListenableBuilder<SelectedDebtor?>(
@@ -95,55 +100,31 @@ class DebtorsTable extends StatelessWidget {
                                           (index + 1).toString(),
                                           colWidths[0],
                                         ),
-                                        onTap: () {
-                                          selectedRowNotifier.value =
-                                              SelectedDebtor(
-                                                debtor: debtor,
-                                                index: index,
-                                              );
-                                        },
+                                        onTap: () =>
+                                            _selectDebtor(debtor, index),
                                       ),
                                       DataCell(
                                         _wrapText(
                                           debtor.fullName,
                                           colWidths[1],
                                         ),
-                                        onTap: () {
-                                          SelectedDebtor(
-                                            debtor: debtor,
-                                            index: index,
-                                          );
-                                        },
+                                        onTap: () =>
+                                            _selectDebtor(debtor, index),
                                       ),
                                       DataCell(
                                         _wrapText(debtor.decree, colWidths[2]),
-                                        onTap: () {
-                                          selectedRowNotifier.value =
-                                              SelectedDebtor(
-                                                debtor: debtor,
-                                                index: index,
-                                              );
-                                        },
+                                        onTap: () =>
+                                            _selectDebtor(debtor, index),
                                       ),
                                       DataCell(
                                         _wrapText(debtor.amount, colWidths[3]),
-                                        onTap: () {
-                                          selectedRowNotifier.value =
-                                              SelectedDebtor(
-                                                debtor: debtor,
-                                                index: index,
-                                              );
-                                        },
+                                        onTap: () =>
+                                            _selectDebtor(debtor, index),
                                       ),
                                       DataCell(
                                         _wrapText(debtor.address, colWidths[4]),
-                                        onTap: () {
-                                          selectedRowNotifier.value =
-                                              SelectedDebtor(
-                                                debtor: debtor,
-                                                index: index,
-                                              );
-                                        },
+                                        onTap: () =>
+                                            _selectDebtor(debtor, index),
                                       ),
                                       DataCell(
                                         _regionDropdown(
@@ -152,13 +133,8 @@ class DebtorsTable extends StatelessWidget {
                                           debtor,
                                           210,
                                         ),
-                                        onTap: () {
-                                          selectedRowNotifier.value =
-                                              SelectedDebtor(
-                                                debtor: debtor,
-                                                index: index,
-                                              );
-                                        },
+                                        onTap: () =>
+                                            _selectDebtor(debtor, index),
                                       ),
                                       DataCell(
                                         _executorDropdown(
@@ -167,13 +143,8 @@ class DebtorsTable extends StatelessWidget {
                                           debtor,
                                           colWidths[6],
                                         ),
-                                        onTap: () {
-                                          selectedRowNotifier.value =
-                                              SelectedDebtor(
-                                                debtor: debtor,
-                                                index: index,
-                                              );
-                                        },
+                                        onTap: () =>
+                                            _selectDebtor(debtor, index),
                                       ),
                                     ],
                                   );
@@ -187,18 +158,20 @@ class DebtorsTable extends StatelessWidget {
                   },
                 );
               }
+
               return const SizedBox.shrink();
             },
           );
         }
+
         return const SizedBox.shrink();
       },
     );
   }
 
-  // ==============================
-  // Хелпери
-  // ==============================
+  void _selectDebtor(DebtorEntity debtor, int index) {
+    selectedRowNotifier.value = SelectedDebtor(debtor: debtor, index: index);
+  }
 
   DataColumn _col(String label, double width) {
     return DataColumn(
@@ -222,7 +195,6 @@ class DebtorsTable extends StatelessWidget {
           text,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          softWrap: true,
           style: const TextStyle(fontSize: 12),
         ),
       ),
@@ -230,49 +202,44 @@ class DebtorsTable extends StatelessWidget {
   }
 
   Color _resolveRowColor(int index, bool isEven, SelectedDebtor? selected) {
-    if (selected?.index == index) {
-      return Colors.blue.withOpacity(0.3); // виділений рядок
-    }
+    if (selected?.index == index) return Colors.blue.withOpacity(0.3);
     return isEven ? Colors.grey.shade100 : Colors.grey.shade200;
   }
 
   // ==============================
-  // Dropdown
+  // Dropdown захист від неіснуючого значення
   // ==============================
-
   Widget _regionDropdown(
     BuildContext context,
     List<RegionEntity> regions,
     DebtorEntity debtor,
     double width,
   ) {
+    final region = regions.firstWhere(
+      (r) => r.id == debtor.regionId,
+      orElse: () =>
+          const RegionEntity(id: 0, name: 'не вибрано', executorOffices: []),
+    );
+
+    final regionName = region.id == 0 ? 'не вибрано' : region.name;
+
     return DropdownButtonHideUnderline(
       child: DropdownButton2<String>(
+        value: regionName,
         buttonStyleData: ButtonStyleData(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           height: 32,
           width: width,
         ),
-        value: _regionNameById(regions, debtor.regionId) ?? 'не вибрано',
         items: [
           const DropdownMenuItem(
             value: 'не вибрано',
-            child: Text(
-              'не вибрано',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 12),
-            ),
+            child: Text('не вибрано', style: TextStyle(fontSize: 12)),
           ),
           ...regions.map(
             (r) => DropdownMenuItem(
               value: r.name,
-              child: Text(
-                r.name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12),
-              ),
+              child: Text(r.name, style: const TextStyle(fontSize: 12)),
             ),
           ),
         ],
@@ -284,7 +251,6 @@ class DebtorsTable extends StatelessWidget {
           );
 
           final newRegionId = selectedRegion.id == 0 ? null : selectedRegion.id;
-
           final primaryExecutor = selectedRegion.executorOffices.firstWhere(
             (e) => e.isPrimary,
             orElse: () => const ExecutorEntity(
@@ -295,16 +261,13 @@ class DebtorsTable extends StatelessWidget {
               regionId: 0,
             ),
           );
-
           final newExecutorId = primaryExecutor.id == 0
               ? null
               : primaryExecutor.id;
 
-          final updatedDebtor = debtor.copyWith(
-            regionId: newRegionId,
-            executorId: newExecutorId,
+          context.read<DebtorCubit>().updateDebtor(
+            debtor.copyWith(regionId: newRegionId, executorId: newExecutorId),
           );
-          context.read<DebtorCubit>().updateDebtor(updatedDebtor);
         },
       ),
     );
@@ -316,9 +279,19 @@ class DebtorsTable extends StatelessWidget {
     DebtorEntity debtor,
     double width,
   ) {
-    final executors = _executorsByRegionId(regions, debtor.regionId);
-    final currentValue =
-        _executorNameById(executors, debtor.executorId) ?? 'не вибрано';
+    final executors = debtor.regionId != null
+        ? regions
+              .firstWhere(
+                (r) => r.id == debtor.regionId,
+                orElse: () =>
+                    const RegionEntity(id: 0, name: '', executorOffices: []),
+              )
+              .executorOffices
+        : <ExecutorEntity>[];
+
+    final currentValue = executors.any((e) => e.id == debtor.executorId)
+        ? executors.firstWhere((e) => e.id == debtor.executorId).name
+        : 'не вибрано';
 
     final isNotSelected = currentValue == 'не вибрано';
 
@@ -333,12 +306,12 @@ class DebtorsTable extends StatelessWidget {
       child: DropdownButtonHideUnderline(
         child: DropdownButton2<String>(
           isExpanded: true,
+          value: currentValue,
           buttonStyleData: ButtonStyleData(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             height: 32,
             width: width,
           ),
-          value: currentValue,
           items: [
             const DropdownMenuItem(
               value: 'не вибрано',
@@ -362,56 +335,16 @@ class DebtorsTable extends StatelessWidget {
                 regionId: 0,
               ),
             );
-
             final newExecutorId = selectedExecutor.id == 0
                 ? null
                 : selectedExecutor.id;
-
-            final updatedDebtor = debtor.copyWith(executorId: newExecutorId);
-            context.read<DebtorCubit>().updateDebtor(updatedDebtor);
+            context.read<DebtorCubit>().updateDebtor(
+              debtor.copyWith(executorId: newExecutorId),
+            );
           },
         ),
       ),
     );
-  }
-
-  String? _regionNameById(List<RegionEntity> regions, int? id) {
-    if (id == null) return null;
-    return regions
-        .firstWhere(
-          (r) => r.id == id,
-          orElse: () =>
-              const RegionEntity(id: 0, name: '', executorOffices: []),
-        )
-        .name;
-  }
-
-  String? _executorNameById(List<ExecutorEntity> executors, int? id) {
-    if (id == null) return null;
-    return executors
-        .firstWhere(
-          (e) => e.id == id,
-          orElse: () => const ExecutorEntity(
-            id: 0,
-            name: '',
-            address: '',
-            isPrimary: false,
-            regionId: 0,
-          ),
-        )
-        .name;
-  }
-
-  List<ExecutorEntity> _executorsByRegionId(
-    List<RegionEntity> regions,
-    int? regionId,
-  ) {
-    if (regionId == null) return [];
-    final region = regions.firstWhere(
-      (r) => r.id == regionId,
-      orElse: () => const RegionEntity(id: 0, name: '', executorOffices: []),
-    );
-    return region.executorOffices;
   }
 }
 

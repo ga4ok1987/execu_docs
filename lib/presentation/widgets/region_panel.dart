@@ -25,7 +25,7 @@ class RegionPanel extends StatelessWidget {
               title: const Text(AppTexts.error),
               content: Text(state.message),
               actions: [
-                TextButton(
+                HoverButton(
                   onPressed: () => Navigator.pop(context),
                   child: const Text(
                     AppTexts.ok,

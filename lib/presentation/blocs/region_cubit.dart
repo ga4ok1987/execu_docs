@@ -1,11 +1,10 @@
 import 'package:execu_docs/domain/entities/region_entity.dart';
-import 'package:execu_docs/domain/usecases/add_region_usacase.dart';
-import 'package:execu_docs/domain/usecases/update_region_name_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import '../../core/di/di.dart';
+import '../../domain/usecases/regions_crud_usecase.dart';
+import 'debtor_cubit.dart';
 
-import '../../domain/usecases/del_region_usecase.dart';
-import '../../domain/usecases/get_all_region_usecase.dart';
 @injectable
 class RegionCubit extends Cubit<RegionState> {
   final GetAllRegionsUseCase getAllRegionsUseCase;
@@ -27,11 +26,11 @@ class RegionCubit extends Cubit<RegionState> {
     emit(RegionLoading());
     final result = await getAllRegionsUseCase();
     result.fold(
-          (failure) {
+      (failure) {
         emit(RegionError(failure.message, prevRegions));
       },
-          (regions) {
-        regions.sort((a,b) => a.name.compareTo(b.name));
+      (regions) {
+        regions.sort((a, b) => a.name.compareTo(b.name));
         emit(RegionLoaded(regions));
       },
     );
@@ -44,10 +43,10 @@ class RegionCubit extends Cubit<RegionState> {
     emit(RegionLoading());
     final res = await addRegionUseCase(region);
     res.fold(
-          (failure) {
+      (failure) {
         emit(RegionError(failure.message, prevRegions));
       },
-          (_) async {
+      (_) async {
         await loadRegions();
       },
     );
@@ -60,10 +59,12 @@ class RegionCubit extends Cubit<RegionState> {
     emit(RegionLoading());
     final res = await deleteRegionUseCase(id);
     res.fold(
-          (failure) {
+      (failure) {
         emit(RegionError(failure.message, prevRegions));
       },
-          (_) async {
+      (_) async {
+        await getIt<DebtorCubit>().loadDebtors();
+
         await loadRegions();
       },
     );
@@ -78,22 +79,24 @@ class RegionCubit extends Cubit<RegionState> {
 
     final res = await updateRegionNameUseCase(id, newName);
     res.fold(
-          (failure) => emit(RegionError(failure.message, prevRegions)),
-          (_) async => await loadRegions(),
+      (failure) => emit(RegionError(failure.message, prevRegions)),
+      (_) async => await loadRegions(),
     );
   }
-
 }
-
 
 sealed class RegionState {}
 
 class RegionInitial extends RegionState {}
+
 class RegionLoading extends RegionState {}
+
 class RegionLoaded extends RegionState {
   final List<RegionEntity> regions;
+
   RegionLoaded(this.regions);
 }
+
 class RegionError extends RegionState {
   final String message;
   final List<RegionEntity> previousRegions; // щоб не втрачати список

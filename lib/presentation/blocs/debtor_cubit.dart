@@ -1,22 +1,16 @@
 import 'dart:io';
-
 import 'package:collection/collection.dart';
 import 'package:execu_docs/core/utils/extensions.dart';
-import 'package:execu_docs/domain/usecases/claer_debtors_usecase.dart';
-import 'package:execu_docs/domain/usecases/get_all_region_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:dartz/dartz.dart';
-
 import '../../core/utils/docx_reader.dart';
 import '../../core/utils/generate_docx.dart';
 import '../../core/utils/word_merger.dart';
 import '../../domain/entities/debtor_entity.dart';
 import '../../domain/entities/region_entity.dart';
-import '../../domain/usecases/add_debtor_usecase.dart';
-import '../../domain/usecases/delete_debtor_usecase.dart';
-import '../../domain/usecases/get_debtors_usecase.dart';
-import '../../domain/usecases/update_debtor_usecase.dart';
+import '../../domain/usecases/debtors_crud_usecases.dart';
+import '../../domain/usecases/regions_crud_usecase.dart';
 import '../../core/failure.dart';
 
 @injectable

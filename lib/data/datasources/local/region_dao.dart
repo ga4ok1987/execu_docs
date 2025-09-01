@@ -8,7 +8,7 @@ import '../../../domain/entities/executor_entity.dart';
 
 part 'region_dao.g.dart';
 @lazySingleton
-@DriftAccessor(tables: [Regions, ExecutorOffices])
+@DriftAccessor(tables: [Regions, ExecutorOffices,Debtors])
 class RegionDao extends DatabaseAccessor<AppDatabase> with _$RegionDaoMixin {
   RegionDao(super.db);
 
@@ -44,8 +44,15 @@ class RegionDao extends DatabaseAccessor<AppDatabase> with _$RegionDaoMixin {
       into(regions).insert(region);
 
   Future<void> deleteById(int regionId) async {
-    await (delete(regions)
-      ..where((r) => r.id.equals(regionId))).go();
+    await transaction(() async {
+      // 1. Видаляємо регіон
+      await (delete(regions)..where((tbl) => tbl.id.equals(regionId))).go();
+
+      // 2. Оновлюємо боржників, ставимо regionId = null
+      await (update(debtors)..where((tbl) => tbl.regionId.equals(regionId)))
+          .write(const DebtorsCompanion(regionId: Value(null), executorId: Value(null)));
+    });
+
   }
 
   Future<void> updateRegionName(int regionId, String newName) async {

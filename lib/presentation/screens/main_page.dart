@@ -62,7 +62,10 @@ class MainPage extends StatelessWidget {
           child: IgnorePointer(
             ignoring: !showOverlay,
             child: GestureDetector(
-              onTap: () => context.read<PanelsCubit>().closeAll(),
+              onTap: () {
+                context.read<PanelsCubit>().closeAll();
+                context.read<RegionSelectionCubit>().clear();
+              },
               child: Container(
                 width: double.infinity,
                 height: double.infinity,
@@ -86,10 +89,7 @@ class MainPage extends StatelessWidget {
             child: SizedBox(
               width: width,
               height: double.infinity,
-              child: const Material(
-                elevation: 8,
-                child: RegionPanel(),
-              ),
+              child: const Material(elevation: 8, child: RegionPanel()),
             ),
           ),
         );
@@ -98,9 +98,8 @@ class MainPage extends StatelessWidget {
   }
 
   Widget _buildExecutorPanel(BuildContext context) {
-    final selectedRegion =
-    context.select<RegionSelectionCubit, RegionEntity?>(
-          (state) => state.state.selectedRegion,
+    final selectedRegion = context.select<RegionSelectionCubit, RegionEntity?>(
+      (state) => state.state.selectedRegion,
     );
 
     return BlocBuilder<PanelsCubit, PanelsState>(
@@ -118,12 +117,12 @@ class MainPage extends StatelessWidget {
                 child: selectedRegion == null
                     ? const SizedBox()
                     : BlocProvider(
-                  key: ValueKey(selectedRegion.id),
-                  create: (context) =>
-                  getIt<ExecutorCubit>(param1: selectedRegion.id)
-                    ..loadOffices(selectedRegion.id),
-                  child: ExecutorsPanel(region: selectedRegion),
-                ),
+                        key: ValueKey(selectedRegion.id),
+                        create: (context) =>
+                            getIt<ExecutorCubit>(param1: selectedRegion.id)
+                              ..loadOffices(selectedRegion.id),
+                        child: ExecutorsPanel(region: selectedRegion),
+                      ),
               ),
             ),
           ),
@@ -131,6 +130,4 @@ class MainPage extends StatelessWidget {
       },
     );
   }
-
 }
-
