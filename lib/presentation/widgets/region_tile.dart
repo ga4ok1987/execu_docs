@@ -35,10 +35,10 @@ class RegionTile extends StatelessWidget {
         },
         child: Container(
           color: selectedRegion == null
-              ? Colors.white
+              ? AppColors.primaryWhite
               : isSelected
-              ? Colors.white
-              : Colors.grey.shade500,
+              ? AppColors.primaryWhite
+              : AppColors.regionsShadow,
 
           child: Slidable(
             enabled: selectedRegion != null ? false : true,
@@ -49,14 +49,14 @@ class RegionTile extends StatelessWidget {
               children: [
                 SlidableAction(
                   onPressed: (context) => _confirmDeletion(context),
-                  backgroundColor: Color(0xFFFE4A49),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.backgroundButtonRed,
+                  foregroundColor: AppColors.primaryWhite,
                   icon: Icons.delete,
                 ),
                 SlidableAction(
                   onPressed: (context) => _showEditDialog(context),
-                  backgroundColor: Color(0xFF21B7CA),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.backgroundButtonBlue,
+                  foregroundColor: AppColors.primaryWhite,
                   icon: Icons.edit,
                 ),
               ],
@@ -64,42 +64,18 @@ class RegionTile extends StatelessWidget {
 
             child: Container(
               color: selectedRegion == null
-                  ? Colors.white
+                  ? AppColors.primaryWhite
                   : isSelected
-                  ? Colors.white
-                  : Colors.grey.shade500,
+                  ? AppColors.primaryWhite
+                  : AppColors.regionsShadow,
               width: double.infinity,
               child: ListTile(
                 title: Text(region.name),
-
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                contentPadding: AppPadding.horizontal16,
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  void _confirmDeletion(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Підтвердити видалення'),
-        content: Text('Ви дійсно хочете видалити регіон "${region.name}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Скасувати'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<RegionCubit>().removeRegion(region.id);
-            },
-            child: const Text('Видалити'),
-          ),
-        ],
       ),
     );
   }
@@ -122,11 +98,11 @@ class RegionTile extends StatelessWidget {
         PopupMenuItem<String>(
           value: 'edit_${region.id}',
 
-          child: const Text('Редагувати'),
+          child: const Text(AppTexts.edit),
         ),
         PopupMenuItem<String>(
           value: 'delete_${region.id}',
-          child: const Text('Видалити'),
+          child: const Text(AppTexts.delete),
         ),
       ],
     ).then((selected) {
@@ -136,11 +112,49 @@ class RegionTile extends StatelessWidget {
           if (selected.startsWith('edit')) {
             _showEditDialog(context);
           } else if (selected.startsWith('delete')) {
-            context.read<RegionCubit>().removeRegion(region.id);
+            _confirmDeletion(context);
           }
         });
       }
     });
+  }
+
+  void _confirmDeletion(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.primaryWhite,
+
+        title: const Text(AppTexts.acceptDelete),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(AppTexts.alertDelete),
+            Text(AppTexts.deleteRegionConfirm(region.name)),
+          ],
+        ),
+        actions: [
+          HoverButton(
+            onPressed: () => Navigator.pop(context),
+            color: AppColors.backgroundButtonRed,
+            child: const Text(
+              AppTexts.cancel,
+              style: TextStyle(color: AppColors.textButtonWhite),
+            ),
+          ),
+          HoverButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<RegionCubit>().removeRegion(region.id);
+            },
+            child: const Text(
+              AppTexts.delete,
+              style: TextStyle(color: AppColors.textButtonWhite),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showEditDialog(BuildContext context) {
@@ -149,73 +163,51 @@ class RegionTile extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 300),
-          child: Container(
-            padding: AppPadding.all16,
-            decoration: BoxDecoration(
-              color: AppColors.primaryWhite,
-              borderRadius: BorderRadius.circular(16),
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.primaryWhite,
+        title: Text(AppTexts.editRegion),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: controller,
+            decoration: const InputDecoration(
+              labelText: AppTexts.nameRegion,
             ),
-            child: Form(
-              key: formKey, // додали ключ форми
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Редагувати регіон',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  AppGaps.w16,
-
-                  TextFormField(
-                    controller: controller,
-                    decoration: const InputDecoration(
-                      labelText: 'Назва регіону',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Назва регіону не може бути порожньою';
-                      }
-                      return null;
-                    },
-                  ),
-                  AppGaps.w16,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      HoverButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'Скасувати',
-                          style: TextStyle(color: AppColors.textButtonWhite),
-                        ),
-                      ),
-                      AppGaps.w12,
-
-                      HoverButton(
-                        onPressed: () {
-                          if (formKey.currentState?.validate() ?? false) {
-                            context.read<RegionCubit>().updateRegionName(
-                              region.id,
-                              controller.text.trim(),
-                            );
-                            Navigator.pop(context);
-                          }
-                        },
-                        child: const Text(
-                          'Зберегти',
-                          style: TextStyle(color: AppColors.textButtonWhite),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return AppTexts.nameRegionEmpty;
+              }
+              return null;
+            },
           ),
         ),
+        actions: [
+          HoverButton(
+            onPressed: () => Navigator.pop(context),
+            color: AppColors.backgroundButtonRed,
+            child: const Text(
+              AppTexts.cancel,
+              style: TextStyle(color: AppColors.textButtonWhite),
+            ),
+          ),
+          AppGaps.w12,
+
+          HoverButton(
+            onPressed: () {
+              if (formKey.currentState?.validate() ?? false) {
+                context.read<RegionCubit>().updateRegionName(
+                  region.id,
+                  controller.text.trim(),
+                );
+                Navigator.pop(context);
+              }
+            },
+            child: const Text(
+              AppTexts.save,
+              style: TextStyle(color: AppColors.textButtonWhite),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -5,4 +5,6 @@ class AppSizes {
   static const double mainPanelHeight = 68;
   static const double tableControlsWidth = 450;
   static const double smallPanelHeight = 68;
+  static const double appBarHeight = 90;
+  static const double alertDialogHeight300 = 300;
 }

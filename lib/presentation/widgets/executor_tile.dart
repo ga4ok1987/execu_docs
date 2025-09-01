@@ -1,9 +1,11 @@
+import 'package:execu_docs/core/widgets/hover_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/executor_entity.dart';
 import '../blocs/executor_office_cubit.dart';
+import 'package:execu_docs/core/constants/index.dart';
 
 class ExecutorTile extends StatelessWidget {
   final ExecutorEntity office;
@@ -22,7 +24,7 @@ class ExecutorTile extends StatelessWidget {
         }
       },
       child: Container(
-        color: Colors.white,
+        color: AppColors.primaryWhite,
         child: ListTile(
           title: Text(office.name),
           subtitle: Column(
@@ -30,11 +32,12 @@ class ExecutorTile extends StatelessWidget {
             children: [
               Text(office.address),
               if (office.isPrimary)
-                Container(
-                  color: Colors.white,
-                  child: const Text(
-                    'Основна',
-                    style: TextStyle(color: Colors.white, fontSize: 12),
+                const Text(
+                  AppTexts.selectedExecutor,
+                  style: TextStyle(
+                    color: AppColors.texBlue,
+                    fontSize: AppTextSizes.large,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
             ],
@@ -59,29 +62,6 @@ class ExecutorTile extends StatelessWidget {
     );
   }
 
-  void _confirmDeletion(BuildContext context, ExecutorCubit cubit) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Підтвердити видалення'),
-        content: Text('Ви дійсно хочете видалити службу "${office.name}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Скасувати'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              cubit.removeOffice(office);
-            },
-            child: const Text('Видалити'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showContextMenu(
     BuildContext context,
     Offset position,
@@ -91,6 +71,7 @@ class ExecutorTile extends StatelessWidget {
     final offset = overlay.localToGlobal(Offset.zero);
 
     showMenu<String>(
+      color: AppColors.primaryWhite,
       context: context,
       position: RelativeRect.fromLTRB(
         position.dx,
@@ -101,11 +82,11 @@ class ExecutorTile extends StatelessWidget {
       items: [
         PopupMenuItem<String>(
           value: 'edit_${office.id}',
-          child: const Text('Редагувати'),
+          child: const Text(AppTexts.edit),
         ),
         PopupMenuItem<String>(
           value: 'delete_${office.id}',
-          child: const Text('Видалити'),
+          child: const Text(AppTexts.delete),
         ),
       ],
     ).then((selected) {
@@ -114,45 +95,97 @@ class ExecutorTile extends StatelessWidget {
           if (selected.startsWith('edit')) {
             _showEditDialog(context, cubit);
           } else if (selected.startsWith('delete')) {
-            cubit.removeOffice(office);
+            _confirmDeletion(context, cubit);
           }
         });
       }
     });
   }
 
+  void _confirmDeletion(BuildContext context, ExecutorCubit cubit) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.primaryWhite,
+
+        title: const Text(AppTexts.acceptDelete),
+        content: Text(AppTexts.deleteExecutorConfirm(office.name)),
+        actions: [
+          HoverButton(
+            onPressed: () => Navigator.pop(context),
+            color: AppColors.backgroundButtonRed,
+            child: const Text(
+              AppTexts.cancel,
+              style: TextStyle(color: AppColors.textButtonWhite),
+            ),
+          ),
+          HoverButton(
+            onPressed: () {
+              Navigator.pop(context);
+              cubit.removeOffice(office);
+            },
+            child: const Text(
+              AppTexts.delete,
+              style: TextStyle(color: AppColors.textButtonWhite),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showEditDialog(BuildContext context, ExecutorCubit cubit) {
     final nameController = TextEditingController(text: office.name);
     final addressController = TextEditingController(text: office.address);
+    final formKey = GlobalKey<FormState>();
+    final formKey2 = GlobalKey<FormState>();
+
     bool isPrimary = office.isPrimary;
 
     showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (statefulContext, setState) => AlertDialog(
-          title: const Text('Редагувати службу'),
+          backgroundColor: AppColors.primaryWhite,
+          title: const Text(AppTexts.editExecutor),
           content: SizedBox(
-            width: 300,
+            width: AppSizes.alertDialogHeight300,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Назва служби',
-                    border: OutlineInputBorder(),
+                Form(
+                  key: formKey,
+                  child: TextFormField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: AppTexts.nameExecutor,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return AppTexts.nameExecutorEmpty;
+                      }
+                      return null;
+                    },
                   ),
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: addressController,
-                  decoration: const InputDecoration(
-                    labelText: 'Адреса',
-                    border: OutlineInputBorder(),
+                AppGaps.h16,
+                Form(
+                  key: formKey2,
+                  child: TextFormField(
+                    controller: addressController,
+                    decoration: const InputDecoration(
+                      labelText: AppTexts.address,
+                    ),
+                    maxLines: 2,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return AppTexts.addressExecutorEmpty;
+                      }
+                      return null;
+                    },
                   ),
-                  maxLines: 2,
                 ),
-                const SizedBox(height: 16),
+                AppGaps.h16,
                 Row(
                   children: [
                     Checkbox(
@@ -163,35 +196,49 @@ class ExecutorTile extends StatelessWidget {
                         });
                       },
                     ),
-                    const Text('Основна служба'),
+                    const Text(AppTexts.mainExecutor),
                   ],
                 ),
               ],
             ),
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                nameController.dispose();
-                addressController.dispose();
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('Скасувати'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final updatedOffice = ExecutorEntity(
-                  id: office.id,
-                  name: nameController.text,
-                  address: addressController.text,
-                  isPrimary: isPrimary,
-                  regionId: office.regionId,
-                );
+            HoverButton(
+              color: AppColors.backgroundButtonRed,
 
-                cubit.editOffice(updatedOffice);
+              onPressed: () {
                 Navigator.pop(dialogContext);
               },
-              child: const Text('Зберегти'),
+              child: const Text(
+                AppTexts.cancel,
+                style: TextStyle(color: AppColors.textButtonWhite),
+              ),
+            ),
+            AppGaps.w12,
+
+            HoverButton(
+              onPressed: () {
+                final isNameValid = formKey.currentState?.validate() ?? false;
+                final isAddressValid =
+                    formKey2.currentState?.validate() ?? false;
+
+                if (isNameValid && isAddressValid) {
+                  final updatedOffice = ExecutorEntity(
+                    id: office.id,
+                    name: nameController.text,
+                    address: addressController.text,
+                    isPrimary: isPrimary,
+                    regionId: office.regionId,
+                  );
+
+                  cubit.editOffice(updatedOffice);
+                  Navigator.pop(dialogContext);
+                }
+              },
+              child: const Text(
+                AppTexts.save,
+                style: TextStyle(color: AppColors.textButtonWhite),
+              ),
             ),
           ],
         ),

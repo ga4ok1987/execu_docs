@@ -7,6 +7,9 @@ class AppTexts {
   static const String accept = 'Підтвердити';
   static const String acceptDelete = 'Підтвердити видалення';
 
+  static const String error = 'Помилка';
+  static const String ok = 'Ок';
+
   static const String tittle =
       'Підготовка документів для подання до виконавчих органів';
   static const String loadFiles = 'Завантажити файл';
@@ -38,6 +41,12 @@ class AppTexts {
   static const String addRegion = 'Додати область';
   static const String nameRegion = 'Назва області';
   static const String editRegion = 'Редагувати назву області';
+  static const String addNameRegion = 'Введіть назву області';
+  static const String regionExist = 'Область з такою назвою вже існує';
+  static const String noRegions = 'Список областей пустий';
+  static const String nameRegionEmpty = 'Назва області не може бути порожньою';
+  static const String alertDelete =
+      'Увага, з видаленням області, також будуть видалені виконавці в цій області';
 
   static String deleteRegionConfirm(String regionName) =>
       'Ви дійсно хочете видалити "$regionName"?';
@@ -47,9 +56,16 @@ class AppTexts {
   static const String nameExecutor = 'Назва виконавця';
   static const String mainExecutor = 'Головний виконавець';
   static const String editExecutor = 'Редагувати виконавця';
+  static const String executorsNotFound = 'Виконавців ще не додано';
+  static const String nameExecutorEmpty = 'Назва виконавця не може бути порожньою';
+  static const String addressExecutorEmpty = 'Адреса виконавця не може бути порожньою';
+  static const String selectedExecutor = 'Вибраний виконавець';
+
 
   static String deleteExecutorConfirm(String executorName) =>
       'Ви дійсно хочете видалити виконавця "$executorName"?';
+  static String executorsInRegion(String executorName) =>
+      'Виконавчі служби \n"$executorName"';
 
   static const String fine600 = '(шістсот) гривень';
   static const String fine680 = '(шістсот вісімдесят) гривень';
