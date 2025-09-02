@@ -22,13 +22,14 @@ extension ExtractFromString on String {
   /// Повертає текст після першої двокрапки, обрізає пробіли
   String get extractName {
     final regex = RegExp(
-      r'Притягнути гр\.-на\(ку\)\s+(.*?)\s+до',
+      r'Притягнути гр\.-на\(ку\)\s+([А-ЯІЇЄҐа-яіїєґ\s\-]+?)(?:\s+\(|\s+до)',
       caseSensitive: false,
       dotAll: true,
     );
     final match = regex.firstMatch(this);
     return match?.group(1)?.trim() ?? '';
   }
+
 
   String get extractDecree {
     return replaceAll(
