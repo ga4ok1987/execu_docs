@@ -1,4 +1,3 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -10,248 +9,216 @@ import '../blocs/region_cubit.dart';
 
 class DebtorsTable extends StatelessWidget {
   final ValueNotifier<SelectedDebtor?> selectedRowNotifier;
+  final ValueNotifier<int?> hoveredRowNotifier;
+  final ScrollController scrollController;
 
-  DebtorsTable({
+  const DebtorsTable({
     super.key,
     required this.selectedRowNotifier,
-    required int rowCount,
-  }) : hoverNotifiers = List.generate(
-         rowCount,
-         (_) => ValueNotifier<bool>(false),
-       );
-
-  final List<ValueNotifier<bool>> hoverNotifiers;
+    required this.hoveredRowNotifier,
+    required this.scrollController,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<RegionCubit, RegionState>(
       builder: (context, regionState) {
-        if (regionState is RegionLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (regionState is RegionError) {
-          return Center(child: Text('Помилка: ${regionState.message}'));
-        }
-        if (regionState is RegionLoaded) {
-          final regions = regionState.regions;
+        if (regionState is! RegionLoaded) return _buildRegionState(regionState);
+        final regions = regionState.regions;
 
-          return BlocBuilder<DebtorCubit, DebtorState>(
-            builder: (context, debtorState) {
-              if (debtorState is DebtorLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (debtorState is DebtorError) {
-                return Center(child: Text('Помилка: ${debtorState.message}'));
-              }
-              if (debtorState is DebtorLoaded) {
-                final debtors = debtorState.debtors;
+        return BlocBuilder<DebtorCubit, DebtorState>(
+          builder: (context, debtorState) {
+            if (debtorState is! DebtorLoaded) {
+              return _buildDebtorState(debtorState);
+            }
+            final debtors = debtorState.debtors;
 
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final totalWidth = constraints.maxWidth;
-                    final colWidths = [
-                      totalWidth * 0.02,
-                      totalWidth * 0.15,
-                      totalWidth * 0.1,
-                      totalWidth * 0.06,
-                      totalWidth * 0.2,
-                      totalWidth * 0.24,
-                      totalWidth * 0.24,
-                    ];
+            return Column(
+              children: [
+                _buildHeader(), // шапка завжди зверху
+                Expanded(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    itemCount: debtors.length,
+                    itemBuilder: (context, index) {
+                      final debtor = debtors[index];
+                      return ValueListenableBuilder<int?>(
+                        valueListenable: hoveredRowNotifier,
+                        builder: (context, hoveredIndex, _) {
+                          final isSelected =
+                              selectedRowNotifier.value?.index;
+                          final isHovered = hoveredIndex == index;
 
-                    return ValueListenableBuilder<SelectedDebtor?>(
-                      valueListenable: selectedRowNotifier,
-                      builder: (context, selectedIndex, _) {
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.vertical,
-                            child: SizedBox(
-                              width: totalWidth,
-                              child: DataTable(
-                                columnSpacing: 0,
-                                headingRowHeight: 28,
-                                columns: [
-                                  _col('№', colWidths[0]),
-                                  _col('ПІБ', colWidths[1]),
-                                  _col('Постанова', colWidths[2]),
-                                  _col('Сума', colWidths[3]),
-                                  _col('Адреса', colWidths[4]),
-                                  _col('Область', 210),
-                                  _col('Виконавець', colWidths[6]),
-                                ],
-                                rows: List.generate(debtors.length, (index) {
-                                  final debtor = debtors[index];
-                                  final isEven = index % 2 == 0;
 
-                                  return DataRow(
-                                    color: WidgetStateProperty.resolveWith((
-                                      states,
-                                    ) {
-                                      return _resolveRowColor(
-                                        index,
-                                        isEven,
-                                        selectedIndex,
-                                      );
-                                    }),
-                                    cells: [
-                                      DataCell(
-                                        _wrapText(
-                                          (index + 1).toString(),
-                                          colWidths[0],
-                                        ),
-                                        onTap: () =>
-                                            _selectDebtor(debtor, index),
-                                      ),
-                                      DataCell(
-                                        _wrapText(
-                                          debtor.fullName,
-                                          colWidths[1],
-                                        ),
-                                        onTap: () =>
-                                            _selectDebtor(debtor, index),
-                                      ),
-                                      DataCell(
-                                        _wrapText(debtor.decree, colWidths[2]),
-                                        onTap: () =>
-                                            _selectDebtor(debtor, index),
-                                      ),
-                                      DataCell(
-                                        _wrapText(debtor.amount, colWidths[3]),
-                                        onTap: () =>
-                                            _selectDebtor(debtor, index),
-                                      ),
-                                      DataCell(
-                                        _wrapText(debtor.address, colWidths[4]),
-                                        onTap: () =>
-                                            _selectDebtor(debtor, index),
-                                      ),
-                                      DataCell(
-                                        _regionDropdown(
-                                          context,
-                                          regions,
-                                          debtor,
-                                          210,
-                                        ),
-                                        onTap: () =>
-                                            _selectDebtor(debtor, index),
-                                      ),
-                                      DataCell(
-                                        _executorDropdown(
-                                          context,
-                                          regions,
-                                          debtor,
-                                          colWidths[6],
-                                        ),
-                                        onTap: () =>
-                                            _selectDebtor(debtor, index),
-                                      ),
-                                    ],
+                          return MouseRegion(
+                            onEnter: (_) {
+                              if (selectedRowNotifier.value?.index != index) {
+                                hoveredRowNotifier.value = index;
+                              }
+                            },
+                            onExit: (_) {
+                              if (selectedRowNotifier.value?.index != index) {
+                                hoveredRowNotifier.value = null;
+                              }
+                            },
+                            child: GestureDetector(
+                              onTap: () {
+                                selectedRowNotifier.value = SelectedDebtor(
+                                  debtor: debtor,
+                                  index: index,
+                                );
+                                final rowContext = context;
+                                WidgetsBinding.instance.addPostFrameCallback((
+                                  _,
+                                ) {
+                                  Scrollable.ensureVisible(
+                                    rowContext,
+                                    duration: const Duration(milliseconds: 250),
+                                    alignment: 0.5,
                                   );
-                                }),
+                                });
+                              },
+                              child: Container(
+                                color: _rowColor(index,isSelected,hoveredIndex),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                  horizontal: 8,
+                                ),
+                                child: Row(
+                                  children: [
+                                    _cell((index + 1).toString(), 40),
+                                    _cell(debtor.fullName, 200),
+                                    _cell(debtor.decree, 120),
+                                    _cell(debtor.amount, 80),
+                                    _cell(debtor.address, 220),
+                                    _regionCell(context, debtor, regions, 200),
+                                    _executorCell(
+                                      context,
+                                      debtor,
+                                      regions,
+                                      160,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                );
-              }
-
-              return const SizedBox.shrink();
-            },
-          );
-        }
-
-        return const SizedBox.shrink();
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        );
       },
     );
   }
 
-  void _selectDebtor(DebtorEntity debtor, int index) {
-    selectedRowNotifier.value = SelectedDebtor(debtor: debtor, index: index);
+  Color _rowColor(int index, int? selectedIndex, int? hoveredIndex) {
+    if (selectedIndex == index) return Colors.blue.withOpacity(0.3);
+    if (hoveredIndex == index) return Colors.grey.shade300;
+    return index % 2 == 0 ? Colors.grey[100]! : Colors.grey[200]!;
   }
 
-  DataColumn _col(String label, double width) {
-    return DataColumn(
-      label: ConstrainedBox(
-        constraints: BoxConstraints(minWidth: width),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
+
+
+
+
+  Widget _buildRegionState(RegionState state) {
+    if (state is RegionLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state is RegionError) {
+      return Center(child: Text('Помилка: ${state.message}'));
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildDebtorState(DebtorState state) {
+    if (state is DebtorLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state is DebtorError) {
+      return Center(child: Text('Помилка: ${state.message}'));
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      color: Colors.grey.shade300,
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+      child: Row(
+        children: [
+          _headerCell('№', 40),
+          _headerCell('ПІБ', 200),
+          _headerCell('Постанова', 120),
+          _headerCell('Сума', 80),
+          _headerCell('Адреса', 220),
+          _headerCell('Область', 200),
+          _headerCell('Виконавець', 160),
+        ],
       ),
     );
   }
 
-  Widget _wrapText(String text, double width) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: width),
+  Widget _cell(String text, double width) {
+    return SizedBox(
+      width: width,
+      child: Text(
+        text,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(fontSize: 12),
+      ),
+    );
+  }
+
+  Widget _headerCell(String text, double width) {
+    return SizedBox(
+      width: width,
       child: Center(
         child: Text(
           text,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 12),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
         ),
       ),
     );
   }
 
-  Color _resolveRowColor(int index, bool isEven, SelectedDebtor? selected) {
-    if (selected?.index == index) return Colors.blue.withOpacity(0.3);
-    return isEven ? Colors.grey.shade100 : Colors.grey.shade200;
-  }
-
-  // ==============================
-  // Dropdown захист від неіснуючого значення
-  // ==============================
-  Widget _regionDropdown(
+  Widget _regionCell(
     BuildContext context,
-    List<RegionEntity> regions,
     DebtorEntity debtor,
+    List<RegionEntity> regions,
     double width,
   ) {
-    final region = regions.firstWhere(
+    final currentRegion = regions.firstWhere(
       (r) => r.id == debtor.regionId,
       orElse: () =>
           const RegionEntity(id: 0, name: 'не вибрано', executorOffices: []),
     );
 
-    final regionName = region.id == 0 ? 'не вибрано' : region.name;
-
-    return DropdownButtonHideUnderline(
-      child: DropdownButton2<String>(
-        value: regionName,
-        buttonStyleData: ButtonStyleData(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          height: 32,
-          width: width,
-        ),
-        items: [
-          const DropdownMenuItem(
-            value: 'не вибрано',
-            child: Text('не вибрано', style: TextStyle(fontSize: 12)),
+    return GestureDetector(
+      onTap: () async {
+        final selected = await showDialog<RegionEntity>(
+          context: context,
+          builder: (cntx) => SimpleDialog(
+            backgroundColor: Colors.white,
+            title: const Text('Оберіть область'),
+            children: regions
+                .map(
+                  (r) => SimpleDialogOption(
+                    child: Text(r.name),
+                    onPressed: () => Navigator.pop(cntx, r),
+                  ),
+                )
+                .toList(),
           ),
-          ...regions.map(
-            (r) => DropdownMenuItem(
-              value: r.name,
-              child: Text(r.name, style: const TextStyle(fontSize: 12)),
-            ),
-          ),
-        ],
-        onChanged: (value) {
-          final selectedRegion = regions.firstWhere(
-            (r) => r.name == value,
-            orElse: () =>
-                const RegionEntity(id: 0, name: '', executorOffices: []),
-          );
-
-          final newRegionId = selectedRegion.id == 0 ? null : selectedRegion.id;
-          final primaryExecutor = selectedRegion.executorOffices.firstWhere(
+        );
+        if (selected != null) {
+          final primaryExecutor = selected.executorOffices.firstWhere(
             (e) => e.isPrimary,
             orElse: () => const ExecutorEntity(
               id: 0,
@@ -261,22 +228,34 @@ class DebtorsTable extends StatelessWidget {
               regionId: 0,
             ),
           );
-          final newExecutorId = primaryExecutor.id == 0
-              ? null
-              : primaryExecutor.id;
-
-          context.read<DebtorCubit>().updateDebtor(
-            debtor.copyWith(regionId: newRegionId, executorId: newExecutorId),
-          );
-        },
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<DebtorCubit>().updateDebtor(
+              debtor.copyWith(
+                regionId: selected.id == 0 ? null : selected.id,
+                executorId: primaryExecutor.id == 0 ? null : primaryExecutor.id,
+              ),
+            );
+          });
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.all(8),
+        width: width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(currentRegion.name, style: const TextStyle(fontSize: 12)),
+            Icon(Icons.keyboard_arrow_down_outlined)
+          ],
+        ),
       ),
     );
   }
 
-  Widget _executorDropdown(
+  Widget _executorCell(
     BuildContext context,
-    List<RegionEntity> regions,
     DebtorEntity debtor,
+    List<RegionEntity> regions,
     double width,
   ) {
     final executors = debtor.regionId != null
@@ -289,60 +268,54 @@ class DebtorsTable extends StatelessWidget {
               .executorOffices
         : <ExecutorEntity>[];
 
-    final currentValue = executors.any((e) => e.id == debtor.executorId)
-        ? executors.firstWhere((e) => e.id == debtor.executorId).name
-        : 'не вибрано';
-
-    final isNotSelected = currentValue == 'не вибрано';
-
-    return Container(
-      decoration: BoxDecoration(
-        color: isNotSelected ? Colors.red.shade100 : null,
-        border: Border.all(
-          color: isNotSelected ? Colors.red : Colors.grey.shade300,
-        ),
-        borderRadius: BorderRadius.circular(4),
+    final currentExecutor = executors.firstWhere(
+      (e) => e.id == debtor.executorId,
+      orElse: () => const ExecutorEntity(
+        id: 0,
+        name: 'не вибрано',
+        address: '',
+        isPrimary: false,
+        regionId: 0,
       ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton2<String>(
-          isExpanded: true,
-          value: currentValue,
-          buttonStyleData: ButtonStyleData(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            height: 32,
-            width: width,
+    );
+
+    return GestureDetector(
+      onTap: () async {
+        final selected = await showDialog<ExecutorEntity>(
+          context: context,
+          builder: (cntx) => SimpleDialog(
+            title: const Text('Оберіть виконавця'),
+            children: executors
+                .map(
+                  (e) => SimpleDialogOption(
+                    child: Text(e.name),
+                    onPressed: () => Navigator.pop(cntx, e),
+                  ),
+                )
+                .toList(),
           ),
-          items: [
-            const DropdownMenuItem(
-              value: 'не вибрано',
-              child: Text('не вибрано', style: TextStyle(fontSize: 12)),
-            ),
-            ...executors.map(
-              (e) => DropdownMenuItem(
-                value: e.name,
-                child: Text(e.name, style: const TextStyle(fontSize: 12)),
-              ),
-            ),
-          ],
-          onChanged: (value) {
-            final selectedExecutor = executors.firstWhere(
-              (e) => e.name == value,
-              orElse: () => const ExecutorEntity(
-                id: 0,
-                name: '',
-                address: '',
-                isPrimary: false,
-                regionId: 0,
-              ),
-            );
-            final newExecutorId = selectedExecutor.id == 0
-                ? null
-                : selectedExecutor.id;
+        );
+        if (selected != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
             context.read<DebtorCubit>().updateDebtor(
-              debtor.copyWith(executorId: newExecutorId),
+              debtor.copyWith(
+                executorId: selected.id == 0 ? null : selected.id,
+              ),
             );
-          },
+          });
+        }
+      },
+      child: Container(
+        width: width,
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        decoration: BoxDecoration(
+          color: currentExecutor.id == 0 ? Colors.red.shade100 : null,
+          border: Border.all(
+            color: currentExecutor.id == 0 ? Colors.red : Colors.grey.shade300,
+          ),
+          borderRadius: BorderRadius.circular(4),
         ),
+        child: Text(currentExecutor.name, style: const TextStyle(fontSize: 12)),
       ),
     );
   }

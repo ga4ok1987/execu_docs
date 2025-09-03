@@ -20,6 +20,8 @@ class MainPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectedRowNotifier = ValueNotifier<SelectedDebtor?>(null);
+    final hoveredRowNotifier = ValueNotifier<int?>(null);
+    final scrollController = ScrollController();
 
     final folderPath = context.watch<FolderCubit>().state;
 
@@ -237,11 +239,10 @@ class MainPanel extends StatelessWidget {
               ),
 
               Expanded(
-                child: HighlightContainer(
-                  child: DebtorsTable(
-                    selectedRowNotifier: selectedRowNotifier,
-                    rowCount: 2,
-                  ),
+                child: DebtorsTable(
+                  selectedRowNotifier: selectedRowNotifier,
+                  hoveredRowNotifier: hoveredRowNotifier,
+                  scrollController: scrollController,
                 ),
               ),
             ],

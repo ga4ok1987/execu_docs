@@ -22,13 +22,20 @@ extension ExtractFromString on String {
   /// Повертає текст після першої двокрапки, обрізає пробіли
   String get extractName {
     final regex = RegExp(
-      r'Притягнути гр\.-на\(ку\)\s+([А-ЯІЇЄҐа-яіїєґ\s\-]+?)(?:\s+\(|\s+до)',
+      r'Притягнути гр\.-на\(ку\)\s*(.+?)\s*до адміністративної',
       caseSensitive: false,
       dotAll: true,
     );
+
     final match = regex.firstMatch(this);
-    return match?.group(1)?.trim() ?? '';
+    if (match == null) return '';
+
+    return match.group(1)
+        ?.replaceAll(RegExp(r'\s*\(.*?\)'), '') // видаляємо дужки та текст всередині
+        .trim() ?? '';
   }
+
+
 
 
   String get extractDecree {
@@ -67,18 +74,36 @@ extension ExtractFromString on String {
   }
 
   int? extractRegion(List<RegionEntity>? regions) {
-    final normalized = toUpperCase().trim();
     if (regions == null) return null;
+
+    String normalize(String input) => input.toUpperCase()
+        .replaceAll('.', ' ')
+        .replaceAll('ОБЛАСТЬ', 'ОБЛ')
+        .replaceAll('ОБЛ', 'ОБЛ') // уніфікація
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
+    final normalized = normalize(toUpperCase());
+
     for (final region in regions) {
-      final normRegion = region.name.toUpperCase();
-      if (normalized.contains(normRegion.split(' ').first)) {
-        return region
-            .id; // повертаємо з оригінального списку, щоб зберегти формат
+      final normRegion = normalize(region.name);
+
+      if (normRegion == 'КИЇВ') {
+        // спеціально для Києва — перевіряємо як слово
+        final words = normalized.split(' ');
+        if (words.contains('КИЇВ')) {
+          return region.id;
+        }
+      } else {
+        // для областей перевіряємо повну назву
+        if (normalized.startsWith(normRegion)) {
+          return region.id;
+        }
       }
     }
-
-    return null; // якщо не знайдено
+    return null;
   }
+
 }
 
 extension SimpleNumberToWords on String {
