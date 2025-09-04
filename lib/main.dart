@@ -1,5 +1,6 @@
 import 'package:execu_docs/core/constants/app_border_radius.dart';
 import 'package:execu_docs/presentation/blocs/debtor_cubit.dart';
+import 'package:execu_docs/presentation/blocs/debtor_sort_cubit.dart';
 import 'package:execu_docs/presentation/blocs/folder_cubit.dart';
 import 'package:execu_docs/presentation/blocs/panels_cubit.dart';
 import 'package:execu_docs/presentation/blocs/region_cubit.dart';
@@ -29,7 +30,7 @@ void main() async {
   await configureDependencies();
   final regionRepo = getIt<SeedRegionsUseCase>();
   await regionRepo.call(ukrainianRegions);
-  //WindowCubit().init();
+  WindowCubit().init();
 
   runApp(const AppWrapper());
 }
@@ -66,6 +67,7 @@ class AppWrapper extends StatelessWidget {
           create: (_) => getIt<RegionSelectionCubit>(),
         ),
         BlocProvider<PanelsCubit>(create: (_) => getIt<PanelsCubit>()),
+        BlocProvider<DebtorSortCubit>(create: (_) => getIt<DebtorSortCubit>()),
       ],
 
       child: const MyApp(),

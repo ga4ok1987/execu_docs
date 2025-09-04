@@ -1,3 +1,4 @@
+import 'package:execu_docs/core/constants/app_texts.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -5,60 +6,12 @@ import 'package:window_manager/window_manager.dart';
 
 enum WindowMode { normal, maximized, minimized, fullscreen }
 
-class WindowState {
-  final double width;
-  final double height;
-  final double dx;
-  final double dy;
-  final WindowMode mode;
-
-  const WindowState({
-    required this.width,
-    required this.height,
-    required this.dx,
-    required this.dy,
-    this.mode = WindowMode.normal,
-  });
-
-  Map<String, dynamic> toMap() => {
-    'width': width,
-    'height': height,
-    'dx': dx,
-    'dy': dy,
-    'mode': mode.index,
-  };
-
-  factory WindowState.fromMap(Map<String, dynamic> map) => WindowState(
-    width: (map['width'] ?? 1000).toDouble(),
-    height: (map['height'] ?? 700).toDouble(),
-    dx: (map['dx'] ?? 100).toDouble(),
-    dy: (map['dy'] ?? 100).toDouble(),
-    mode: WindowMode.values[map['mode'] ?? 0],
-  );
-
-  WindowState copyWith({
-    double? width,
-    double? height,
-    double? dx,
-    double? dy,
-    WindowMode? mode,
-  }) {
-    return WindowState(
-      width: width ?? this.width,
-      height: height ?? this.height,
-      dx: dx ?? this.dx,
-      dy: dy ?? this.dy,
-      mode: mode ?? this.mode,
-    );
-  }
-}
-
 @injectable
 class WindowCubit extends HydratedCubit<WindowState> with WindowListener {
   WindowCubit()
     : super(
         const WindowState(
-          width: 1000,
+          width: 1366,
           height: 700,
           dx: 100,
           dy: 100,
@@ -70,9 +23,12 @@ class WindowCubit extends HydratedCubit<WindowState> with WindowListener {
 
   Future<void> init() async {
     await windowManager.ensureInitialized();
+    WindowOptions windowOptions = const WindowOptions(
+      title: AppTexts.appName,
+    );
     windowManager.addListener(this);
-    await windowManager.waitUntilReadyToShow();
-    await windowManager.setMinimumSize(const Size(1000, 700));
+    await windowManager.waitUntilReadyToShow(windowOptions);
+    await windowManager.setMinimumSize(const Size(1366, 700));
     await restoreWindow();
   }
 
@@ -176,5 +132,52 @@ class WindowCubit extends HydratedCubit<WindowState> with WindowListener {
   Future<void> close() {
     windowManager.removeListener(this);
     return super.close();
+  }
+}
+class WindowState {
+  final double width;
+  final double height;
+  final double dx;
+  final double dy;
+  final WindowMode mode;
+
+  const WindowState({
+    required this.width,
+    required this.height,
+    required this.dx,
+    required this.dy,
+    this.mode = WindowMode.normal,
+  });
+
+  Map<String, dynamic> toMap() => {
+    'width': width,
+    'height': height,
+    'dx': dx,
+    'dy': dy,
+    'mode': mode.index,
+  };
+
+  factory WindowState.fromMap(Map<String, dynamic> map) => WindowState(
+    width: (map['width'] ?? 1366).toDouble(),
+    height: (map['height'] ?? 700).toDouble(),
+    dx: (map['dx'] ?? 100).toDouble(),
+    dy: (map['dy'] ?? 100).toDouble(),
+    mode: WindowMode.values[map['mode'] ?? 0],
+  );
+
+  WindowState copyWith({
+    double? width,
+    double? height,
+    double? dx,
+    double? dy,
+    WindowMode? mode,
+  }) {
+    return WindowState(
+      width: width ?? this.width,
+      height: height ?? this.height,
+      dx: dx ?? this.dx,
+      dy: dy ?? this.dy,
+      mode: mode ?? this.mode,
+    );
   }
 }

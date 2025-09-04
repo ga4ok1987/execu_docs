@@ -9,6 +9,7 @@ class AppColors {
   static const Color backgroundColor = Color(0xFFBED3E8);
   static const Color dividerMain = Color(0xFFBDBDBD);
   static const Color errorMain = Color(0xFFE01E12);
+  static Color notSelected = Colors.red.shade100;
   static const Color headerBackgroundMain = Color(0xFF616A77);
   static Color regionsShadow = Colors.grey.shade500;
 
@@ -28,4 +29,10 @@ class AppColors {
 
   //dropdown colors
   static const Color dropdownColorWhite = Colors.white;
+
+  static const List<Color> gradientWhite = [
+    Colors.white70,
+    Colors.white,
+    Colors.white70,
+  ];
 }

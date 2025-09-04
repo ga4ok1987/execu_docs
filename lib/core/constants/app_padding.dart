@@ -12,5 +12,6 @@ class AppPadding {
   static const onlyRight20 = EdgeInsets.only(right: 20);
   static const hor16ver8 = EdgeInsets.symmetric(horizontal: 16, vertical: 8);
   static const hor25ver6 = EdgeInsets.symmetric(horizontal: 25, vertical: 6);
+  static const hor8ver6 = EdgeInsets.symmetric(horizontal: 8,vertical: 6 );
 }
 

@@ -1,11 +1,11 @@
-import 'package:execu_docs/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:execu_docs/core/constants/index.dart';
 import '../../domain/entities/debtor_entity.dart';
 import '../../domain/entities/executor_entity.dart';
 import '../../domain/entities/region_entity.dart';
 import '../blocs/debtor_cubit.dart';
+import '../blocs/debtor_sort_cubit.dart';
 import '../blocs/region_cubit.dart';
 
 class DebtorsTable extends StatelessWidget {
@@ -34,94 +34,146 @@ class DebtorsTable extends StatelessWidget {
             }
             final debtors = debtorState.debtors;
 
-            return Column(
-              children: [
-                _buildHeader(), // шапка завжди зверху
-                Expanded(
-                  child: Scrollbar(
-                    controller: scrollController,
-                    thumbVisibility: true,
-                    child: ListView.builder(
-                      controller: scrollController,
-                      itemCount: debtors.length,
-                      itemBuilder: (context, index) {
-                        final debtor = debtors[index];
-                        return ValueListenableBuilder(
-                          valueListenable: hoveredRowNotifier,
-                          builder: (context, hoveredIndex, _) {
-                            final isHovered = hoveredIndex == index;
-                            return ValueListenableBuilder<SelectedDebtor?>(
-                              valueListenable: selectedRowNotifier,
-                              builder: (context, _, _) {
-                                final isSelected =
-                                    selectedRowNotifier.value?.index;
+            return Center(
+              child: SizedBox(
+                width: AppSizes.tableWidth,
+                child: Column(
+                  children: [
+                    _buildHeader(context), // шапка з сортуванням
+                    Expanded(
+                      child: BlocBuilder<DebtorSortCubit, DebtorSortState>(
+                        builder: (context, sortState) {
+                          final sortedDebtors = List<DebtorEntity>.from(debtors)
+                            ..sort((a, b) {
+                              final valA = _getColumnValue(a, sortState.column);
+                              final valB = _getColumnValue(b, sortState.column);
+                              if (valA is num && valB is num) {
+                                return sortState.ascending
+                                    ? valA.compareTo(valB)
+                                    : valB.compareTo(valA);
+                              }
+                              return sortState.ascending
+                                  ? valA.toString().compareTo(valB.toString())
+                                  : valB.toString().compareTo(valA.toString());
+                            });
 
-                                return MouseRegion(
-                                  onEnter: (_) {
-                                    if (selectedRowNotifier.value?.index !=
-                                        index) {
-                                      hoveredRowNotifier.value = index;
-                                    }
-                                  },
-                                  onExit: (_) {
-                                    if (selectedRowNotifier.value?.index !=
-                                        index) {
-                                      hoveredRowNotifier.value = null;
-                                    }
-                                  },
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      selectedRowNotifier.value =
-                                          SelectedDebtor(
-                                            debtor: debtor,
-                                            index: index,
-                                          );
-                                      final rowContext = context;
-                                    },
-                                    child: Container(
-                                      decoration: _rowDecoration(
-                                        index,
-                                        isSelected,
-                                        isHovered,
-                                      ),
-
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 6,
-                                        horizontal: 8,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          _cell((index + 1).toString(), 40),
-                                          _cell(debtor.fullName, 200),
-                                          _cell(debtor.decree, 120),
-                                          _cell(debtor.amount, 80),
-                                          _cell(debtor.address, 220),
-                                          _regionCell(
-                                            context,
-                                            debtor,
-                                            regions,
-                                            200,
+                          return Scrollbar(
+                            controller: scrollController,
+                            thumbVisibility: true,
+                            child: ListView.builder(
+                              controller: scrollController,
+                              itemCount: sortedDebtors.length,
+                              itemBuilder: (context, index) {
+                                final debtor = sortedDebtors[index];
+                                return ValueListenableBuilder(
+                                  valueListenable: hoveredRowNotifier,
+                                  builder: (context, hoveredIndex, _) {
+                                    final isHovered = hoveredIndex == index;
+                                    return ValueListenableBuilder<
+                                      SelectedDebtor?
+                                    >(
+                                      valueListenable: selectedRowNotifier,
+                                      builder: (context, _, __) {
+                                        final isSelected =
+                                            selectedRowNotifier.value?.index;
+                                        return MouseRegion(
+                                          onEnter: (_) {
+                                            if (selectedRowNotifier
+                                                    .value
+                                                    ?.index !=
+                                                index) {
+                                              hoveredRowNotifier.value = index;
+                                            }
+                                          },
+                                          onExit: (_) {
+                                            if (selectedRowNotifier
+                                                    .value
+                                                    ?.index !=
+                                                index) {
+                                              hoveredRowNotifier.value = null;
+                                            }
+                                          },
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              selectedRowNotifier.value =
+                                                  SelectedDebtor(
+                                                    debtor: debtor,
+                                                    index: index,
+                                                  );
+                                            },
+                                            child: Container(
+                                              decoration: _rowDecoration(
+                                                index,
+                                                isSelected,
+                                                isHovered,
+                                              ),
+                                              padding: AppPadding.hor8ver6,
+                                              child: Row(
+                                                children: [
+                                                  _cell(
+                                                    (index + 1).toString(),
+                                                    AppSizes
+                                                        .columnWidths[AppTexts
+                                                        .number]!,
+                                                  ),
+                                                  _cell(
+                                                    debtor.fullName,
+                                                    AppSizes
+                                                        .columnWidths[AppTexts
+                                                        .fullName]!,
+                                                  ),
+                                                  _cell(
+                                                    debtor.decree,
+                                                    AppSizes
+                                                        .columnWidths[AppTexts
+                                                        .decree]!,
+                                                  ),
+                                                  _cell(
+                                                    debtor.amount,
+                                                    AppSizes
+                                                        .columnWidths[AppTexts
+                                                        .amount]!,
+                                                  ),
+                                                  _cell(
+                                                    debtor.address,
+                                                    AppSizes
+                                                        .columnWidths[AppTexts
+                                                        .address]!,
+                                                  ),
+                                                  _regionCell(
+                                                    context,
+                                                    debtor,
+                                                    regions,
+                                                    AppSizes
+                                                        .columnWidths[AppTexts
+                                                        .region]!,
+                                                  ),
+                                                  _executorCell(
+                                                    context,
+                                                    debtor,
+                                                    regions,
+                                                    AppSizes
+                                                        .columnWidths[AppTexts
+                                                        .executor]!,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
                                           ),
-                                          _executorCell(
-                                            context,
-                                            debtor,
-                                            regions,
-                                            300,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                                        );
+                                      },
+                                    );
+                                  },
                                 );
                               },
-                            );
-                          },
-                        );
-                      },
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             );
           },
         );
@@ -129,59 +181,30 @@ class DebtorsTable extends StatelessWidget {
     );
   }
 
-  Color _rowColor(int index, int? selectedIndex) {
-    if (selectedIndex == index) return Colors.blue.withOpacity(0.3);
-
-    return index % 2 == 0 ? Colors.white : Colors.grey[200]!;
-  }
-
   BoxDecoration _rowDecoration(int index, int? selectedIndex, bool isHovered) {
     if (selectedIndex == index) {
-      return BoxDecoration(
-        color: Colors.blue[300],
-        boxShadow: isHovered
-            ? [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            offset: Offset(0, -3), // тінь зверху
-            blurRadius: 6,
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            offset: Offset(0, 3), // тінь знизу
-            blurRadius: 6,
-          ),
-        ]
-            : [],
-      );
+      return BoxDecoration(color: AppColors.primaryLightMain);
     }
 
     return BoxDecoration(
-      color: Colors.white,
-      boxShadow: isHovered
-          ? [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.25),
-          offset: Offset(0, -3),
-          blurRadius: 6,
-        ),
-        BoxShadow(
-          color: Colors.black.withOpacity(0.25),
-          offset: Offset(0, 3),
-          blurRadius: 6,
-        ),
-      ]
-          : [],
+      color: AppColors.primaryWhite,
+
+      gradient: isHovered
+          ? LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: AppColors.gradientWhite,
+            )
+          : null,
     );
   }
-
 
   Widget _buildRegionState(RegionState state) {
     if (state is RegionLoading) {
       return const Center(child: CircularProgressIndicator());
     }
     if (state is RegionError) {
-      return Center(child: Text('Помилка: ${state.message}'));
+      return Center(child: Text(AppTexts.errorString(state.message)));
     }
     return const SizedBox.shrink();
   }
@@ -191,34 +214,85 @@ class DebtorsTable extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
     if (state is DebtorError) {
-      return Center(child: Text('Помилка: ${state.message}'));
+      return Center(child: Text(AppTexts.errorString(state.message)));
     }
     return const SizedBox.shrink();
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.primaryMainBlue,
-
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(8),
           topRight: Radius.circular(8),
         ),
       ),
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
       child: Row(
-        children: [
-          _headerCell('№', 40),
-          _headerCell('ПІБ', 200),
-          _headerCell('Постанова', 120),
-          _headerCell('Сума', 80),
-          _headerCell('Адреса', 220),
-          _headerCell('Область', 200),
-          _headerCell('Виконавець', 300),
-        ],
+        children: AppSizes.columnWidths.entries.map((e) {
+          return GestureDetector(
+            onTap: () {
+              context.read<DebtorSortCubit>().toggleColumn(e.key);
+              selectedRowNotifier.value = null;
+              },
+            child: SizedBox(
+              width: e.value,
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      e.key,
+                      style: const TextStyle(
+                        color: AppColors.primaryWhite,
+                        fontWeight: FontWeight.bold,
+                        fontSize: AppTextSizes.small,
+                      ),
+                    ),
+                    BlocBuilder<DebtorSortCubit, DebtorSortState>(
+                      builder: (context, sortState) {
+                        if (sortState.column != e.key) {
+                          return const SizedBox.shrink();
+                        }
+                        return Icon(
+                          sortState.ascending
+                              ? Icons.arrow_upward
+                              : Icons.arrow_downward,
+                          size: 14,
+                          color: AppColors.primaryWhite,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
+  }
+
+  dynamic _getColumnValue(DebtorEntity debtor, String column) {
+    switch (column) {
+      case AppTexts.number:
+        return debtor.id;
+      case AppTexts.fullName:
+        return debtor.fullName;
+      case AppTexts.decree:
+        return debtor.decree;
+      case AppTexts.amount:
+        return debtor.amount;
+      case AppTexts.address:
+        return debtor.address;
+      case AppTexts.region:
+        return debtor.regionId ?? 0;
+      case AppTexts.executor:
+        return debtor.executorId ?? 0;
+      default:
+        return AppTexts.empty;
+    }
   }
 
   Widget _cell(String text, double width) {
@@ -228,23 +302,7 @@ class DebtorsTable extends StatelessWidget {
         text,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 12),
-      ),
-    );
-  }
-
-  Widget _headerCell(String text, double width) {
-    return SizedBox(
-      width: width,
-      child: Center(
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: AppColors.primaryWhite,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-          ),
-        ),
+        style: const TextStyle(fontSize: AppTextSizes.small),
       ),
     );
   }
@@ -257,8 +315,11 @@ class DebtorsTable extends StatelessWidget {
   ) {
     final currentRegion = regions.firstWhere(
       (r) => r.id == debtor.regionId,
-      orElse: () =>
-          const RegionEntity(id: 0, name: 'не вибрано', executorOffices: []),
+      orElse: () => const RegionEntity(
+        id: 0,
+        name: AppTexts.notSelected,
+        executorOffices: [],
+      ),
     );
 
     return GestureDetector(
@@ -266,8 +327,8 @@ class DebtorsTable extends StatelessWidget {
         final selected = await showDialog<RegionEntity>(
           context: context,
           builder: (cntx) => SimpleDialog(
-            backgroundColor: Colors.white,
-            title: const Text('Оберіть область'),
+            backgroundColor: AppColors.primaryWhite,
+            title: const Text(AppTexts.selectRegion),
             children: regions
                 .map(
                   (r) => SimpleDialogOption(
@@ -283,8 +344,8 @@ class DebtorsTable extends StatelessWidget {
             (e) => e.isPrimary,
             orElse: () => const ExecutorEntity(
               id: 0,
-              name: '',
-              address: '',
+              name: AppTexts.empty,
+              address: AppTexts.empty,
               isPrimary: false,
               regionId: 0,
             ),
@@ -300,12 +361,15 @@ class DebtorsTable extends StatelessWidget {
         }
       },
       child: Container(
-        padding: EdgeInsets.all(8),
+        padding: AppPadding.all8,
         width: width,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(currentRegion.name, style: const TextStyle(fontSize: 12)),
+            Text(
+              currentRegion.name,
+              style: const TextStyle(fontSize: AppTextSizes.small),
+            ),
             Icon(Icons.keyboard_arrow_down_outlined),
           ],
         ),
@@ -323,8 +387,11 @@ class DebtorsTable extends StatelessWidget {
         ? regions
               .firstWhere(
                 (r) => r.id == debtor.regionId,
-                orElse: () =>
-                    const RegionEntity(id: 0, name: '', executorOffices: []),
+                orElse: () => const RegionEntity(
+                  id: 0,
+                  name: AppTexts.empty,
+                  executorOffices: [],
+                ),
               )
               .executorOffices
         : <ExecutorEntity>[];
@@ -333,8 +400,8 @@ class DebtorsTable extends StatelessWidget {
       (e) => e.id == debtor.executorId,
       orElse: () => const ExecutorEntity(
         id: 0,
-        name: 'не вибрано',
-        address: '',
+        name: AppTexts.notSelected,
+        address: AppTexts.empty,
         isPrimary: false,
         regionId: 0,
       ),
@@ -345,9 +412,9 @@ class DebtorsTable extends StatelessWidget {
         final selected = await showDialog<ExecutorEntity>(
           context: context,
           builder: (cntx) => SimpleDialog(
-            backgroundColor: Colors.white,
+            backgroundColor: AppColors.primaryWhite,
 
-            title: const Text('Оберіть виконавця'),
+            title: const Text(AppTexts.selectExecutor),
             children: executors
                 .map(
                   (e) => SimpleDialogOption(
@@ -371,13 +438,15 @@ class DebtorsTable extends StatelessWidget {
 
       child: Container(
         width: width,
-        padding: EdgeInsets.all(8),
+        padding: AppPadding.all8,
         decoration: BoxDecoration(
-          color: currentExecutor.id == 0 ? Colors.red.shade100 : null,
+          color: currentExecutor.id == 0 ? AppColors.notSelected : null,
           border: Border.all(
-            color: currentExecutor.id == 0 ? Colors.red : Colors.transparent,
+            color: currentExecutor.id == 0
+                ? AppColors.errorMain
+                : AppColors.transparent,
           ),
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: AppBorderRadius.all4,
         ),
         child: Row(
           children: [
@@ -389,7 +458,7 @@ class DebtorsTable extends StatelessWidget {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   softWrap: true,
-                  style: const TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: AppTextSizes.small),
                 ),
               ),
             ),

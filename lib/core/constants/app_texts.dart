@@ -1,4 +1,6 @@
 class AppTexts {
+  static const String appName = 'Створення супровідних документів для виконавців';
+
   static const String add = 'Додати';
   static const String edit = 'Редагувати';
   static const String cancel = 'Скасувати';
@@ -8,11 +10,14 @@ class AppTexts {
   static const String acceptDelete = 'Підтвердити видалення';
 
   static const String error = 'Помилка';
+  static String errorString(String error) =>
+      'Помилка: "$error"';
   static const String ok = 'Ок';
+  static const String empty = '';
 
   static const String tittle =
       'Підготовка документів для подання до виконавчих органів';
-  static const String loadFiles = 'Завантажити файл';
+  static const String loadFiles = 'Завантажити постанови';
   static const String createDocs = 'Створити супровідні';
   static const String settings = 'Налаштування';
   static const String executors = 'Виконавці';
@@ -36,8 +41,10 @@ class AppTexts {
   static const String regions = 'Області';
   static const String executor = 'Виконавець';
   static const String dropdownNotSelected = 'не вибрано';
+  static const String notSelected = 'не вибрано';
 
   //region
+  static const String selectRegion = 'Виберіть область';
   static const String addRegion = 'Додати область';
   static const String nameRegion = 'Назва області';
   static const String editRegion = 'Редагувати назву області';
@@ -60,6 +67,7 @@ class AppTexts {
   static const String nameExecutorEmpty = 'Назва виконавця не може бути порожньою';
   static const String addressExecutorEmpty = 'Адреса виконавця не може бути порожньою';
   static const String selectedExecutor = 'Вибраний виконавець';
+  static const String selectExecutor = 'Виберіть виконавеця';
 
 
   static String deleteExecutorConfirm(String executorName) =>
