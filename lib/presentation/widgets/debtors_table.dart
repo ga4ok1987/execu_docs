@@ -1,3 +1,4 @@
+import 'package:execu_docs/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -37,75 +38,87 @@ class DebtorsTable extends StatelessWidget {
               children: [
                 _buildHeader(), // шапка завжди зверху
                 Expanded(
-                  child: ListView.builder(
+                  child: Scrollbar(
                     controller: scrollController,
-                    itemCount: debtors.length,
-                    itemBuilder: (context, index) {
-                      final debtor = debtors[index];
-                      return ValueListenableBuilder<int?>(
-                        valueListenable: hoveredRowNotifier,
-                        builder: (context, hoveredIndex, _) {
-                          final isSelected =
-                              selectedRowNotifier.value?.index;
-                          final isHovered = hoveredIndex == index;
+                    thumbVisibility: true,
+                    child: ListView.builder(
+                      controller: scrollController,
+                      itemCount: debtors.length,
+                      itemBuilder: (context, index) {
+                        final debtor = debtors[index];
+                        return ValueListenableBuilder(
+                          valueListenable: hoveredRowNotifier,
+                          builder: (context, hoveredIndex, _) {
+                            final isHovered = hoveredIndex == index;
+                            return ValueListenableBuilder<SelectedDebtor?>(
+                              valueListenable: selectedRowNotifier,
+                              builder: (context, _, _) {
+                                final isSelected =
+                                    selectedRowNotifier.value?.index;
 
+                                return MouseRegion(
+                                  onEnter: (_) {
+                                    if (selectedRowNotifier.value?.index !=
+                                        index) {
+                                      hoveredRowNotifier.value = index;
+                                    }
+                                  },
+                                  onExit: (_) {
+                                    if (selectedRowNotifier.value?.index !=
+                                        index) {
+                                      hoveredRowNotifier.value = null;
+                                    }
+                                  },
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      selectedRowNotifier.value =
+                                          SelectedDebtor(
+                                            debtor: debtor,
+                                            index: index,
+                                          );
+                                      final rowContext = context;
+                                    },
+                                    child: Container(
+                                      decoration: _rowDecoration(
+                                        index,
+                                        isSelected,
+                                        isHovered,
+                                      ),
 
-                          return MouseRegion(
-                            onEnter: (_) {
-                              if (selectedRowNotifier.value?.index != index) {
-                                hoveredRowNotifier.value = index;
-                              }
-                            },
-                            onExit: (_) {
-                              if (selectedRowNotifier.value?.index != index) {
-                                hoveredRowNotifier.value = null;
-                              }
-                            },
-                            child: GestureDetector(
-                              onTap: () {
-                                selectedRowNotifier.value = SelectedDebtor(
-                                  debtor: debtor,
-                                  index: index,
-                                );
-                                final rowContext = context;
-                                WidgetsBinding.instance.addPostFrameCallback((
-                                  _,
-                                ) {
-                                  Scrollable.ensureVisible(
-                                    rowContext,
-                                    duration: const Duration(milliseconds: 250),
-                                    alignment: 0.5,
-                                  );
-                                });
-                              },
-                              child: Container(
-                                color: _rowColor(index,isSelected,hoveredIndex),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4,
-                                  horizontal: 8,
-                                ),
-                                child: Row(
-                                  children: [
-                                    _cell((index + 1).toString(), 40),
-                                    _cell(debtor.fullName, 200),
-                                    _cell(debtor.decree, 120),
-                                    _cell(debtor.amount, 80),
-                                    _cell(debtor.address, 220),
-                                    _regionCell(context, debtor, regions, 200),
-                                    _executorCell(
-                                      context,
-                                      debtor,
-                                      regions,
-                                      160,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 6,
+                                        horizontal: 8,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          _cell((index + 1).toString(), 40),
+                                          _cell(debtor.fullName, 200),
+                                          _cell(debtor.decree, 120),
+                                          _cell(debtor.amount, 80),
+                                          _cell(debtor.address, 220),
+                                          _regionCell(
+                                            context,
+                                            debtor,
+                                            regions,
+                                            200,
+                                          ),
+                                          _executorCell(
+                                            context,
+                                            debtor,
+                                            regions,
+                                            300,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -116,14 +129,51 @@ class DebtorsTable extends StatelessWidget {
     );
   }
 
-  Color _rowColor(int index, int? selectedIndex, int? hoveredIndex) {
+  Color _rowColor(int index, int? selectedIndex) {
     if (selectedIndex == index) return Colors.blue.withOpacity(0.3);
-    if (hoveredIndex == index) return Colors.grey.shade300;
-    return index % 2 == 0 ? Colors.grey[100]! : Colors.grey[200]!;
+
+    return index % 2 == 0 ? Colors.white : Colors.grey[200]!;
   }
 
+  BoxDecoration _rowDecoration(int index, int? selectedIndex, bool isHovered) {
+    if (selectedIndex == index) {
+      return BoxDecoration(
+        color: Colors.blue[300],
+        boxShadow: isHovered
+            ? [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            offset: Offset(0, -3), // тінь зверху
+            blurRadius: 6,
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            offset: Offset(0, 3), // тінь знизу
+            blurRadius: 6,
+          ),
+        ]
+            : [],
+      );
+    }
 
-
+    return BoxDecoration(
+      color: Colors.white,
+      boxShadow: isHovered
+          ? [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.25),
+          offset: Offset(0, -3),
+          blurRadius: 6,
+        ),
+        BoxShadow(
+          color: Colors.black.withOpacity(0.25),
+          offset: Offset(0, 3),
+          blurRadius: 6,
+        ),
+      ]
+          : [],
+    );
+  }
 
 
   Widget _buildRegionState(RegionState state) {
@@ -148,7 +198,14 @@ class DebtorsTable extends StatelessWidget {
 
   Widget _buildHeader() {
     return Container(
-      color: Colors.grey.shade300,
+      decoration: BoxDecoration(
+        color: AppColors.primaryMainBlue,
+
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(8),
+          topRight: Radius.circular(8),
+        ),
+      ),
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
       child: Row(
         children: [
@@ -158,7 +215,7 @@ class DebtorsTable extends StatelessWidget {
           _headerCell('Сума', 80),
           _headerCell('Адреса', 220),
           _headerCell('Область', 200),
-          _headerCell('Виконавець', 160),
+          _headerCell('Виконавець', 300),
         ],
       ),
     );
@@ -182,7 +239,11 @@ class DebtorsTable extends StatelessWidget {
       child: Center(
         child: Text(
           text,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          style: const TextStyle(
+            color: AppColors.primaryWhite,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
         ),
       ),
     );
@@ -245,7 +306,7 @@ class DebtorsTable extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(currentRegion.name, style: const TextStyle(fontSize: 12)),
-            Icon(Icons.keyboard_arrow_down_outlined)
+            Icon(Icons.keyboard_arrow_down_outlined),
           ],
         ),
       ),
@@ -284,6 +345,8 @@ class DebtorsTable extends StatelessWidget {
         final selected = await showDialog<ExecutorEntity>(
           context: context,
           builder: (cntx) => SimpleDialog(
+            backgroundColor: Colors.white,
+
             title: const Text('Оберіть виконавця'),
             children: executors
                 .map(
@@ -305,17 +368,35 @@ class DebtorsTable extends StatelessWidget {
           });
         }
       },
+
       child: Container(
         width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: currentExecutor.id == 0 ? Colors.red.shade100 : null,
           border: Border.all(
-            color: currentExecutor.id == 0 ? Colors.red : Colors.grey.shade300,
+            color: currentExecutor.id == 0 ? Colors.red : Colors.transparent,
           ),
           borderRadius: BorderRadius.circular(4),
         ),
-        child: Text(currentExecutor.name, style: const TextStyle(fontSize: 12)),
+        child: Row(
+          children: [
+            Flexible(
+              child: SizedBox(
+                width: width - 30,
+                child: Text(
+                  currentExecutor.name,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: true,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+
+            Icon(Icons.keyboard_arrow_down_outlined),
+          ],
+        ),
       ),
     );
   }
