@@ -9,23 +9,21 @@ enum WindowMode { normal, maximized, minimized, fullscreen }
 @injectable
 class WindowCubit extends HydratedCubit<WindowState> with WindowListener {
   WindowCubit()
-    : super(
-        const WindowState(
-          width: 1366,
-          height: 700,
-          dx: 100,
-          dy: 100,
-          mode: WindowMode.minimized,
-        ),
-      ) {
+      : super(
+    const WindowState(
+      width: 1366,
+      height: 700,
+      dx: 100,
+      dy: 100,
+      mode: WindowMode.normal,
+    ),
+  ) {
     init();
   }
 
   Future<void> init() async {
     await windowManager.ensureInitialized();
-    WindowOptions windowOptions = const WindowOptions(
-      title: AppTexts.appName,
-    );
+    const windowOptions = WindowOptions(title: AppTexts.appName);
     windowManager.addListener(this);
     await windowManager.waitUntilReadyToShow(windowOptions);
     await windowManager.setMinimumSize(const Size(1366, 700));
@@ -33,11 +31,24 @@ class WindowCubit extends HydratedCubit<WindowState> with WindowListener {
   }
 
   Future<void> restoreWindow() async {
+    Rect newBounds = Rect.fromLTWH(
+      state.dx,
+      state.dy,
+      state.width,
+      state.height,
+    );
+
+    // Якщо збережені параметри некоректні → дефолт
+    if (newBounds.width < 300 ||
+        newBounds.height < 300 ||
+        newBounds.left < 0 ||
+        newBounds.top < 0) {
+      newBounds = const Rect.fromLTWH(100, 100, 1366, 700);
+    }
+
     switch (state.mode) {
       case WindowMode.normal:
-        await windowManager.setBounds(
-          Rect.fromLTWH(state.dx, state.dy, state.width, state.height),
-        );
+        await windowManager.setBounds(newBounds);
         break;
       case WindowMode.maximized:
         await windowManager.maximize();
@@ -51,49 +62,45 @@ class WindowCubit extends HydratedCubit<WindowState> with WindowListener {
     }
   }
 
+
+
   @override
   void onWindowMove() async {
     final size = await windowManager.getSize();
     final pos = await windowManager.getPosition();
-    emit(
-      WindowState(
-        width: size.width,
-        height: size.height,
-        dx: pos.dx,
-        dy: pos.dy,
-        mode: WindowMode.normal,
-      ),
-    );
+    emit(state.copyWith(
+      width: size.width,
+      height: size.height,
+      dx: pos.dx,
+      dy: pos.dy,
+      mode: WindowMode.normal,
+    ));
   }
 
   @override
   void onWindowMaximize() async {
     final size = await windowManager.getSize();
     final pos = await windowManager.getPosition();
-    emit(
-      WindowState(
-        width: size.width,
-        height: size.height,
-        dx: pos.dx,
-        dy: pos.dy,
-        mode: WindowMode.maximized,
-      ),
-    );
+    emit(state.copyWith(
+      width: size.width,
+      height: size.height,
+      dx: pos.dx,
+      dy: pos.dy,
+      mode: WindowMode.maximized,
+    ));
   }
 
   @override
   void onWindowUnmaximize() async {
     final size = await windowManager.getSize();
     final pos = await windowManager.getPosition();
-    emit(
-      WindowState(
-        width: size.width,
-        height: size.height,
-        dx: pos.dx,
-        dy: pos.dy,
-        mode: WindowMode.normal,
-      ),
-    );
+    emit(state.copyWith(
+      width: size.width,
+      height: size.height,
+      dx: pos.dx,
+      dy: pos.dy,
+      mode: WindowMode.normal,
+    ));
   }
 
   @override
@@ -105,15 +112,31 @@ class WindowCubit extends HydratedCubit<WindowState> with WindowListener {
   void onWindowRestore() async {
     final size = await windowManager.getSize();
     final pos = await windowManager.getPosition();
-    emit(
-      WindowState(
-        width: size.width,
-        height: size.height,
-        dx: pos.dx,
-        dy: pos.dy,
-        mode: WindowMode.normal,
-      ),
-    );
+    emit(state.copyWith(
+      width: size.width,
+      height: size.height,
+      dx: pos.dx,
+      dy: pos.dy,
+      mode: WindowMode.normal,
+    ));
+  }
+
+  @override
+  void onWindowEnterFullScreen() async {
+    emit(state.copyWith(mode: WindowMode.fullscreen));
+  }
+
+  @override
+  void onWindowLeaveFullScreen() async {
+    final size = await windowManager.getSize();
+    final pos = await windowManager.getPosition();
+    emit(state.copyWith(
+      width: size.width,
+      height: size.height,
+      dx: pos.dx,
+      dy: pos.dy,
+      mode: WindowMode.normal,
+    ));
   }
 
   @override
@@ -134,6 +157,7 @@ class WindowCubit extends HydratedCubit<WindowState> with WindowListener {
     return super.close();
   }
 }
+
 class WindowState {
   final double width;
   final double height;

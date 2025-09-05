@@ -12,6 +12,8 @@ import '../../domain/entities/region_entity.dart';
 import '../../domain/usecases/debtors_crud_usecases.dart';
 import '../../domain/usecases/regions_crud_usecase.dart';
 import '../../core/failure.dart';
+import 'package:equatable/equatable.dart';
+
 
 @injectable
 class DebtorCubit extends Cubit<DebtorState> {
@@ -60,6 +62,11 @@ class DebtorCubit extends Cubit<DebtorState> {
       (_) => loadDebtors(),
     );
   }
+  Future<void> _addDebtorSilently(DebtorEntity debtor) async {
+    final result = await addDebtorUseCase(debtor);
+    result.fold((f) => emit(DebtorError(f.message)), (_) {});
+  }
+
 
   Future<void> deleteDebtor(int id) async {
     emit(DebtorLoading());
@@ -120,9 +127,10 @@ class DebtorCubit extends Cubit<DebtorState> {
       return;
     }
 
+    emit(DebtorImporting(0));
 
-    for (var file in files) {
-      final text = await DocxReader().readDocxParagraphs(file.path);
+    for (int i = 0; i < files.length; i++) {
+      final text = await DocxReader().readDocxParagraphs(files[i].path);
 
       final fullName = text[15].extractName;
       final decree = text[2].extractDecree;
@@ -146,7 +154,11 @@ class DebtorCubit extends Cubit<DebtorState> {
         regionId: regionId,
         executorId: executorId,
       );
-      await addDebtor(debtor);
+      await Future.delayed(Duration(milliseconds: 100));
+      emit(DebtorImporting((i + 1) / files.length));
+
+      await _addDebtorSilently(debtor);
+
     }
 
     await loadDebtors();
@@ -186,7 +198,10 @@ class DebtorCubit extends Cubit<DebtorState> {
   }
 }
 
-sealed class DebtorState {}
+sealed class DebtorState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
 
 class DebtorInitial extends DebtorState {}
 
@@ -196,16 +211,25 @@ class DebtorImporting extends DebtorState {
   final double progress;
 
   DebtorImporting(this.progress);
+
+  @override
+  List<Object?> get props => [progress];
 }
 
 class DebtorLoaded extends DebtorState {
   final List<DebtorEntity> debtors;
 
   DebtorLoaded(this.debtors);
+
+  @override
+  List<Object?> get props => [debtors];
 }
 
 class DebtorError extends DebtorState {
   final String message;
 
   DebtorError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

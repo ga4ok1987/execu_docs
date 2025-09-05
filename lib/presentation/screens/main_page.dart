@@ -40,6 +40,7 @@ class MainPage extends StatelessWidget {
             context.read<RegionCubit>().loadRegions();
           },
         ),
+
       ],
       child: Stack(
         children: [
@@ -47,6 +48,7 @@ class MainPage extends StatelessWidget {
           _buildOverlay(context),
           _buildRegionPanel(context, regionPanelWidth),
           _buildExecutorPanel(context),
+
         ],
       ),
     );
