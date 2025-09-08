@@ -298,11 +298,13 @@ class DebtorsTable extends StatelessWidget {
   Widget _cell(String text, double width) {
     return SizedBox(
       width: width,
-      child: Text(
-        text,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: AppTextSizes.small),
+      child: Expanded(
+        child: Text(
+          text,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: AppTextSizes.small),
+        ),
       ),
     );
   }
