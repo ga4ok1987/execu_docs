@@ -126,8 +126,8 @@ class DebtorCubit extends Cubit<DebtorState> {
       emit(DebtorError("Не знайдено DOCX файлів"));
       return;
     }
-
-    emit(DebtorImporting(0));
+    final previousState = state;
+    emit(DebtorImporting(0, previousState));
 
     for (int i = 0; i < files.length; i++) {
       final text = await DocxReader().readDocxParagraphs(files[i].path);
@@ -155,7 +155,7 @@ class DebtorCubit extends Cubit<DebtorState> {
         executorId: executorId,
       );
       await Future.delayed(Duration(milliseconds: 100));
-      emit(DebtorImporting((i + 1) / files.length));
+      emit(DebtorImporting(((i + 1) / files.length),previousState));
 
       await _addDebtorSilently(debtor);
 
@@ -209,11 +209,12 @@ class DebtorLoading extends DebtorState {}
 
 class DebtorImporting extends DebtorState {
   final double progress;
+  final DebtorState? previous;
 
-  DebtorImporting(this.progress);
+  DebtorImporting(this.progress, this.previous);
 
   @override
-  List<Object?> get props => [progress];
+  List<Object?> get props => [progress,previous];
 }
 
 class DebtorLoaded extends DebtorState {

@@ -29,10 +29,18 @@ class DebtorsTable extends StatelessWidget {
 
         return BlocBuilder<DebtorCubit, DebtorState>(
           builder: (context, debtorState) {
-            if (debtorState is! DebtorLoaded) {
+            List<DebtorEntity> debtors = [];
+
+            if (debtorState is DebtorLoaded) {
+              debtors = debtorState.debtors;
+            } else if (debtorState is DebtorImporting &&
+                debtorState.previous is DebtorLoaded) {
+              // під час імпорту — беремо попередні дані
+              debtors = (debtorState.previous as DebtorLoaded).debtors;
+            } else {
+              // інші випадки
               return _buildDebtorState(debtorState);
             }
-            final debtors = debtorState.debtors;
 
             return Center(
               child: SizedBox(
@@ -298,13 +306,11 @@ class DebtorsTable extends StatelessWidget {
   Widget _cell(String text, double width) {
     return SizedBox(
       width: width,
-      child: Expanded(
-        child: Text(
-          text,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: AppTextSizes.small),
-        ),
+      child: Text(
+        text,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(fontSize: AppTextSizes.small),
       ),
     );
   }
@@ -451,17 +457,15 @@ class DebtorsTable extends StatelessWidget {
           borderRadius: AppBorderRadius.all4,
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Flexible(
-              child: SizedBox(
-                width: width - 30,
-                child: Text(
-                  currentExecutor.name,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: true,
-                  style: const TextStyle(fontSize: AppTextSizes.small),
-                ),
+              child: Text(
+                currentExecutor.name,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                softWrap: true,
+                style: const TextStyle(fontSize: AppTextSizes.small),
               ),
             ),
 

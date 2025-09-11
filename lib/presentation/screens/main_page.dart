@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/region_entity.dart';
+import '../blocs/debtor_cubit.dart';
 import '../blocs/executor_office_cubit.dart';
 import '../blocs/panels_cubit.dart';
 import '../blocs/region_selection_cubit.dart';
@@ -17,6 +18,8 @@ class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double regionPanelWidth = MediaQuery.of(context).size.width * 0.35;
+    final isImportingNotifier = ValueNotifier<bool>(false);
+
 
     return MultiBlocListener(
       listeners: [
@@ -40,16 +43,57 @@ class MainPage extends StatelessWidget {
             context.read<RegionCubit>().loadRegions();
           },
         ),
+        BlocListener<DebtorCubit, DebtorState>(
+          listener: (context, state) {
+            if (state is DebtorImporting) {
+              isImportingNotifier.value = true;
+            } else {
+              isImportingNotifier.value = false;
+            }
+          },
+        ),
 
       ],
-      child: Stack(
-        children: [
-          const MainPanel(),
-          _buildOverlay(context),
-          _buildRegionPanel(context, regionPanelWidth),
-          _buildExecutorPanel(context),
+      child: ValueListenableBuilder<bool>(
+          valueListenable: isImportingNotifier,
+          builder: (context, isImporting, _) {
+          return Stack(
+            children: [
+              const MainPanel(),
+              _buildOverlay(context),
+              _buildRegionPanel(context, regionPanelWidth),
+              _buildExecutorPanel(context),
+              if (isImporting)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    ignoring: false,
+                    child: Container(
+                      color: Colors.black.withOpacity(0.2),
+                      child: const Center(
+                        child: SizedBox(
+                          width: 200,
+                          child: Card(
+                            child: Padding(
+                              padding: EdgeInsets.all(24),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircularProgressIndicator(),
+                                  SizedBox(width: 16),
+                                  Text("Імпорт даних..."),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
 
-        ],
+            ],
+          );
+        }
       ),
     );
   }

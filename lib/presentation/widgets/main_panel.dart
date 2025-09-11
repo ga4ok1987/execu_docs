@@ -27,17 +27,12 @@ class MainPanel extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: [
-            _buildMainContent(
-              context,
-              selectedRowNotifier,
-              hoveredRowNotifier,
-              scrollController,
-              folderPath,
-            ),
-
-          ],
+        child: _buildMainContent(
+          context,
+          selectedRowNotifier,
+          hoveredRowNotifier,
+          scrollController,
+          folderPath,
         ),
       ),
     );
@@ -51,215 +46,217 @@ Widget _buildMainContent(
   ScrollController scrollController,
   dynamic folderPath,
 ) {
-  return Container(
-    padding: AppPadding.all16,
+  return Center(
+    child: Container(
+      padding: AppPadding.all16,
 
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
 
-      children: [
-        SizedBox(
-          height: AppSizes.tittlePanelHeight,
-          width: AppSizes.tittlePanelWidth,
-          child: HighlightContainer(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  AppTexts.tittle,
-                  style: TextStyle(
-                    color: AppColors.texBlack,
-                    fontSize: AppTextSizes.big,
-                    fontWeight: FontWeight.bold,
+        children: [
+          SizedBox(
+            height: AppSizes.tittlePanelHeight,
+            width: AppSizes.tittlePanelWidth,
+            child: HighlightContainer(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    AppTexts.tittle,
+                    style: TextStyle(
+                      color: AppColors.texBlack,
+                      fontSize: AppTextSizes.big,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
 
-                HoverButton(
-                  onPressed: () =>
-                      context.read<PanelsCubit>().toggleRegionPanel(),
-                  child: Text(
-                    AppTexts.executors,
-                    style: TextStyle(color: AppColors.textButtonWhite),
+                  HoverButton(
+                    onPressed: () =>
+                        context.read<PanelsCubit>().toggleRegionPanel(),
+                    child: Text(
+                      AppTexts.executors,
+                      style: TextStyle(color: AppColors.textButtonWhite),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: AppSizes.mainPanelHeight,
-              width: AppSizes.mainPanelWidth,
-              child: HighlightContainer(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    HoverButton(
-                      child: Text(
-                        AppTexts.loadFiles,
-                        style: TextStyle(color: AppColors.textButtonWhite),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: AppSizes.mainPanelHeight,
+                width: AppSizes.mainPanelWidth,
+                child: HighlightContainer(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      HoverButton(
+                        child: Text(
+                          AppTexts.loadFiles,
+                          style: TextStyle(color: AppColors.textButtonWhite),
+                        ),
+                        onPressed: () async {
+                          if (folderPath.path1 != null) {
+                            context.read<DebtorCubit>().importFromDocx(
+                              folderPath.path1!,
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(AppTexts.selectFolderFirst),
+                              ),
+                            );
+                          }
+                        },
                       ),
-                      onPressed: () async {
-                        if (folderPath.path1 != null) {
-                          context.read<DebtorCubit>().importFromDocx(
-                            folderPath.path1!,
+
+                      HoverButton(
+                        child: Text(
+                          AppTexts.createDocs,
+                          style: TextStyle(color: AppColors.textButtonWhite),
+                        ),
+                        onPressed: () async {
+                          context.read<DebtorCubit>().exportDebtors(
+                            folderPath.path2!,
                           );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: AppSizes.mainPanelWidth,
+
+                child: HighlightContainer(
+                  child: CustomExpansionTile(
+                    title: AppTexts.settings,
+                    expandedNotifier: settingsExpanded,
+
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(AppTexts.pathToDocs),
+                          FolderSelector(
+                            path: folderPath.path1,
+                            onSelect: () => _selectFolder(context, 1),
+                          ),
+                          Text(AppTexts.pathToResults),
+                          FolderSelector(
+                            path: folderPath.path2,
+                            onSelect: () => _selectFolder(context, 2),
+                          ),
+                        ],
+                      ),
+
+                      AppGaps.h16,
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(
+            width: AppSizes.mainPanelWidth,
+            child: HighlightContainer(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: AppPadding.all8,
+                    child: HoverButton(
+                      onPressed: () => addDebtorDialog(context),
+                      isCircle: true,
+                      child: Icon(Icons.add, color: AppColors.primaryWhite),
+                    ),
+                  ),
+                  Padding(
+                    padding: AppPadding.all8,
+                    child: HoverButton(
+                      onPressed: () async {
+                        final selected = selectedRowNotifier.value;
+                        if (selected != null) {
+                          editDebtorDialog(context, selected.debtor);
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text(AppTexts.selectFolderFirst),
+                              content: Text(AppTexts.firstSelectDebtor),
                             ),
                           );
                         }
                       },
-                    ),
 
-                    HoverButton(
+                      isCircle: true,
+                      child: Icon(Icons.edit, color: AppColors.primaryWhite),
+                    ),
+                  ),
+                  Padding(
+                    padding: AppPadding.all8,
+                    child: HoverButton(
+                      onPressed: () async {
+                        final selected = selectedRowNotifier.value;
+                        if (selected != null) {
+                          await confirmDialog(
+                            context: context,
+                            title: AppTexts.deleteDebtorConfirm(
+                              selected.debtor.fullName,
+                            ),
+                            onConfirm: () {
+                              context.read<DebtorCubit>().deleteDebtor(
+                                selected.debtor.id,
+                              );
+                              selectedRowNotifier.value = null;
+                            },
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(AppTexts.firstSelectDebtor),
+                            ),
+                          );
+                        }
+                      },
+                      isCircle: true,
+                      child: Icon(Icons.delete, color: AppColors.primaryWhite),
+                    ),
+                  ),
+                  Padding(
+                    padding: AppPadding.all8,
+                    child: HoverButton(
+                      onPressed: () => confirmDialog(
+                        context: context,
+                        title: AppTexts.clearAllAlert,
+                        message: AppTexts.deleteAlert,
+                        onConfirm: () =>
+                            context.read<DebtorCubit>().clearDebtors(),
+                      ),
                       child: Text(
-                        AppTexts.createDocs,
+                        AppTexts.clearAll,
                         style: TextStyle(color: AppColors.textButtonWhite),
                       ),
-                      onPressed: () async {
-                        context.read<DebtorCubit>().exportDebtors(
-                          folderPath.path2!,
-                        );
-                      },
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(
-              width: AppSizes.mainPanelWidth,
+          ),
 
-              child: HighlightContainer(
-                child: CustomExpansionTile(
-                  title: AppTexts.settings,
-                  expandedNotifier: settingsExpanded,
-
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(AppTexts.pathToDocs),
-                        FolderSelector(
-                          path: folderPath.path1,
-                          onSelect: () => _selectFolder(context, 1),
-                        ),
-                        Text(AppTexts.pathToResults),
-                        FolderSelector(
-                          path: folderPath.path2,
-                          onSelect: () => _selectFolder(context, 2),
-                        ),
-                      ],
-                    ),
-
-                    AppGaps.h16,
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-
-        SizedBox(
-          width: AppSizes.mainPanelWidth,
-          child: HighlightContainer(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: AppPadding.all8,
-                  child: HoverButton(
-                    onPressed: () => addDebtorDialog(context),
-                    isCircle: true,
-                    child: Icon(Icons.add, color: AppColors.primaryWhite),
-                  ),
-                ),
-                Padding(
-                  padding: AppPadding.all8,
-                  child: HoverButton(
-                    onPressed: () async {
-                      final selected = selectedRowNotifier.value;
-                      if (selected != null) {
-                        editDebtorDialog(context, selected.debtor);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(AppTexts.firstSelectDebtor),
-                          ),
-                        );
-                      }
-                    },
-
-                    isCircle: true,
-                    child: Icon(Icons.edit, color: AppColors.primaryWhite),
-                  ),
-                ),
-                Padding(
-                  padding: AppPadding.all8,
-                  child: HoverButton(
-                    onPressed: () async {
-                      final selected = selectedRowNotifier.value;
-                      if (selected != null) {
-                        await confirmDialog(
-                          context: context,
-                          title: AppTexts.deleteDebtorConfirm(
-                            selected.debtor.fullName,
-                          ),
-                          onConfirm: () {
-                            context.read<DebtorCubit>().deleteDebtor(
-                              selected.debtor.id,
-                            );
-                            selectedRowNotifier.value = null;
-                          },
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(AppTexts.firstSelectDebtor),
-                          ),
-                        );
-                      }
-                    },
-                    isCircle: true,
-                    child: Icon(Icons.delete, color: AppColors.primaryWhite),
-                  ),
-                ),
-                Padding(
-                  padding: AppPadding.all8,
-                  child: HoverButton(
-                    onPressed: () => confirmDialog(
-                      context: context,
-                      title: AppTexts.clearAllAlert,
-                      message: AppTexts.deleteAlert,
-                      onConfirm: () =>
-                          context.read<DebtorCubit>().clearDebtors(),
-                    ),
-                    child: Text(
-                      AppTexts.clearAll,
-                      style: TextStyle(color: AppColors.textButtonWhite),
-                    ),
-                  ),
-                ),
-              ],
+          Expanded(
+            child: DebtorsTable(
+              selectedRowNotifier: selectedRowNotifier,
+              hoveredRowNotifier: hoveredRowNotifier,
+              scrollController: scrollController,
             ),
           ),
-        ),
-
-        Expanded(
-          child: DebtorsTable(
-            selectedRowNotifier: selectedRowNotifier,
-            hoveredRowNotifier: hoveredRowNotifier,
-            scrollController: scrollController,
-          ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }
