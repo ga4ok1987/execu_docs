@@ -20,7 +20,6 @@ class MainPage extends StatelessWidget {
     final double regionPanelWidth = MediaQuery.of(context).size.width * 0.35;
     final isImportingNotifier = ValueNotifier<bool>(false);
 
-
     return MultiBlocListener(
       listeners: [
         BlocListener<RegionSelectionCubit, RegionSelectionState>(
@@ -43,57 +42,19 @@ class MainPage extends StatelessWidget {
             context.read<RegionCubit>().loadRegions();
           },
         ),
-        BlocListener<DebtorCubit, DebtorState>(
-          listener: (context, state) {
-            if (state is DebtorImporting) {
-              isImportingNotifier.value = true;
-            } else {
-              isImportingNotifier.value = false;
-            }
-          },
-        ),
 
       ],
-      child: ValueListenableBuilder<bool>(
-          valueListenable: isImportingNotifier,
-          builder: (context, isImporting, _) {
-          return Stack(
+      child: Scaffold(
+        body: SafeArea(
+          child: Stack(
             children: [
               const MainPanel(),
               _buildOverlay(context),
               _buildRegionPanel(context, regionPanelWidth),
               _buildExecutorPanel(context),
-              if (isImporting)
-                Positioned.fill(
-                  child: IgnorePointer(
-                    ignoring: false,
-                    child: Container(
-                      color: Colors.black.withOpacity(0.2),
-                      child: const Center(
-                        child: SizedBox(
-                          width: 200,
-                          child: Card(
-                            child: Padding(
-                              padding: EdgeInsets.all(24),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CircularProgressIndicator(),
-                                  SizedBox(width: 16),
-                                  Text("Імпорт даних..."),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
             ],
-          );
-        }
+          ),
+        ),
       ),
     );
   }

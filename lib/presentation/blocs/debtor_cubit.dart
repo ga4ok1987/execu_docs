@@ -14,7 +14,6 @@ import '../../domain/usecases/regions_crud_usecase.dart';
 import '../../core/failure.dart';
 import 'package:equatable/equatable.dart';
 
-
 @injectable
 class DebtorCubit extends Cubit<DebtorState> {
   final AddDebtorUseCase addDebtorUseCase;
@@ -24,7 +23,6 @@ class DebtorCubit extends Cubit<DebtorState> {
   final GetAllRegionsUseCase getAllRegionsUseCase;
   final ClearDebtorsUseCase clearDebtorsUseCase;
 
-
   DebtorCubit({
     required this.addDebtorUseCase,
     required this.updateDebtorUseCase,
@@ -32,7 +30,6 @@ class DebtorCubit extends Cubit<DebtorState> {
     required this.getDebtorsUseCase,
     required this.getAllRegionsUseCase,
     required this.clearDebtorsUseCase,
-
   }) : super(DebtorInitial());
 
   Future<void> loadDebtors() async {
@@ -62,11 +59,11 @@ class DebtorCubit extends Cubit<DebtorState> {
       (_) => loadDebtors(),
     );
   }
+
   Future<void> _addDebtorSilently(DebtorEntity debtor) async {
     final result = await addDebtorUseCase(debtor);
     result.fold((f) => emit(DebtorError(f.message)), (_) {});
   }
-
 
   Future<void> deleteDebtor(int id) async {
     emit(DebtorLoading());
@@ -81,8 +78,8 @@ class DebtorCubit extends Cubit<DebtorState> {
     emit(DebtorLoading());
     final Either<Failure, Unit> result = await clearDebtorsUseCase();
     result.fold(
-          (failure) => emit(DebtorError(failure.message)),
-          (_) => loadDebtors(),
+      (failure) => emit(DebtorError(failure.message)),
+      (_) => loadDebtors(),
     );
   }
 
@@ -90,24 +87,30 @@ class DebtorCubit extends Cubit<DebtorState> {
     List<RegionEntity>? regions;
     List<DebtorEntity>? debtors;
     final Either<Failure, List<RegionEntity>> result =
-    await getAllRegionsUseCase();
+        await getAllRegionsUseCase();
     result.fold(
-          (failure) => regions = null,
-          (loadedRegions) => regions = loadedRegions,
+      (failure) => regions = null,
+      (loadedRegions) => regions = loadedRegions,
     );
     final Either<Failure, List<DebtorEntity>> resultDebtors =
-    await getDebtorsUseCase();
-    resultDebtors.fold((failure)=>null,
-        (loadedDebtors) => debtors = loadedDebtors);
-    final generator = DebtorDocxGenerator(regions??[]);
-    await generator.generateDebtorsDoc(debtors!,path);
+        await getDebtorsUseCase();
+    resultDebtors.fold(
+      (failure) => null,
+      (loadedDebtors) => debtors = loadedDebtors,
+    );
+    final generator = DebtorDocxGenerator(regions ?? []);
+    await generator.generateDebtorsDoc(debtors!, path);
     await WordMerger.mergeDocs(path);
-
-
   }
 
   Future<void> importFromDocx(String dirPath) async {
-    emit(DebtorLoading());
+    if (state is! DebtorLoaded) {
+      emit(DebtorLoading());
+      await loadDebtors(); // щоб завжди був список
+    }
+    final current = state is DebtorLoaded
+        ? (state as DebtorLoaded).debtors
+        : [];
     List<RegionEntity>? regions;
     final Either<Failure, List<RegionEntity>> result =
         await getAllRegionsUseCase();
@@ -126,8 +129,6 @@ class DebtorCubit extends Cubit<DebtorState> {
       emit(DebtorError("Не знайдено DOCX файлів"));
       return;
     }
-    final previousState = state;
-    emit(DebtorImporting(0, previousState));
 
     for (int i = 0; i < files.length; i++) {
       final text = await DocxReader().readDocxParagraphs(files[i].path);
@@ -139,11 +140,12 @@ class DebtorCubit extends Cubit<DebtorState> {
       final regionId = address.extractRegion(regions);
       final executorsList = (regionId != null)
           ? regions
-          ?.firstWhere((element) => element.id == regionId)
-          .executorOffices:[];
-      final executorId = executorsList?.firstWhereOrNull(
-        (element) => element.isPrimary,
-      )?.id;
+                ?.firstWhere((element) => element.id == regionId)
+                .executorOffices
+          : [];
+      final executorId = executorsList
+          ?.firstWhereOrNull((element) => element.isPrimary)
+          ?.id;
 
       final debtor = DebtorEntity(
         id: 0,
@@ -154,15 +156,13 @@ class DebtorCubit extends Cubit<DebtorState> {
         regionId: regionId,
         executorId: executorId,
       );
-      await Future.delayed(Duration(milliseconds: 100));
-      emit(DebtorImporting(((i + 1) / files.length),previousState));
-
       await _addDebtorSilently(debtor);
-
+      final progress = (i + 1) / files.length;
+      await Future.delayed(Duration(milliseconds: 100));
+      emit(DebtorLoaded([...current, debtor], progress: progress));
     }
 
     await loadDebtors();
-
   }
 
   // Якщо треба оновити локальний стан без перезавантаження з бази:
@@ -214,16 +214,24 @@ class DebtorImporting extends DebtorState {
   DebtorImporting(this.progress, this.previous);
 
   @override
-  List<Object?> get props => [progress,previous];
+  List<Object?> get props => [progress, previous];
 }
 
 class DebtorLoaded extends DebtorState {
   final List<DebtorEntity> debtors;
+  final double? progress; // null коли імпорту нема
 
-  DebtorLoaded(this.debtors);
+  DebtorLoaded(this.debtors, {this.progress});
+
+  DebtorLoaded copyWith({List<DebtorEntity>? debtors, double? progress}) {
+    return DebtorLoaded(
+      debtors ?? this.debtors,
+      progress: progress ?? this.progress,
+    );
+  }
 
   @override
-  List<Object?> get props => [debtors];
+  List<Object?> get props => [debtors, progress];
 }
 
 class DebtorError extends DebtorState {

@@ -25,16 +25,29 @@ class MainPanel extends StatelessWidget {
 
     final folderPath = context.watch<FolderCubit>().state;
 
-    return Scaffold(
-      body: SafeArea(
-        child: _buildMainContent(
-          context,
-          selectedRowNotifier,
-          hoveredRowNotifier,
-          scrollController,
-          folderPath,
-        ),
-      ),
+    return BlocBuilder<DebtorCubit, DebtorState>(
+      builder: (context, state) {
+        if (state is DebtorLoaded) {
+          return Stack(
+            children: [
+              if (state.progress != null)
+                LinearProgressIndicator(value: state.progress),
+              _buildMainContent(
+                context,
+                selectedRowNotifier,
+                hoveredRowNotifier,
+                scrollController,
+                folderPath,
+              ),
+            ],
+          );
+        } else if (state is DebtorLoading) {
+          return const CircularProgressIndicator();
+        } else if (state is DebtorError) {
+          return Text(state.message);
+        }
+        return const SizedBox();
+      },
     );
   }
 }
