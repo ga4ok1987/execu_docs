@@ -82,7 +82,7 @@ class ExecutorsPanel extends StatelessWidget {
                   return ListView.separated(
                     itemCount: state.offices.length,
                     itemBuilder: (context, index) {
-                      return ExecutorTile(office: state.offices[index]);
+                      return ExecutorTile(executor: state.offices[index]);
                     },
                     separatorBuilder: (_, __) => const Divider(height: 0),
                   );

@@ -12,6 +12,8 @@ class AppBorderRadius {
 
   static const circular = BorderRadius.all(Radius.circular(1000));
 
+  static const r8 = Radius.circular(8);
+
   // Якщо треба заокруглення тільки певних кутів
   static const top16 = BorderRadius.vertical(top: Radius.circular(16));
   static const bottom16 = BorderRadius.vertical(bottom: Radius.circular(16));

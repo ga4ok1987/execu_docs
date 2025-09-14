@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:execu_docs/core/utils/extensions.dart';
@@ -32,6 +33,13 @@ class DebtorCubit extends Cubit<DebtorState> {
     required this.clearDebtorsUseCase,
   }) : super(DebtorInitial());
 
+  StreamSubscription<double>? _mergeSubscription;
+  @override
+  Future<void> close() {
+    _mergeSubscription?.cancel();
+    return super.close();
+  }
+
   Future<void> loadDebtors() async {
     emit(DebtorLoading());
     final Either<Failure, List<DebtorEntity>> result =
@@ -43,7 +51,6 @@ class DebtorCubit extends Cubit<DebtorState> {
   }
 
   Future<void> updateDebtor(DebtorEntity debtor) async {
-    emit(DebtorLoading());
     final Either<Failure, Unit> result = await updateDebtorUseCase(debtor);
     result.fold(
       (failure) => emit(DebtorError(failure.message)),
@@ -52,7 +59,6 @@ class DebtorCubit extends Cubit<DebtorState> {
   }
 
   Future<void> addDebtor(DebtorEntity debtor) async {
-    emit(DebtorLoading());
     final Either<Failure, Unit> result = await addDebtorUseCase(debtor);
     result.fold(
       (failure) => emit(DebtorError(failure.message)),
@@ -66,7 +72,6 @@ class DebtorCubit extends Cubit<DebtorState> {
   }
 
   Future<void> deleteDebtor(int id) async {
-    emit(DebtorLoading());
     final Either<Failure, Unit> result = await deleteDebtorUseCase(id);
     result.fold(
       (failure) => emit(DebtorError(failure.message)),
@@ -75,7 +80,6 @@ class DebtorCubit extends Cubit<DebtorState> {
   }
 
   Future<void> clearDebtors() async {
-    emit(DebtorLoading());
     final Either<Failure, Unit> result = await clearDebtorsUseCase();
     result.fold(
       (failure) => emit(DebtorError(failure.message)),
@@ -98,10 +102,36 @@ class DebtorCubit extends Cubit<DebtorState> {
       (failure) => null,
       (loadedDebtors) => debtors = loadedDebtors,
     );
-    final generator = DebtorDocxGenerator(regions ?? []);
-    await generator.generateDebtorsDoc(debtors!, path);
-    await WordMerger.mergeDocs(path);
+    try {
+      final generator = DebtorDocxGenerator(regions ?? []);
+
+      final total = debtors?.length;
+      int done = 0;
+      for (final debtor in debtors!) {
+        await generator.generateDebtorsDoc(debtor, path);
+        done++;
+        emit(DebtorLoaded(debtors!, progress: (done / total!) * 0.5,  ));
+      }
+      _mergeSubscription?.cancel();
+      _mergeSubscription = WordMerger.mergeDocsWithProgress(path).listen(
+        (mergeProgress) {
+          // додаємо до прогресу генерації, діапазон 0.5..1.0
+          final overall = 0.5 + mergeProgress * 0.5;
+          emit(DebtorLoaded(progress: overall,  debtors!));
+        },
+        onError: (e) {
+          emit(DebtorError(e.toString()));
+        },
+        onDone: () {
+          emit(DebtorLoaded(debtors!));
+        },
+      );
+      // WordMerger.mergeDocs(path);
+    } catch (e) {
+      emit(DebtorError(e.toString()));
+    }
   }
+
 
   Future<void> importFromDocx(String dirPath) async {
     if (state is! DebtorLoaded) {
@@ -156,10 +186,16 @@ class DebtorCubit extends Cubit<DebtorState> {
         regionId: regionId,
         executorId: executorId,
       );
+      current.add(debtor);
       await _addDebtorSilently(debtor);
       final progress = (i + 1) / files.length;
       await Future.delayed(Duration(milliseconds: 100));
-      emit(DebtorLoaded([...current, debtor], progress: progress));
+      emit(
+        DebtorLoaded(
+          current as List<DebtorEntity>,
+          progress: progress,
+        ),
+      );
     }
 
     await loadDebtors();
@@ -207,21 +243,11 @@ class DebtorInitial extends DebtorState {}
 
 class DebtorLoading extends DebtorState {}
 
-class DebtorImporting extends DebtorState {
-  final double progress;
-  final DebtorState? previous;
-
-  DebtorImporting(this.progress, this.previous);
-
-  @override
-  List<Object?> get props => [progress, previous];
-}
-
 class DebtorLoaded extends DebtorState {
   final List<DebtorEntity> debtors;
   final double? progress; // null коли імпорту нема
 
-  DebtorLoaded(this.debtors, {this.progress});
+  DebtorLoaded( this.debtors, {this.progress});
 
   DebtorLoaded copyWith({List<DebtorEntity>? debtors, double? progress}) {
     return DebtorLoaded(

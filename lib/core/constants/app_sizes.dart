@@ -10,6 +10,9 @@ class AppSizes {
   static const double appBarHeight = 90;
   static const double alertDialogHeight300 = 300;
 
+  static const double progressWidth = 400;
+  static const double progressHeight = 50;
+
   static const tableWidth = 1340.0;
   static const Map<String, double> columnWidths = {
     AppTexts.number: 40,

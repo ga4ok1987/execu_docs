@@ -29,14 +29,11 @@ class DebtorsTable extends StatelessWidget {
 
         return BlocBuilder<DebtorCubit, DebtorState>(
           builder: (context, debtorState) {
-            List<DebtorEntity> debtors = [];
+            List<DebtorEntity>? debtors = [];
 
             if (debtorState is DebtorLoaded) {
               debtors = debtorState.debtors;
-            } else if (debtorState is DebtorImporting &&
-                debtorState.previous is DebtorLoaded) {
-              // під час імпорту — беремо попередні дані
-              debtors = (debtorState.previous as DebtorLoaded).debtors;
+
             } else {
               // інші випадки
               return _buildDebtorState(debtorState);
@@ -51,7 +48,7 @@ class DebtorsTable extends StatelessWidget {
                     Expanded(
                       child: BlocBuilder<DebtorSortCubit, DebtorSortState>(
                         builder: (context, sortState) {
-                          final sortedDebtors = List<DebtorEntity>.from(debtors)
+                          final sortedDebtors = List<DebtorEntity>.from(debtors!)
                             ..sort((a, b) {
                               final valA = _getColumnValue(a, sortState.column);
                               final valB = _getColumnValue(b, sortState.column);

@@ -7,10 +7,12 @@ import '../../domain/entities/executor_entity.dart';
 import '../blocs/executor_office_cubit.dart';
 import 'package:execu_docs/core/constants/index.dart';
 
-class ExecutorTile extends StatelessWidget {
-  final ExecutorEntity office;
+import 'dialogs/edit_executor_dialog.dart';
 
-  const ExecutorTile({super.key, required this.office});
+class ExecutorTile extends StatelessWidget {
+  final ExecutorEntity executor;
+
+  const ExecutorTile({super.key, required this.executor});
 
   @override
   Widget build(BuildContext context) {
@@ -26,12 +28,12 @@ class ExecutorTile extends StatelessWidget {
       child: Container(
         color: AppColors.primaryWhite,
         child: ListTile(
-          title: Text(office.name),
+          title: Text(executor.name),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(office.address),
-              if (office.isPrimary)
+              Text(executor.address),
+              if (executor.isPrimary)
                 const Text(
                   AppTexts.selectedExecutor,
                   style: TextStyle(
@@ -48,7 +50,8 @@ class ExecutorTile extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () =>
-                    _showEditDialog(context, context.read<ExecutorCubit>()),
+                    editExecutorDialog(
+                        context, context.read<ExecutorCubit>(), executor),
               ),
               IconButton(
                 icon: const Icon(Icons.delete),
@@ -62,12 +65,13 @@ class ExecutorTile extends StatelessWidget {
     );
   }
 
-  void _showContextMenu(
-    BuildContext context,
-    Offset position,
-    ExecutorCubit cubit,
-  ) {
-    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+  void _showContextMenu(BuildContext context,
+      Offset position,
+      ExecutorCubit cubit,) {
+    final overlay = Overlay
+        .of(context)
+        .context
+        .findRenderObject() as RenderBox;
     final offset = overlay.localToGlobal(Offset.zero);
 
     showMenu<String>(
@@ -81,11 +85,11 @@ class ExecutorTile extends StatelessWidget {
       ),
       items: [
         PopupMenuItem<String>(
-          value: 'edit_${office.id}',
+          value: 'edit_${executor.id}',
           child: const Text(AppTexts.edit),
         ),
         PopupMenuItem<String>(
-          value: 'delete_${office.id}',
+          value: 'delete_${executor.id}',
           child: const Text(AppTexts.delete),
         ),
       ],
@@ -93,7 +97,7 @@ class ExecutorTile extends StatelessWidget {
       if (selected != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (selected.startsWith('edit')) {
-            _showEditDialog(context, cubit);
+            editExecutorDialog(context, cubit, executor);
           } else if (selected.startsWith('delete')) {
             _confirmDeletion(context, cubit);
           }
@@ -105,144 +109,33 @@ class ExecutorTile extends StatelessWidget {
   void _confirmDeletion(BuildContext context, ExecutorCubit cubit) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.primaryWhite,
+      builder: (context) =>
+          AlertDialog(
+            backgroundColor: AppColors.primaryWhite,
 
-        title: const Text(AppTexts.acceptDelete),
-        content: Text(AppTexts.deleteExecutorConfirm(office.name)),
-        actions: [
-          HoverButton(
-            onPressed: () => Navigator.pop(context),
-            color: AppColors.backgroundButtonRed,
-            child: const Text(
-              AppTexts.cancel,
-              style: TextStyle(color: AppColors.textButtonWhite),
-            ),
-          ),
-          HoverButton(
-            onPressed: () {
-              Navigator.pop(context);
-              cubit.removeOffice(office);
-            },
-            child: const Text(
-              AppTexts.delete,
-              style: TextStyle(color: AppColors.textButtonWhite),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditDialog(BuildContext context, ExecutorCubit cubit) {
-    final nameController = TextEditingController(text: office.name);
-    final addressController = TextEditingController(text: office.address);
-    final formKey = GlobalKey<FormState>();
-    final formKey2 = GlobalKey<FormState>();
-
-    bool isPrimary = office.isPrimary;
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (statefulContext, setState) => AlertDialog(
-          backgroundColor: AppColors.primaryWhite,
-          title: const Text(AppTexts.editExecutor),
-          content: SizedBox(
-            width: AppSizes.alertDialogHeight300,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Form(
-                  key: formKey,
-                  child: TextFormField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: AppTexts.nameExecutor,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return AppTexts.nameExecutorEmpty;
-                      }
-                      return null;
-                    },
-                  ),
+            title: const Text(AppTexts.acceptDelete),
+            content: Text(AppTexts.deleteExecutorConfirm(executor.name)),
+            actions: [
+              HoverButton(
+                onPressed: () => Navigator.pop(context),
+                color: AppColors.backgroundButtonRed,
+                child: const Text(
+                  AppTexts.cancel,
+                  style: TextStyle(color: AppColors.textButtonWhite),
                 ),
-                AppGaps.h16,
-                Form(
-                  key: formKey2,
-                  child: TextFormField(
-                    controller: addressController,
-                    decoration: const InputDecoration(
-                      labelText: AppTexts.address,
-                    ),
-                    maxLines: 2,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return AppTexts.addressExecutorEmpty;
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                AppGaps.h16,
-                Row(
-                  children: [
-                    Checkbox(
-                      value: isPrimary,
-                      onChanged: (value) {
-                        setState(() {
-                          isPrimary = value ?? false;
-                        });
-                      },
-                    ),
-                    const Text(AppTexts.mainExecutor),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            HoverButton(
-              color: AppColors.backgroundButtonRed,
-
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text(
-                AppTexts.cancel,
-                style: TextStyle(color: AppColors.textButtonWhite),
               ),
-            ),
-            AppGaps.w12,
-
-            HoverButton(
-              onPressed: () {
-                final isNameValid = formKey.currentState?.validate() ?? false;
-                final isAddressValid =
-                    formKey2.currentState?.validate() ?? false;
-
-                if (isNameValid && isAddressValid) {
-                  final updatedOffice = ExecutorEntity(
-                    id: office.id,
-                    name: nameController.text,
-                    address: addressController.text,
-                    isPrimary: isPrimary,
-                    regionId: office.regionId,
-                  );
-
-                  cubit.editOffice(updatedOffice);
-                  Navigator.pop(dialogContext);
-                }
-              },
-              child: const Text(
-                AppTexts.save,
-                style: TextStyle(color: AppColors.textButtonWhite),
+              HoverButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  cubit.removeOffice(executor);
+                },
+                child: const Text(
+                  AppTexts.delete,
+                  style: TextStyle(color: AppColors.textButtonWhite),
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
     );
   }
 }

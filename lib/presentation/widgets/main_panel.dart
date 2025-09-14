@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/widgets/highlight_container.dart';
+import '../../core/widgets/progress_loader.dart';
 import '../blocs/debtor_cubit.dart';
 import '../blocs/folder_cubit.dart';
 import '../blocs/panels_cubit.dart';
@@ -30,8 +31,6 @@ class MainPanel extends StatelessWidget {
         if (state is DebtorLoaded) {
           return Stack(
             children: [
-              if (state.progress != null)
-                LinearProgressIndicator(value: state.progress),
               _buildMainContent(
                 context,
                 selectedRowNotifier,
@@ -39,6 +38,8 @@ class MainPanel extends StatelessWidget {
                 scrollController,
                 folderPath,
               ),
+              if (state.progress != null)
+                ProgressLoader(progress: state.progress!),
             ],
           );
         } else if (state is DebtorLoading) {

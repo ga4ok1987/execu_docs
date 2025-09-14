@@ -52,7 +52,7 @@ class DebtorDocxGenerator {
   }
 
   Future<void> generateDebtorsDoc(
-    List<DebtorEntity> debtors,
+    DebtorEntity debtor,
     String path,
   ) async {
     final templateBytes = await File(
@@ -63,7 +63,7 @@ class DebtorDocxGenerator {
     final outputDir = Directory(path);
     if (!outputDir.existsSync()) outputDir.createSync();
 
-    for (final debtor in debtors) {
+
       final content = Content()
         ..add(TextContent('year', DateTime.now().year.toString()))
         ..add(
@@ -88,6 +88,6 @@ class DebtorDocxGenerator {
         final filePath = '${outputDir.path}/${debtor.decree}.docx';
         await File(filePath).writeAsBytes(generated);
       }
-    }
+
   }
 }
