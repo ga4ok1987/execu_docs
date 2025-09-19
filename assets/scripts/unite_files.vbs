@@ -6,8 +6,6 @@ Dim wordApp, mainDoc, rng, firstPageRange
 Dim mergedFilePath
 Dim total, counter
 
-On Error Resume Next ' обробка помилок без зависання
-' --- Отримання аргументів ---
 Set args = WScript.Arguments
 If args.Count < 2 Then
     WScript.Echo "ERROR: Не передано аргументи"
@@ -39,7 +37,7 @@ Set folder = fso.GetFolder(folderPath)
 total = 0
 For Each file In folder.Files
     If LCase(fso.GetExtensionName(file.Name)) = "docx" And _
-       Left(file.Name, 2) <> "~$" And _
+       Left(file.Name,2) <> "~$" And _
        LCase(file.Name) <> LCase(fso.GetFileName(baseFilePath)) Then
         total = total + 1
     End If
@@ -52,10 +50,9 @@ Set mainDoc = wordApp.Documents.Open(baseFilePath)
 
 counter = 0
 
-
 For Each file In folder.Files
     If LCase(fso.GetExtensionName(file.Name)) = "docx" And _
-       Left(file.Name, 2) <> "~$" And _
+       Left(file.Name,2) <> "~$" And _
        LCase(file.Name) <> LCase(fso.GetFileName(baseFilePath)) Then
 
     ' Вставка файлу
@@ -63,26 +60,21 @@ For Each file In folder.Files
         rng.Collapse 0
         rng.InsertFile file.Path, , , False, True
 
+        ' Створюємо Range в кінці вставленого фрагменту
         Set rng = mainDoc.Content
         rng.Collapse 0
-        rng.InsertBreak 7 ' wdPageBreak
         counter = counter + 1
-        WScript.Echo "PROGRESS:" & Int((counter / total) * 100)
+        WScript.Echo "PROGRESS:" & Int((counter/total)*100)
     End If
 Next
 
 ' Видалення першої сторінки (як у вас було)
-Set firstPageRange = mainDoc.GoTo(1, 1)
-firstPageRange.End = mainDoc.GoTo(2, 1).Start
+Set firstPageRange = mainDoc.GoTo(1,1)
+firstPageRange.End = mainDoc.GoTo(2,1).Start
 firstPageRange.Delete
 
 mainDoc.SaveAs2 mergedFilePath
 mainDoc.Close False
 wordApp.Quit
-
-Set mainDoc = Nothing
-Set wordApp = Nothing
-
-On Error GoTo 0
 
 WScript.Echo "Об’єднання завершено!"

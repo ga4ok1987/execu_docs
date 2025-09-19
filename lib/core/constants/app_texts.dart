@@ -18,6 +18,7 @@ class AppTexts {
   static const String tittle =
       'Підготовка документів для подання до виконавчих органів';
   static const String loadFiles = 'Завантажити постанови';
+  static const String uniteFiles = "Об'єднати";
   static const String createDocs = 'Створити супровідні';
   static const String settings = 'Налаштування';
   static const String executors = 'Виконавці';

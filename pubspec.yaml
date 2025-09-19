@@ -37,6 +37,7 @@ dependencies:
   flutter_slidable: ^4.0.1
   equatable: ^2.0.7
   percent_indicator: ^4.2.5
+  excel: ^4.0.6
 
 dev_dependencies:
   flutter_test:
@@ -53,8 +54,10 @@ dev_dependencies:
 flutter:
   assets:
     - assets/scripts/merge_docs.vbs
+    - assets/scripts/unite_files.vbs
     - assets/templates/template.docx
     - assets/templates/empty_template.docx
+    - assets/templates/empty_resolution_template.docx
 
 
   uses-material-design: true

@@ -140,6 +140,17 @@ Widget _buildMainContent(
                           );
                         },
                       ),
+                      HoverButton(
+                        child: Text(
+                            AppTexts.uniteFiles,
+                          style: TextStyle(color: AppColors.textButtonWhite),
+                        ),
+                        onPressed: () async {
+                          context.read<DebtorCubit>().uniteFiles(
+                            folderPath.path1!,
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),

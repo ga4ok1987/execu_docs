@@ -14,6 +14,7 @@ import '../../domain/usecases/debtors_crud_usecases.dart';
 import '../../domain/usecases/regions_crud_usecase.dart';
 import '../../core/failure.dart';
 import 'package:equatable/equatable.dart';
+import 'package:execu_docs/core/constants/index.dart';
 
 @injectable
 class DebtorCubit extends Cubit<DebtorState> {
@@ -34,6 +35,7 @@ class DebtorCubit extends Cubit<DebtorState> {
   }) : super(DebtorInitial());
 
   StreamSubscription<double>? _mergeSubscription;
+
   @override
   Future<void> close() {
     _mergeSubscription?.cancel();
@@ -110,28 +112,63 @@ class DebtorCubit extends Cubit<DebtorState> {
       for (final debtor in debtors!) {
         await generator.generateDebtorsDoc(debtor, path);
         done++;
-        emit(DebtorLoaded(debtors!, progress: (done / total!) * 0.5,  ));
+        emit(DebtorLoaded(debtors!, progress: (done / total!) * 0.5));
       }
       _mergeSubscription?.cancel();
-      _mergeSubscription = WordMerger.mergeDocsWithProgress(path).listen(
-        (mergeProgress) {
-          // додаємо до прогресу генерації, діапазон 0.5..1.0
-          final overall = 0.5 + mergeProgress * 0.5;
-          emit(DebtorLoaded(progress: overall,  debtors!));
-        },
-        onError: (e) {
-          emit(DebtorError(e.toString()));
-        },
-        onDone: () {
-          emit(DebtorLoaded(debtors!));
-        },
-      );
+      _mergeSubscription =
+          WordMerger.mergeDocsWithProgress(
+            path,
+            AppAssets.emptyTemplate,
+            false,
+          ).listen(
+            (mergeProgress) {
+              // додаємо до прогресу генерації, діапазон 0.5..1.0
+              final overall = 0.5 + mergeProgress * 0.5;
+              emit(DebtorLoaded(progress: overall, debtors!));
+            },
+            onError: (e) {
+              emit(DebtorError(e.toString()));
+            },
+            onDone: () {
+              emit(DebtorLoaded(debtors!));
+            },
+          );
       // WordMerger.mergeDocs(path);
     } catch (e) {
       emit(DebtorError(e.toString()));
     }
   }
 
+  Future<void> uniteFiles(String path) async {
+    List<DebtorEntity>? debtors;
+    final Either<Failure, List<DebtorEntity>> resultDebtors =
+        await getDebtorsUseCase();
+    resultDebtors.fold(
+      (failure) => null,
+      (loadedDebtors) => debtors = loadedDebtors,
+    );
+    try {
+      _mergeSubscription?.cancel();
+      _mergeSubscription =
+          WordMerger.mergeDocsWithProgress(
+            path,
+            AppAssets.emptyResolutionTemplate,
+            true,
+          ).listen(
+            (mergeProgress) {
+              emit(DebtorLoaded(progress: mergeProgress, debtors!));
+            },
+            onError: (e) {
+              emit(DebtorError(e.toString()));
+            },
+            onDone: () {
+              emit(DebtorLoaded(debtors!));
+            },
+          );
+    } catch (e) {
+      emit(DebtorError(e.toString()));
+    }
+  }
 
   Future<void> importFromDocx(String dirPath) async {
     if (state is! DebtorLoaded) {
@@ -190,12 +227,7 @@ class DebtorCubit extends Cubit<DebtorState> {
       await _addDebtorSilently(debtor);
       final progress = (i + 1) / files.length;
       await Future.delayed(Duration(milliseconds: 100));
-      emit(
-        DebtorLoaded(
-          current as List<DebtorEntity>,
-          progress: progress,
-        ),
-      );
+      emit(DebtorLoaded(current as List<DebtorEntity>, progress: progress));
     }
 
     await loadDebtors();
@@ -247,7 +279,7 @@ class DebtorLoaded extends DebtorState {
   final List<DebtorEntity> debtors;
   final double? progress; // null коли імпорту нема
 
-  DebtorLoaded( this.debtors, {this.progress});
+  DebtorLoaded(this.debtors, {this.progress});
 
   DebtorLoaded copyWith({List<DebtorEntity>? debtors, double? progress}) {
     return DebtorLoaded(
