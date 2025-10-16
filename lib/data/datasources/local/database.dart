@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:injectable/injectable.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'dart:io';
 
@@ -44,8 +43,9 @@ class AppDatabase extends _$AppDatabase {
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final path = p.join(dir.path, 'execu_docs.sqlite');
+    final exePath = Platform.resolvedExecutable;
+    final exeDir = File(exePath).parent.path;
+    final path = p.join(exeDir, 'execu_docs.sqlite');
     final file = File(path);
     return NativeDatabase(file);
   });

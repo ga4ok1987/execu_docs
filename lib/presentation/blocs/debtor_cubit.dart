@@ -133,7 +133,6 @@ class DebtorCubit extends Cubit<DebtorState> {
               emit(DebtorLoaded(debtors!));
             },
           );
-      // WordMerger.mergeDocs(path);
     } catch (e) {
       emit(DebtorError(e.toString()));
     }
