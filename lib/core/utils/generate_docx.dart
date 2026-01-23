@@ -51,6 +51,49 @@ class DebtorDocxGenerator {
         .address;
   }
 
+ /* Future<void> generateTernopilDebtorsListDoc(
+      List<DebtorEntity> debtors,
+      String path,
+      ) async {
+    final templateBytes = await File(
+      AppAssets.template,
+    ).readAsBytes();
+    final template = await DocxTemplate.fromBytes(templateBytes);
+
+    final outputDir = Directory(path);
+    if (!outputDir.existsSync()) outputDir.createSync();
+
+    final content = Content()
+      ..add(TextContent('year', DateTime.now().year.toString()))
+      ..add(
+        TextContent(
+          "executor",
+          executorNameById(debtor.regionId, debtor.executorId) ?? '',
+        ),
+      )
+      ..add(
+        TextContent(
+          "address",
+          executorAddressById(debtor.regionId, debtor.executorId) ?? '',
+        ),
+      )
+      ..add(TableContent("debtors", [
+        for(var debtor in debtors){
+          RowContent()
+          ..add(TableContent(key, rows))
+        }
+
+        ]
+      ));
+
+
+
+    final generated = await template.generate(content);
+    if (generated != null) {
+      final filePath = '${outputDir.path}/${AppTexts.ternopilList}.docx';
+      await File(filePath).writeAsBytes(generated);
+    }
+  }*/
   Future<void> generateDebtorsDoc(
     DebtorEntity debtor,
     String path,

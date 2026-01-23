@@ -89,4 +89,7 @@ class AppTexts {
 
   static const String deleteAlert = 'Бажаєте видалити дані?';
   static const String firstSelectDebtor = 'Спочатку виберіть боржника';
+
+
+  static const String ternopilList = 'список Тернопіль';
 }
