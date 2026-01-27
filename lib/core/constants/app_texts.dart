@@ -36,6 +36,7 @@ class AppTexts {
   static const String fullName = 'ПІБ';
   static const String fullNameIsRequired = 'Поле ПІБ є обов’язковим';
   static const String decree = 'Постанова';
+  static const String coverDocs = 'Супровідні';
   static const String amount = 'Сума';
   static const String address = 'Адреса';
   static const String region = 'Область';

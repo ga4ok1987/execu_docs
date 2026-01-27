@@ -114,10 +114,11 @@ class DebtorCubit extends Cubit<DebtorState> {
         done++;
         emit(DebtorLoaded(debtors!, progress: (done / total!) * 0.5));
       }
+       generator.generateTernopilDebtorsListDoc(debtors ?? [], path);
       _mergeSubscription?.cancel();
       _mergeSubscription =
           WordMerger.mergeDocsWithProgress(
-            path,
+            '$path/${AppTexts.coverDocs}',
             AppAssets.emptyTemplate,
             false,
           ).listen(

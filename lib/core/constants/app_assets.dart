@@ -5,4 +5,6 @@ class AppAssets {
   static const String emptyResolutionTemplate =
       'assets/templates/empty_resolution_template.docx';
   static const String template = 'assets/templates/template.docx';
+  static const String templateTernopil =
+      'assets/templates/template_ternopil.docx';
 }

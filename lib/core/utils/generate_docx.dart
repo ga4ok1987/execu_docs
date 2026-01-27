@@ -51,14 +51,26 @@ class DebtorDocxGenerator {
         .address;
   }
 
- /* Future<void> generateTernopilDebtorsListDoc(
-      List<DebtorEntity> debtors,
-      String path,
-      ) async {
-    final templateBytes = await File(
-      AppAssets.template,
-    ).readAsBytes();
+  String debtorsFromTernopil(List<DebtorEntity> debtors) {
+    return debtors
+        .where((d) => d.regionId == 19)
+        .map((d) => '${d.decree}  ${d.fullName}')
+        .join('\n');
+  }
+
+  Future<String> createAppFolder(String path, String folderName) async {
+    final dir = Directory('$path/$folderName');
+    dir.create(recursive: true);
+    return dir.path;
+  }
+
+  Future<void> generateTernopilDebtorsListDoc(
+    List<DebtorEntity> debtors,
+    String path,
+  ) async {
+    final templateBytes = await File(AppAssets.templateTernopil).readAsBytes();
     final template = await DocxTemplate.fromBytes(templateBytes);
+    final debtor = debtors.firstWhere((d) => d.regionId == 19);
 
     final outputDir = Directory(path);
     if (!outputDir.existsSync()) outputDir.createSync();
@@ -77,60 +89,45 @@ class DebtorDocxGenerator {
           executorAddressById(debtor.regionId, debtor.executorId) ?? '',
         ),
       )
-      ..add(TableContent("debtors", [
-        for(var debtor in debtors){
-          RowContent()
-          ..add(TableContent(key, rows))
-        }
-
-        ]
-      ));
-
-
+      ..add(TextContent("debtors", debtorsFromTernopil(debtors)));
 
     final generated = await template.generate(content);
     if (generated != null) {
       final filePath = '${outputDir.path}/${AppTexts.ternopilList}.docx';
       await File(filePath).writeAsBytes(generated);
     }
-  }*/
-  Future<void> generateDebtorsDoc(
-    DebtorEntity debtor,
-    String path,
-  ) async {
-    final templateBytes = await File(
-      AppAssets.template,
-    ).readAsBytes();
+  }
+
+  Future<void> generateDebtorsDoc(DebtorEntity debtor, String path) async {
+    final templateBytes = await File(AppAssets.template).readAsBytes();
     final template = await DocxTemplate.fromBytes(templateBytes);
 
-    final outputDir = Directory(path);
+    final outputDir = Directory(await createAppFolder(path, AppTexts.coverDocs));
     if (!outputDir.existsSync()) outputDir.createSync();
 
+    final content = Content()
+      ..add(TextContent('year', DateTime.now().year.toString()))
+      ..add(
+        TextContent(
+          "executor",
+          executorNameById(debtor.regionId, debtor.executorId) ?? '',
+        ),
+      )
+      ..add(
+        TextContent(
+          "address",
+          executorAddressById(debtor.regionId, debtor.executorId) ?? '',
+        ),
+      )
+      ..add(TextContent("amount", debtor.amount.toString()))
+      ..add(TextContent("words", debtor.amount.toWords()))
+      ..add(TextContent("name", debtor.fullName))
+      ..add(TextContent("decree", debtor.decree));
 
-      final content = Content()
-        ..add(TextContent('year', DateTime.now().year.toString()))
-        ..add(
-          TextContent(
-            "executor",
-            executorNameById(debtor.regionId, debtor.executorId) ?? '',
-          ),
-        )
-        ..add(
-          TextContent(
-            "address",
-            executorAddressById(debtor.regionId, debtor.executorId) ?? '',
-          ),
-        )
-        ..add(TextContent("amount", debtor.amount.toString()))
-        ..add(TextContent("words", debtor.amount.toWords()))
-        ..add(TextContent("name", debtor.fullName))
-        ..add(TextContent("decree", debtor.decree));
-
-      final generated = await template.generate(content);
-      if (generated != null) {
-        final filePath = '${outputDir.path}/${debtor.decree}.docx';
-        await File(filePath).writeAsBytes(generated);
-      }
-
+    final generated = await template.generate(content);
+    if (generated != null) {
+      final filePath = '${outputDir.path}/${debtor.decree}.docx';
+      await File(filePath).writeAsBytes(generated);
+    }
   }
 }

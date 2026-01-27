@@ -8,6 +8,9 @@ import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
 
+const _dbName = 'execu_docs.sqlite';
+
+
 @DataClassName('DebtorsDto')
 class Debtors extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -45,9 +48,12 @@ class AppDatabase extends _$AppDatabase {
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    final dir = await getApplicationDocumentsDirectory();
+    final dir = await getApplicationSupportDirectory(); // 👈 заміна тут
+
+    // на всякий випадок (інколи директорія ще не створена)
+    await dir.create(recursive: true);
+
     final path = p.join(dir.path, 'execu_docs.sqlite');
-    final file = File(path);
-    return NativeDatabase(file);
+    return NativeDatabase(File(path));
   });
 }
