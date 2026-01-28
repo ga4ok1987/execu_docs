@@ -5,6 +5,7 @@ import 'package:execu_docs/core/utils/extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:dartz/dartz.dart';
+import 'package:path/path.dart' as p;
 import '../../core/utils/docx_reader.dart';
 import '../../core/utils/generate_docx.dart';
 import '../../core/utils/word_merger.dart';
@@ -114,7 +115,7 @@ class DebtorCubit extends Cubit<DebtorState> {
         done++;
         emit(DebtorLoaded(debtors!, progress: (done / total!) * 0.5));
       }
-       generator.generateTernopilDebtorsListDoc(debtors ?? [], path);
+      generator.generateTernopilDebtorsListDoc(debtors ?? [], path);
       _mergeSubscription?.cancel();
       _mergeSubscription =
           WordMerger.mergeDocsWithProgress(
@@ -189,7 +190,13 @@ class DebtorCubit extends Cubit<DebtorState> {
     final directory = Directory(dirPath);
     final files = directory
         .listSync()
-        .where((f) => f.path.endsWith('.docx'))
+        .where((f) {
+      final fileName = p.basename(f.path);
+
+      return f.path.endsWith('.docx') &&
+          !fileName.startsWith('~\$') && // Ігноруємо фантомні файли Word
+          fileName.contains('Resolution'); // Файл МАЄ містити слово Resolution
+    })
         .toList();
 
     if (files.isEmpty) {
